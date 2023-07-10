@@ -12,8 +12,7 @@ The pycolorbar is still in development. Feel free to try it out and to report is
 
 ## Quick start
 
-pycolorbar provides an easy-to-use interface to manipulate image, videos and n-dimensional arrays
-with classical image processing techniques.
+pycolorbar provides a way to define colormaps and colorbar settings for later use in matplotlib or xarray. 
 
 Look at the [Tutorials][tutorial_link] to have an overview of the software !
 
@@ -51,9 +50,10 @@ You can find the documentation under [pycolorbar.readthedocs.io][doc_link]
 The documentation also includes some [tutorials][tutorial_link], showing the most important use cases of pycolorbar.
 These tutorial are also available as Jupyter Notebooks and in Google Colab:
 
-- 1. Introduction to image labeling [[Notebook][tut3_label_link]][[Colab][colab3_label_link]]
-- 2. Introduction to label patch extraction [[Notebook][tut3_label_link]][[Colab][colab3_label_link]]
-- 3. Introduction to image patch extraction [[Notebook][tut3_patch_link]][[Colab][colab3_patch_link]]
+- 1. Introduction to colormaps definition [[Notebook][tut3_label_link]][[Colab][colab3_label_link]]
+- 2. Introduction to colorbars definition [[Notebook][tut3_label_link]][[Colab][colab3_label_link]]
+- 3. Introduction to bivariate colorbars  [[Notebook][tut3_label_link]][[Colab][colab3_label_link]]
+- 4. Introduction to trivariate colorbars [[Notebook][tut3_label_link]][[Colab][colab3_label_link]]
 
 
 ## Citation
@@ -70,11 +70,8 @@ If you want to cite a specific version, have a look at the [Zenodo site](https:/
 
 ## Requirements:
 
-- [xarray](https://docs.xarray.dev/en/stable/)
-- [dask](https://www.dask.org/)
-- [dask_image](https://image.dask.org/en/latest/)
-- [skimage](https://scikit-image.org/)
-
+- [numpy](https://numpy.org/)
+- [matplotlib](https://matplotlib.org/)
 
 ## License
 
