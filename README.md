@@ -12,7 +12,7 @@ The pycolorbar is still in development. Feel free to try it out and to report is
 
 ## Quick start
 
-pycolorbar provides a way to define colormaps and colorbar settings for later use in matplotlib or xarray. 
+pycolorbar provides a way to define colormaps and colorbar settings for later use in matplotlib or xarray.
 
 Look at the [Tutorials][tutorial_link] to have an overview of the software !
 
