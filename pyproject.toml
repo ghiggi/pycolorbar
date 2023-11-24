@@ -63,6 +63,9 @@ write_to = "pycolorbar/_version.py"
 license-files = ["LICENSE"]
 packages = ["pycolorbar"] # explicitly list the packages in modules
 
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report term-missing --cov-report xml --cov-report lcov:lcov.info"
+
 [tool.black]
 line-length = 100
 # skip-string-normalization = true

@@ -3,62 +3,61 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   tests:
-    name: ${{ matrix.os }}, Python ${{ matrix.python-version }}${{ matrix.experimental && ', experimental' || '' }}
+    name: Test on ${{ matrix.os }}, Python ${{ matrix.python-version }}${{ matrix.experimental && ', latest dependencies' || '' }}
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -el {0}
 
     strategy:
+      fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         experimental: [false]
         include:
           - os: "ubuntu-latest"
-            python-version: "3.10"
+            python-version: "3.11"
             experimental: true
 
           - os: "ubuntu-latest"
-            python-version: "3.10"
+            python-version: "3.11"
             experimental: false
             coverage: true
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Set up micromamba
+        uses: mamba-org/setup-micromamba@v1
         with:
-          python-version: ${{ matrix.python-version }}
+          environment-file: ${{ matrix.experimental && 'ci/environment_latest.yml' || 'ci/environment.yml' }}
+          create-args: >-
+            python=${{ matrix.python-version }}
+          init-shell: >-
+            bash
 
-      - name: Install dependencies
+      - name: Install package
         run: |
-          pip install -U pip
-          pip install -e .[ximage,dev]
-          if echo ${{ matrix.experimental }} | grep -c "true"
-          then
-            pip --disable-pip-version-check list --outdated --format=json | python -c "import json, sys; print('\n'.join([x['name'] for x in json.load(sys.stdin)]))" | xargs -n1 pip install -U
-          fi
-        shell: bash
+          pip install -e .[dev]
 
       - name: Test with pytest
         run: |
-          coverage run -m pytest
+          pytest # See pyproject.toml for cov options
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         if: matrix.coverage
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Generate coverage report in lcov format
-        if: matrix.coverage
-        run: |
-          coverage lcov -o coverage/lcov.info
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
 
       - name: Coveralls Parallel
         uses: coverallsapp/github-action@v2
         if: matrix.coverage
         with:
           parallel: true
+          files: lcov.info
 
   end-coveralls:
     needs: [tests]

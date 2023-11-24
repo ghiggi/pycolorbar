@@ -1,0 +1,11 @@
+name: pycolorbar
+channels:
+  - conda-forge
+dependencies:
+  - matplotlib
+  - numpy
+  # testing
+  - pytest
+  - pytest-cov
+  - pytest-mock
+  - pydantic
