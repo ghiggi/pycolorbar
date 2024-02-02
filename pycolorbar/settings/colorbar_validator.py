@@ -30,23 +30,25 @@ import re
 from typing import List, Optional, Union
 
 import numpy as np
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, field_validator, model_validator
 
 from pycolorbar.utils.mpl import get_mpl_colormaps, get_mpl_named_colors
 
 
 class UnivariateCmapSettings(BaseModel):
     name: Union[str, List[str]]
-    n: Optional[Union[int, List[int]]]
-    bad_alpha: Optional[float]
-    bad_color: Optional[str]
-    over_color: Optional[str]
-    under_color: Optional[str]
+    n: Optional[Union[int, List[int]]] = None
+    bad_color: Optional[str] = None
+    bad_alpha: Optional[float] = None
+    over_color: Optional[str] = None
+    over_alpha: Optional[float] = None
+    under_color: Optional[str] = None
+    under_alpha: Optional[float] = None
 
     class Config:
         arbitrary_types_allowed = True
 
-    @validator("name")
+    @field_validator("name")
     def validate_name(cls, v):
         """Check if cmap is a registered matplotlib colormap or name in pycolorbar.colormaps.registry."""
         import pycolorbar
@@ -60,20 +62,20 @@ class UnivariateCmapSettings(BaseModel):
                 assert name in valid_names, f"'{name}' is not a recognized colormap name."
         return v
 
-    @validator("n")
+    @field_validator("n")
     def validate_n(cls, v, values, **kwargs):
         if v is not None:
             # Single colormap
-            if isinstance(values.get("name"), str):
+            if isinstance(values.data.get("name"), str):
                 assert isinstance(v, int) and v > 0, "'n' must be a positive integer."
             # Multiple colormaps
-            if isinstance(values.get("name"), list):
-                assert len(values.get("name")) == len(v), "'n' must match the number of color maps in 'name'."
+            if isinstance(values.data.get("name"), list):
+                assert len(values.data.get("name")) == len(v), "'n' must match the number of color maps in 'name'."
                 for n in v:
                     assert isinstance(n, int) and n > 0, "'n' values must be positive integers."
         return v
 
-    @validator("bad_color", "over_color", "under_color")
+    @field_validator("bad_color", "over_color", "under_color")
     def validate_colors(cls, v):
         if v is not None and v.lower() != "none":
             if isinstance(v, str):
@@ -96,7 +98,7 @@ class UnivariateCmapSettings(BaseModel):
                 raise ValueError("Invalid color format. Expected a named color, hex string, or RGB/RGBA tuple.")
         return v
 
-    @validator("bad_alpha")
+    @field_validator("bad_alpha", "under_alpha", "over_alpha")
     def validate_bad_alpha(cls, v):
         if v is not None:
             assert 0 <= v <= 1, "bad_alpha must be between 0 and 1"
@@ -153,24 +155,24 @@ def _get_boundary_norm_expected_ncolors(norm_settings):
 
 
 class NormalizeSettings(BaseModel):
-    vmin: Optional[float]
-    vmax: Optional[float]
+    vmin: Optional[float] = None
+    vmax: Optional[float] = None
     clip: Optional[bool] = False
 
-    @validator("clip")
+    @field_validator("clip")
     def validate_clip(cls, v):
         """Validate `clip` option for Normalize."""
         _check_clip(v)
         return v
 
-    @root_validator
+    @model_validator(mode="before")
     def check_vmin_vmax(cls, values):
         """Check `vmin` and `vmax` for Normalize."""
         vmin, vmax = values.get("vmin"), values.get("vmax")
         _check_vmin_vmax(vmin, vmax)
         return values
 
-    @root_validator
+    @model_validator(mode="before")
     def check_valid_args(cls, values):
         """Check for no excess parameters in Normalize."""
         valid_args = {"vmin", "vmax", "clip"}
@@ -180,9 +182,9 @@ class NormalizeSettings(BaseModel):
 
 class CategoryNormSettings(BaseModel):
     labels: List[str]
-    first_value: Optional[int]
+    first_value: Optional[int] = 0
 
-    @validator("labels")
+    @field_validator("labels")
     def validate_labels(cls, v, values):
         """Validate labels for CategoryNorm."""
         if v is not None:
@@ -191,7 +193,7 @@ class CategoryNormSettings(BaseModel):
             assert all([isinstance(label, str) for label in v]), "'labels' must be a list of strings."
         return v
 
-    @validator("first_value")
+    @field_validator("first_value")
     def validate_first_value(cls, v, values):
         """Validate first_value for CategoryNorm."""
         if v is not None:
@@ -203,11 +205,11 @@ class BoundaryNormSettings(BaseModel):
     # "ncolors" if not specified is taken from len(boundaries).
 
     boundaries: List[float]
-    ncolors: Optional[int]
+    ncolors: Optional[int] = None
     clip: Optional[bool] = False
     extend: Optional[str] = "neither"
 
-    @validator("boundaries")
+    @field_validator("boundaries")
     def validate_boundaries(cls, v):
         """Validate `boundaries` list for BoundaryNorm."""
         assert isinstance(v, list), "'boundaries' list is required for 'BoundaryNorm'."
@@ -215,20 +217,20 @@ class BoundaryNormSettings(BaseModel):
         assert _is_monotonically_increasing(v), "'boundaries' must be monotonically increasing."
         return v
 
-    @validator("clip")
+    @field_validator("clip")
     def validate_clip(cls, v):
         """Validate ` clip` option for BoundaryNorm."""
         _check_clip(v)
         return v
 
-    @validator("extend")
+    @field_validator("extend")
     def validate_extend(cls, v):
         """Validate `extend` option for BoundaryNorm."""
         if v is not None:
             _check_extend(v)
         return v
 
-    @validator("ncolors")
+    @field_validator("ncolors")
     def validate_ncolors(cls, v, values):
         """Validate `ncolors` for BoundaryNorm."""
         if v is not None:
@@ -237,7 +239,7 @@ class BoundaryNormSettings(BaseModel):
             # - If extend is "neither" (default) there must be equal or larger than len(boundaries) - 1 colors.
             # - If extend is "min" or "max" ncolors must be equal or larger than len(boundaries)
             # - If extend is "both"  ncolors must be equal or larger than len(boundaries) + 1
-            extend = values.get("extend", "neither")
+            extend = values.data.get("extend", "neither")
             required_ncolors = _get_boundary_norm_expected_ncolors(norm_settings=values)
             if extend == "neither":
                 assert (
@@ -253,7 +255,7 @@ class BoundaryNormSettings(BaseModel):
                 ), f"'ncolors' must be equal or larger than len('boundaries') + 1 ({required_ncolors})."
         return v
 
-    @root_validator
+    @model_validator(mode="before")
     def check_valid_args(cls, values):
         """Check for no excess parameters in BoundaryNorm."""
         valid_args = {"boundaries", "ncolors", "clip", "extend"}
@@ -262,24 +264,24 @@ class BoundaryNormSettings(BaseModel):
 
 
 class NoNormSettings(BaseModel):
-    vmin: Optional[float]
-    vmax: Optional[float]
+    vmin: Optional[float] = None
+    vmax: Optional[float] = None
     clip: Optional[bool] = False
 
-    @validator("clip")
+    @field_validator("clip")
     def validate_clip(cls, v):
         """Validate `clip` option for NoNorm."""
         _check_clip(v)
         return v
 
-    @root_validator
+    @model_validator(mode="before")
     def check_vmin_vmax(cls, values):
         """Check `vmin` and `vmax` for NoNorm."""
         vmin, vmax = values.get("vmin"), values.get("vmax")
         _check_vmin_vmax(vmin, vmax)
         return values
 
-    @root_validator
+    @model_validator(mode="before")
     def check_valid_args(cls, values):
         """Check for no excess parameters in NoNorm."""
         valid_args = {"vmin", "vmax", "clip"}
@@ -289,29 +291,29 @@ class NoNormSettings(BaseModel):
 
 class CenteredNormSettings(BaseModel):
     vcenter: Optional[Union[int, float]] = 0
-    halfrange: Optional[Union[int, float]]
+    halfrange: Optional[Union[int, float]] = None
     clip: Optional[bool] = False
 
-    @validator("clip")
+    @field_validator("clip")
     def validate_clip(cls, v):
         """Validate `clip` option for CenteredNorm."""
         _check_clip(v)
         return v
 
-    @validator("vcenter")
+    @field_validator("vcenter")
     def validate_vcenter(cls, v):
         """Validate `vcenter` for CenteredNorm."""
         assert isinstance(v, (int, float)), "'vcenter' must be an integer or float."
         return v
 
-    @validator("halfrange")
+    @field_validator("halfrange")
     def validate_halfrange(cls, v):
         """Validate `halfrange` for CenteredNorm."""
         if v is not None:
             assert isinstance(v, (int, float)), "'halfrange' must be an integer, float or None."
         return v
 
-    @root_validator
+    @model_validator(mode="before")
     def check_valid_args(cls, values):
         """Check for no excess parameters in CenteredNorm."""
         valid_args = {"vcenter", "halfrange", "clip"}
@@ -321,23 +323,23 @@ class CenteredNormSettings(BaseModel):
 
 class TwoSlopeNormSettings(BaseModel):
     vcenter: float
-    vmin: Optional[float]
-    vmax: Optional[float]
+    vmin: Optional[float] = None
+    vmax: Optional[float] = None
 
-    @validator("vcenter")
+    @field_validator("vcenter")
     def validate_vcenter(cls, v):
         """Validate `vcenter` for TwoSlopeNorm."""
         assert isinstance(v, (int, float)), "'vcenter' must be an integer or float."
         return v
 
-    @root_validator
+    @model_validator(mode="before")
     def check_vmin_vcenter_vmax(cls, values):
         """Check `vmin`, `vcenter`, and `vmax` for TwoSlopeNorm."""
         vmin, vcenter, vmax = values.get("vmin"), values.get("vcenter"), values.get("vmax")
         _check_vmin_vcenter_vmax(vmin=vmin, vcenter=vcenter, vmax=vmax, norm_name="TwoSlopeNorm")
         return values
 
-    @root_validator
+    @model_validator(mode="before")
     def check_valid_args(cls, values):
         """Check for no excess parameters in TwoSlopeNorm."""
         valid_args = {"vcenter", "vmin", "vmax"}
@@ -346,24 +348,24 @@ class TwoSlopeNormSettings(BaseModel):
 
 
 class LogNormSettings(BaseModel):
-    vmin: Optional[float]
-    vmax: Optional[float]
+    vmin: Optional[float] = None
+    vmax: Optional[float] = None
     clip: Optional[bool] = False
 
-    @validator("clip")
+    @field_validator("clip")
     def validate_clip(cls, v):
         """Validate `clip` option for LogNorm."""
         _check_clip(v)
         return v
 
-    @root_validator
+    @model_validator(mode="before")
     def check_vmin_vmax(cls, values):
         """Check `vmin` and `vmax` for LogNorm."""
         vmin, vmax = values.get("vmin"), values.get("vmax")
         _check_vmin_vmax(vmin, vmax)
         return values
 
-    @root_validator
+    @model_validator(mode="before")
     def check_valid_args(cls, values):
         """Check for no excess parameters in LogNorm."""
         valid_args = {"vmin", "vmax", "clip"}
@@ -375,37 +377,37 @@ class SymLogNormSettings(BaseModel):
     linthresh: float
     linscale: Optional[float] = 1.0
     base: Optional[float] = 10
-    vmin: Optional[float]
-    vmax: Optional[float]
+    vmin: Optional[float] = None
+    vmax: Optional[float] = None
     clip: Optional[bool] = False
 
-    @validator("linthresh")
+    @field_validator("linthresh")
     def validate_linthresh(cls, v):
         """Validate `linthresh` for SymLogNorm."""
         assert v > 0, "'linthresh' must be positive for 'SymLogNorm'."
         return v
 
-    @validator("linscale", "base")
+    @field_validator("linscale", "base")
     def validate_linscale_base(cls, v, field):
         """Validate `linscale` and `base` for SymLogNorm."""
         if v is not None:
             assert v > 0, f"'{field.name}' must be positive for 'SymLogNorm'."
         return v
 
-    @validator("clip")
+    @field_validator("clip")
     def validate_clip(cls, v):
         """Validate `clip` option for SymLogNorm."""
         _check_clip(v)
         return v
 
-    @root_validator
+    @model_validator(mode="before")
     def check_vmin_vmax(cls, values):
         """Check `vmin` and `vmax` for SymLogNorm."""
         vmin, vmax = values.get("vmin"), values.get("vmax")
         _check_vmin_vmax(vmin, vmax)
         return values
 
-    @root_validator
+    @model_validator(mode="before")
     def check_valid_args(cls, values):
         """Check for no excess parameters in SymLogNorm."""
         valid_args = ["linthresh", "linscale", "vmin", "vmax", "clip", "base"]
@@ -415,30 +417,30 @@ class SymLogNormSettings(BaseModel):
 
 class PowerNormSettings(BaseModel):
     gamma: float
-    vmin: Optional[float]
-    vmax: Optional[float]
+    vmin: Optional[float] = None
+    vmax: Optional[float] = None
     clip: Optional[bool] = False
 
-    @validator("gamma")
+    @field_validator("gamma")
     def validate_gamma(cls, v):
         """Validate `gamma` for PowerNorm."""
         assert isinstance(v, (int, float)), "'gamma' must be an integer or float."
         return v
 
-    @validator("clip")
+    @field_validator("clip")
     def validate_clip(cls, v):
         """Validate `clip` option for PowerNorm."""
         _check_clip(v)
         return v
 
-    @root_validator
+    @model_validator(mode="before")
     def check_vmin_vmax(cls, values):
         """Check `vmin` and `vmax` for PowerNorm."""
         vmin, vmax = values.get("vmin"), values.get("vmax")
         _check_vmin_vmax(vmin, vmax)
         return values
 
-    @root_validator
+    @model_validator(mode="before")
     def check_valid_args(cls, values):
         """Check for no excess parameters in PowerNorm."""
         valid_args = ["gamma", "vmin", "vmax", "clip"]
@@ -447,31 +449,31 @@ class PowerNormSettings(BaseModel):
 
 
 class AsinhNormSettings(BaseModel):
-    linear_width: Optional[Union[int, float]]
-    vmin: Optional[float]
-    vmax: Optional[float]
+    linear_width: Optional[Union[int, float]] = 1
+    vmin: Optional[float] = None
+    vmax: Optional[float] = None
     clip: Optional[bool] = False
 
-    @validator("linear_width")
+    @field_validator("linear_width")
     def validate_linear_width(cls, v):
         """Validate `linear_width` for AsinhNorm."""
         assert isinstance(v, (int, float)), "'linear_width' must be an integer or float."
         return v
 
-    @validator("clip")
+    @field_validator("clip")
     def validate_clip(cls, v):
         """Validate `clip` option for AsinhNorm."""
         _check_clip(v)
         return v
 
-    @root_validator
+    @model_validator(mode="before")
     def check_vmin_vmax(cls, values):
         """Check `vmin` and `vmax` for AsinhNorm."""
         vmin, vmax = values.get("vmin"), values.get("vmax")
         _check_vmin_vmax(vmin, vmax)
         return values
 
-    @root_validator
+    @model_validator(mode="before")
     def check_valid_args(cls, values):
         """Check for no excess parameters in AsinhNorm."""
         valid_args = ["linear_width", "vmin", "vmax", "clip"]
@@ -524,22 +526,22 @@ def check_norm_settings(norm_settings):
 
 
 class CbarSettings(BaseModel):
-    extend: Optional[str]  # e.g., 'neither', 'both', 'min', 'max'
-    extendfrac: Optional[Union[float, List[float]]]
-    extendrect: Optional[bool]
-    label: Optional[str]  # title of colorbar
+    extend: Optional[str] = "neither"
+    extendfrac: Optional[Union[float, List[float]]] = "auto"
+    extendrect: Optional[bool] = False
+    label: Optional[str] = None  # title of colorbar
 
     class Config:
         arbitrary_types_allowed = True
 
-    @validator("extend")
+    @field_validator("extend")
     def validate_extend(cls, v):
         """Validate extend option."""
         if v is not None:
             _check_extend(v)
         return v
 
-    @validator("extendfrac")
+    @field_validator("extendfrac")
     def validate_extendfrac(cls, v):
         """Validate extend fraction."""
         if v is not None:
@@ -551,14 +553,14 @@ class CbarSettings(BaseModel):
                 assert isinstance(v, (float, int)) and 0 <= v <= 1, "extendfrac must be a float or int between 0 and 1."
         return v
 
-    @validator("extendrect")
+    @field_validator("extendrect")
     def validate_extendrect(cls, v):
         """Validate extend rectangle option."""
         if v is not None:
             assert isinstance(v, bool), "extendrect must be a boolean value."
         return v
 
-    @validator("label")
+    @field_validator("label")
     def validate_label(cls, v):
         """Validate label as string."""
         if v is not None:

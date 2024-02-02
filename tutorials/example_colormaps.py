@@ -97,6 +97,7 @@ pycolorbar.get_cmap_dict("IMERG_Liquid")
 # ------------------------------------------------------------------
 ##### ColorMap Validation
 cmap_dict = pycolorbar.validate_cmap_dict(cmap_dict)
+
 pycolorbar.colormaps.validate(name=None)
 
 # ------------------------------------------------------------------

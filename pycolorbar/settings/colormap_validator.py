@@ -29,7 +29,7 @@ import re
 from typing import List, Optional
 
 import numpy as np
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 from pycolorbar.colors.colors_io import check_valid_internal_data_range
 from pycolorbar.utils.mpl import get_mpl_named_colors
@@ -93,7 +93,7 @@ class ColorMapValidator(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    @validator("type")
+    @field_validator("type")
     def validate_type(cls, v):
         valid_types = [
             "ListedColormap",
@@ -103,23 +103,23 @@ class ColorMapValidator(BaseModel):
         assert v in valid_types, f"Colormap 'type' must be one of {valid_types}"
         return v
 
-    @validator("color_space")
+    @field_validator("color_space")
     def validate_color_space(cls, v):
         check_color_space(color_space=v)
         return v
 
-    @validator("colors")
+    @field_validator("colors")
     def validate_colors(cls, v, values, **kwargs):
         v = np.asanyarray(v)
-        color_space = values.get("color_space", "")
+        color_space = values.data.get("color_space", "")
         validate_colors_values(v, color_space=color_space)
         return v
 
-    @validator("segmentdata")
+    @field_validator("segmentdata")
     def validate_segmentdata(cls, v, values):
         if v is not None:
             assert (
-                values.get("type") == "LinearSegmentedColormap"
+                values.data.get("type") == "LinearSegmentedColormap"
             ), "'segmentdata' requires the 'type' 'LinearSegmentedColormap'"
             assert isinstance(v, list), "'segmentdata' must be a list."
             assert all(isinstance(level, (int, float)) for level in v), "'segmentdata' must be a list of numbers."
