@@ -63,8 +63,11 @@ write_to = "pycolorbar/_version.py"
 license-files = ["LICENSE"]
 packages = ["pycolorbar"] # explicitly list the packages in modules
 
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report term-missing --cov-report xml --cov-report lcov:lcov.info"
+
 [tool.black]
-line-length = 100
+line-length = 120
 # skip-string-normalization = true
 target-version = [
     "py37",
@@ -81,8 +84,8 @@ select = ["F",
 	  "W",
 	  "UP",
 	  "Q",
-	  # "SIM",
-	  # "PTH",
+	  #"SIM",
+	  #"PTH",
 	  #"RET",
 	 ]
 ignore = ["E722"]

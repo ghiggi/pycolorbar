@@ -24,40 +24,30 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
-from importlib.metadata import PackageNotFoundError, version
+import glob
+import os
+import pathlib
 
-from pycolorbar.settings.colorbar_registry import (  # noqa
-    ColorbarRegistry,
-    available_colorbars,
-    get_cbar_dict,
-    get_plot_kwargs,
-    register_colorbar,
-    register_colorbars,
-)
-from pycolorbar.settings.colorbar_validator import validate_cbar_dict  # noqa
-from pycolorbar.settings.colorbar_visualization import show_colorbar, show_colorbars  # noqa
-from pycolorbar.settings.colormap_registry import (  # noqa
-    ColorMapRegistry,
-    available_colormaps,
-    get_cmap,
-    get_cmap_dict,
-    register_colormap,
-    register_colormaps,
-)
-from pycolorbar.settings.colormap_validator import validate_cmap_dict  # noqa
-from pycolorbar.settings.colormap_visualization import show_colormap, show_colormaps  # noqa
 
-# Create a module-level instance of ColorMapRegistry
-colormaps = ColorMapRegistry.get_instance()
+def _recursive_glob(dir_path, glob_pattern):
+    # ** search for all files recursively
+    # glob_pattern = os.path.join(base_dir, "**", "metadata", f"{station_name}.yml")
+    # metadata_filepaths = glob.glob(glob_pattern, recursive=True)
 
-# Create a module-level instance of ColorbarRegistry
-colorbars = ColorbarRegistry.get_instance()
+    dir_path = pathlib.Path(dir_path)
+    return [str(path) for path in dir_path.rglob(glob_pattern)]
 
-__all__ = []
 
-# Get version
-try:
-    __version__ = version("pycolorbar")
-except PackageNotFoundError:
-    # package is not installed
-    pass
+def list_paths(dir_path, glob_pattern, recursive=False):
+    """Return a list of filepaths and directory paths."""
+    if not recursive:
+        return glob.glob(os.path.join(dir_path, glob_pattern))
+    else:
+        return _recursive_glob(dir_path, glob_pattern)
+
+
+def list_files(dir_path, glob_pattern, recursive=False):
+    """Return a list of filepaths (exclude directory paths)."""
+    paths = list_paths(dir_path, glob_pattern, recursive=recursive)
+    filepaths = [f for f in paths if os.path.isfile(f)]
+    return filepaths

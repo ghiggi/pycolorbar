@@ -24,40 +24,42 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
-from importlib.metadata import PackageNotFoundError, version
+"""YAML utility."""
+import yaml
 
-from pycolorbar.settings.colorbar_registry import (  # noqa
-    ColorbarRegistry,
-    available_colorbars,
-    get_cbar_dict,
-    get_plot_kwargs,
-    register_colorbar,
-    register_colorbars,
-)
-from pycolorbar.settings.colorbar_validator import validate_cbar_dict  # noqa
-from pycolorbar.settings.colorbar_visualization import show_colorbar, show_colorbars  # noqa
-from pycolorbar.settings.colormap_registry import (  # noqa
-    ColorMapRegistry,
-    available_colormaps,
-    get_cmap,
-    get_cmap_dict,
-    register_colormap,
-    register_colormaps,
-)
-from pycolorbar.settings.colormap_validator import validate_cmap_dict  # noqa
-from pycolorbar.settings.colormap_visualization import show_colormap, show_colormaps  # noqa
+from pycolorbar.utils.directories import list_files
 
-# Create a module-level instance of ColorMapRegistry
-colormaps = ColorMapRegistry.get_instance()
 
-# Create a module-level instance of ColorbarRegistry
-colorbars = ColorbarRegistry.get_instance()
+def read_yaml(filepath: str) -> dict:
+    """Read a YAML file into a dictionary.
 
-__all__ = []
+    Parameters
+    ----------
+    filepath : str
+        Input YAML file path.
 
-# Get version
-try:
-    __version__ = version("pycolorbar")
-except PackageNotFoundError:
-    # package is not installed
-    pass
+    Returns
+    -------
+    dict
+        Dictionary with the attributes read from the YAML file.
+    """
+    with open(filepath) as f:
+        dictionary = yaml.safe_load(f)
+    return dictionary
+
+
+def write_yaml(dictionary, filepath, sort_keys=False):
+    """Write a dictionary into a YAML file.
+
+    Parameters
+    ----------
+    dictionary : dict
+        Dictionary to write into a YAML file.
+    """
+    with open(filepath, "w") as f:
+        yaml.dump(dictionary, f, sort_keys=sort_keys)
+    return
+
+
+def list_yaml_files(directory):
+    return list_files(directory, glob_pattern="*.yaml", recursive=True)

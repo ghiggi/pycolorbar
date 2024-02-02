@@ -1,0 +1,6 @@
+Tb:
+  reference: Brightness_Temperature
+Tc:
+  reference: Brightness_Temperature
+simulatedBrightTemp:
+  reference: Brightness_Temperature

@@ -1,0 +1,11 @@
+type: ListedColormap
+color_space: name
+colors:
+- lightblue
+- darkblue
+- lightgreen
+- orange
+- white
+- darkgray
+auxiliary:
+  category: categorical

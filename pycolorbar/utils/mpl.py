@@ -24,40 +24,35 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
-from importlib.metadata import PackageNotFoundError, version
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import numpy as np
 
-from pycolorbar.settings.colorbar_registry import (  # noqa
-    ColorbarRegistry,
-    available_colorbars,
-    get_cbar_dict,
-    get_plot_kwargs,
-    register_colorbar,
-    register_colorbars,
-)
-from pycolorbar.settings.colorbar_validator import validate_cbar_dict  # noqa
-from pycolorbar.settings.colorbar_visualization import show_colorbar, show_colorbars  # noqa
-from pycolorbar.settings.colormap_registry import (  # noqa
-    ColorMapRegistry,
-    available_colormaps,
-    get_cmap,
-    get_cmap_dict,
-    register_colormap,
-    register_colormaps,
-)
-from pycolorbar.settings.colormap_validator import validate_cmap_dict  # noqa
-from pycolorbar.settings.colormap_visualization import show_colormap, show_colormaps  # noqa
 
-# Create a module-level instance of ColorMapRegistry
-colormaps = ColorMapRegistry.get_instance()
+# TODO: cache
+def get_mpl_named_colors():
+    """
+    Retrieves the list of valid named colors available in matplotlib.
 
-# Create a module-level instance of ColorbarRegistry
-colorbars = ColorbarRegistry.get_instance()
+    Returns
+    -------
+    np.ndarray
+        An array of valid named colors.
 
-__all__ = []
+    Notes
+    -----
+    This function combines colors from TABLEAU_COLORS, BASE_COLORS, CSS4_COLORS, and XKCD_COLORS in matplotlib.
+    """
+    named_colors = list(mcolors.get_named_colors_mapping())
+    # named_colors = (
+    #     list(mcolors.TABLEAU_COLORS) +
+    #     list(mcolors.BASE_COLORS)    +
+    #     list(mcolors.CSS4_COLORS)    +
+    #     list(mcolors.XKCD_COLORS)
+    # )
+    named_colors = np.array(named_colors, dtype=str)
+    return named_colors
 
-# Get version
-try:
-    __version__ = version("pycolorbar")
-except PackageNotFoundError:
-    # package is not installed
-    pass
+
+def get_mpl_colormaps():
+    return plt.colormaps()

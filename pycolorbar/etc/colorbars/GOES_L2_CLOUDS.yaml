@@ -1,0 +1,201 @@
+COD:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 0
+    vmax: 50
+  cbar:
+    extend: max
+    extendfrac: 0.05
+    label: Cloud Optical Depth at 640 nm [-]
+CPS:
+  cmap:
+    name: turbo_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 0
+    vmax: 50
+  cbar:
+    extend: max
+    extendfrac: 0.05
+    label: Cloud Particle Size [um]
+CTH:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 0
+    vmax: 15000
+  cbar:
+    extend: max
+    extendfrac: 0.05
+    label: Cloud Top Height [m]
+CTT:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 200
+    vmax: 300
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Cloud Top Temperature [K]
+CTP:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 100
+    vmax: 1000
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Cloud Top Pressure [hPa]
+Phase:
+  cmap:
+    name: GOES_CloudPhase
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: CategoryNorm
+    labels:
+    - Clear Sky
+    - Liquid
+    - SC Liquid
+    - Mixed
+    - Ice
+    - Unknown
+CM:
+  cmap:
+    name: GOES_BinaryCloudMask
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: CategoryNorm
+    labels:
+    - Clear Sky
+    - Cloudy
+DQF_COD:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 16
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_CPS:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 16
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_CTT:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 6
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_CTH:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 6
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_CTP:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 6
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_Phase:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 5
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_RRQPE:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 64
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_CM:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 2
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag

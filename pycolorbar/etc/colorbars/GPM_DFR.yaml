@@ -1,0 +1,6 @@
+dfrMeasured:
+  reference: GPM_DFR
+dfrFinal:
+  reference: GPM_DFR
+dfrFinalNearSurface:
+  reference: GPM_DFR

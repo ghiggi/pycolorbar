@@ -1,0 +1,10 @@
+zFactorFinalNearSurface:
+  reference: GPM_Z
+zFactorFinalESurface:
+  reference: GPM_Z
+zFactorMeasured:
+  reference: GPM_Z
+zFactorFinal:
+  reference: GPM_Z
+REFC:
+  reference: GPM_Z

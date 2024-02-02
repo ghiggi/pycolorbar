@@ -1,0 +1,22 @@
+name: pycolorbar
+channels:
+  - conda-forge
+dependencies:
+  - pyyaml
+  - numpy
+  - matplotlib
+  - pydantic
+  # Docs
+  - jupyter
+  - sphinx
+  - sphinx-book-theme
+  - nbsphinx
+  # Testing
+  - setuptools
+  - pre_commit
+  - coverage
+  - pytest
+  - pytest-cov
+  - pytest-mock
+  - requests-mock
+  - pip

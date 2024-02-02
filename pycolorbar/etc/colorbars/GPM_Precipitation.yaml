@@ -1,0 +1,44 @@
+precipRate:
+  reference: pysteps_mm/hr
+precipRateNearSurface:
+  reference: pysteps_mm/hr
+precipRateESurface:
+  reference: pysteps_mm/hr
+precipRateESurface2:
+  reference: pysteps_mm/hr
+precipRateAve24:
+  reference: pysteps_mm/hr
+precipTotRate:
+  reference: pysteps_mm/hr
+nearSurfPrecipTotRate:
+  reference: pysteps_mm/hr
+nearSurfPrecipLiqRate:
+  reference: pysteps_mm/hr
+estimSurfPrecipTotRate:
+  reference: pysteps_mm/hr
+OEestimSurfPrecipTotRate:
+  reference: pysteps_mm/hr
+estimSurfPrecipLiqRate:
+  reference: pysteps_mm/hr
+OEestimSurfPrecipLiqRate:
+  reference: pysteps_mm/hr
+surfacePrecipitation:
+  reference: pysteps_mm/hr
+mostLikelyPrecipitation:
+  reference: pysteps_mm/hr
+convectivePrecipitation:
+  reference: pysteps_mm/hr
+frozenPrecipitation:
+  reference: pysteps_mm/hr
+nearSurfacePrecipRate:
+  reference: pysteps_mm/hr
+surfacePrecipRate:
+  reference: pysteps_mm/hr
+precipitationCal:
+  reference: pysteps_mm/hr
+precipitationUncal:
+  reference: pysteps_mm/hr
+IRprecipitation:
+  reference: pysteps_mm/hr
+RRQPE:
+  reference: pysteps_mm/hr

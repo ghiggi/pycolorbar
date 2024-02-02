@@ -1,0 +1,432 @@
+C01:
+  cmap:
+    name: gray
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 0
+    vmax: 100
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Reflectance [%]
+C02:
+  cmap:
+    name: gray
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 0
+    vmax: 100
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Reflectance [%]
+C03:
+  cmap:
+    name: gray
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 0
+    vmax: 100
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Reflectance [%]
+C04:
+  cmap:
+    name: gray
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 0
+    vmax: 100
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Reflectance [%]
+C05:
+  cmap:
+    name: gray
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 0
+    vmax: 100
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Reflectance [%]
+C06:
+  cmap:
+    name: gray
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 0
+    vmax: 100
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Reflectance [%]
+C07:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 200
+    vmax: 300
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Brightness Temperature [K]
+C08:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 200
+    vmax: 300
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Brightness Temperature [K]
+C09:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 200
+    vmax: 300
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Brightness Temperature [K]
+C10:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 200
+    vmax: 300
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Brightness Temperature [K]
+C11:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 200
+    vmax: 300
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Brightness Temperature [K]
+C12:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 200
+    vmax: 300
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Brightness Temperature [K]
+C13:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 200
+    vmax: 300
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Brightness Temperature [K]
+C14:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 200
+    vmax: 300
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Brightness Temperature [K]
+C15:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 200
+    vmax: 300
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Brightness Temperature [K]
+C16:
+  cmap:
+    name: RdYlBu_r
+    bad_alpha: 0.5
+    bad_color: gray
+  norm:
+    name: Norm
+    vmin: 200
+    vmax: 300
+  cbar:
+    extend: both
+    extendfrac: 0.05
+    label: Brightness Temperature [K]
+DQF_C01:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C02:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C03:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C04:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C05:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C06:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C07:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C08:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C09:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C10:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C11:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C12:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C13:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C14:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C15:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
+DQF_C16:
+  cmap:
+    name: viridis
+    bad_alpha: 0.5
+    bad_color: gray
+    under_color: none
+  norm:
+    name: Norm
+    vmin: 1
+    vmax: 4
+  cbar:
+    extend: neither
+    extendfrac: 0.05
+    label: Data Quality Flag
