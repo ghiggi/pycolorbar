@@ -4,4 +4,3 @@ sphinx_book_theme==1.0.1
 sphinx-mdinclude==0.5.3
 sphinx-gallery
 pycolorbar[dev]
-
