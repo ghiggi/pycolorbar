@@ -167,7 +167,7 @@ The latter is recommended since it indicates if the commit contained any formatt
 
 
 Run pycolorbar on Jupyter Notebooks
-==================================
+=====================================
 
 If you want to run pycolorbar on a `Jupyter Notebook <https://jupyter.org/>`__,
 you have to take care to set up the IPython kernel environment where pycolorbar is installed.

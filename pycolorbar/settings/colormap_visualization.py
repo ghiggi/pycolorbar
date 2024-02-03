@@ -70,7 +70,7 @@ def plot_colormaps(cmaps, cols=None, subplot_size=None, dpi=200):
     axes = axes.ravel()
 
     # Loop through colormaps and axes
-    for idx, (cmap, ax) in enumerate(zip(cmaps, axes)):
+    for cmap, ax in zip(cmaps, axes):
         ax.set_title(cmap.name, fontsize=10, weight="bold")
         ax.imshow(im, cmap=cmap)
         ax.axis("off")  # Set axis off

@@ -29,7 +29,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-# TODO: cache
 def get_mpl_named_colors():
     """
     Retrieves the list of valid named colors available in matplotlib.
