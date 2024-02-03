@@ -37,6 +37,7 @@ keywords = ["colormap", "colorbar", "bivariate", "trivariate"]
 dependencies = [
     "matplotlib",
     "numpy",
+    "pydantic>=2.0.0",
 ]
 requires-python = ">=3.8"
 dynamic = ["version"]
