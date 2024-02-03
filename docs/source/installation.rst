@@ -14,7 +14,7 @@ We recommend users and contributors to first set up a `Virtual Environment <#vir
 
 .. _virtual_environment:
 
-Virtual Environment Creation
+Virtual environment creation
 ===============================
 
 While not mandatory, utilizing a virtual environment when installing pycolorbar is recommended.

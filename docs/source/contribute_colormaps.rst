@@ -1,6 +1,6 @@
-==================================
-How to Contribute New Colormaps
-==================================
+======================
+Contribute Colormaps
+======================
 
 Do you want to contribute your own colormap to to pycolorbar ? Great! You are in the right place !
 

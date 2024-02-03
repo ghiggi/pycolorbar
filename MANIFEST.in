@@ -3,3 +3,4 @@ prune dev
 prune docs
 prune tutorials
 prune ci
+prune pycolorbar/tests

@@ -208,7 +208,7 @@ class ColorEncoderDecoder:
         """
         Check if the color values are within the internal data range for each channel.
 
-        Parameters:
+        Parameters
         ----------
         colors : np.array
             2D-Array with the columns representing the color space dimensions.

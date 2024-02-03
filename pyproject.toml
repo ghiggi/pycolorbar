@@ -38,6 +38,7 @@ dependencies = [
     "matplotlib",
     "numpy",
     "pydantic>=2.0.0",
+    "PyYAML",
 ]
 requires-python = ">=3.8"
 dynamic = ["version"]
@@ -45,10 +46,9 @@ dynamic = ["version"]
 [project.optional-dependencies]
 dev = ["pre-commit",
        "black", "black[jupyter]", "blackdoc", "ruff", "codespell",
-       "pytest", "pytest-cov", "pytest-mock", "pydantic",
+       "pytest", "pytest-cov", "pytest-mock",
        "pip-tools", "bumpver", "twine",
-       "setuptools>=61.0.0", "wheel",
-       "sphinx", "sphinx-gallery", "sphinx_rtd_theme", "nbsphinx"]
+       "setuptools>=61.0.0", "wheel"]
 
 [project.urls]
 Homepage = "https://github.com/ghiggi/pycolorbar"
@@ -97,7 +97,6 @@ unfixable = []
 # Exclude a variety of commonly ignored directories.
 exclude = [
     "dev*",
-    "pycolorbar/test*",
     ".bzr",
     ".direnv",
     ".eggs",
