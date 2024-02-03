@@ -13,7 +13,7 @@
 | Code Quality         | [![Codefactor](https://www.codefactor.io/repository/github/ghiggi/pycolorbar/badge?style=flat)](https://www.codefactor.io/repository/github/ghiggi/pycolorbar) [![Codebeat](https://codebeat.co/badges/236abcf2-cbae-4ca9-8a2d-3b70495bb16b?style=flat)](https://codebeat.co/projects/github-com-ghiggi-pycolorbar-main) [![Codacy](https://app.codacy.com/project/badge/Grade/bee842cb10004ad8bb9288256f2fc8af?style=flat)](https://app.codacy.com/gh/ghiggi/pycolorbar/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![Codescene](https://codescene.io/projects/41870/status-badges/code-health?style=flat)](https://codescene.io/projects/41870) |
 | License              | [![License](https://img.shields.io/github/license/ghiggi/pycolorbar?style=flat)](https://github.com/ghiggi/pycolorbar/blob/main/LICENSE) |
 | Community            | [![Slack](https://img.shields.io/badge/Slack-pycolorbar-green.svg?logo=slack&style=flat)](https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g) [![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-green?logo=github&style=flat)](https://github.com/ghiggi/pycolorbar/discussions) |
-| Citation             | [![DOI](https://zenodo.org/badge/286664485.svg?style=flat)](https://doi.org/10.5281/zenodo.10255084) |
+| Citation             | [![DOI](https://zenodo.org/badge/664671614.svg?style=flat)](https://doi.org/10.5281/zenodo.10613635) |
 
  [**Slack**](https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g) | [**Docs**](https://pycolorbar.readthedocs.io/en/latest/)
 
@@ -71,9 +71,9 @@ If you are using pycolorbar in your publication please cite our paper:
 
 TODO: GMD
 
-You can cite the Zenodo code publication of pycolorbar by:
+You can cite the  code publication of pycolorbar by:
 
-> Ghiggi Gionata & XXXX . ghiggi/pycolorbar. Zenodo. https://doi.org/10.5281/zenodo.8131552
+> Ghiggi Gionata & XXXX . ghiggi/pycolorbar. Zenodo. https://doi.org/10.5281/zenodo.10613635
 
 If you want to cite a specific version, have a look at the [Zenodo site](https://doi.org/10.5281/zenodo.7753488).
 
