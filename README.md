@@ -75,7 +75,7 @@ You can cite the  code publication of pycolorbar by:
 
 > Ghiggi Gionata & XXXX . ghiggi/pycolorbar. Zenodo. https://doi.org/10.5281/zenodo.10613635
 
-If you want to cite a specific version, have a look at the [Zenodo site](https://doi.org/10.5281/zenodo.7753488).
+If you want to cite a specific version, have a look at the [Zenodo site](https://doi.org/10.5281/zenodo.10613635).
 
 ## Requirements:
 
