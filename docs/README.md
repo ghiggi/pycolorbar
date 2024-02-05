@@ -1,6 +1,6 @@
 # pycolorbar documentation
 
-pycolorbar’s documentation is built using the powerful [Sphinx](https://www.sphinx-doc.org/en/master/) framework, 
+pycolorbar’s documentation is built using the powerful [Sphinx](https://www.sphinx-doc.org/en/master/) framework,
 styled with [Book Theme](https://sphinx-book-theme.readthedocs.io/en/stable/index.html).
 
 All documentation source files are neatly organized in the `docs/` directory within the project's repository.
@@ -14,17 +14,17 @@ To build the documentation locally, follow the next three steps.
 **1. Set up the python environment for building the documentation**
 
   The python packages required to build the documentation are listed in the [requirements.txt ](https://github.com/ghiggi/pycolorbar/blob/main/docs/requirements.txt) file.
-  
-  For an efficient setup, we recommend creating a dedicated virtual environment. 
+
+  For an efficient setup, we recommend creating a dedicated virtual environment.
   Navigate to the `docs/` directory and execute the following command.
   This will also install [pandoc](https://pandoc.org/), a versatile document conversion tool:
-  
+
   ```
   conda create -f environment.yaml
   ```
 
 **2. Activate the virtual environment**
-  
+
   Once the environment is ready, activate it using:
 
   ```
@@ -32,17 +32,17 @@ To build the documentation locally, follow the next three steps.
   ```
 
 **3. Generate the documentation**
-  
-With the environment set and activated, you're ready to generate the documentation. 
+
+With the environment set and activated, you're ready to generate the documentation.
 Execute:
 
 ```
 make clean html
 ```
 
-This command will build the HTML version of the documentation. 
+This command will build the HTML version of the documentation.
 It first cleans previous builds (`make clean`) and then generates fresh documentation (`html`).
-  
+
 **Note**: It's important to review the output of the command. Look out for warnings or errors and address them to ensure the documentation is accurate and complete.
 
 By following these steps, you should have a local version of the pycolorbar documentation in the ``docs/build/html/`` directory,

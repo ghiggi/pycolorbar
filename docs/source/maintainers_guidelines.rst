@@ -114,7 +114,7 @@ To build the documentation locally, follow the next three steps.
 
 	.. note:: It's important to review the output of the command. Look out for warnings or errors and address them to ensure the documentation is accurate and complete.
 
-By following these steps, you should have a local version of the pycolorbar documentation 
+By following these steps, you should have a local version of the pycolorbar documentation
 in the ``docs/build/html/`` directory, ready for review or deployment!
 
 
