@@ -1,7 +1,7 @@
 # pyproject.toml
 
 [build-system]
-requires = ["setuptools>=61.0.0", "setuptools_scm[toml]>=6.2", "wheel"]
+requires = ["setuptools>=61.0.0", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -45,10 +45,10 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = ["pre-commit",
-       "black", "black[jupyter]", "blackdoc", "ruff", "codespell",
        "pytest", "pytest-cov", "pytest-mock",
-       "pip-tools", "bumpver", "twine",
-       "setuptools>=61.0.0", "wheel"]
+       "setuptools",
+       "build", "twine",
+]
 
 [project.urls]
 Homepage = "https://github.com/ghiggi/pycolorbar"

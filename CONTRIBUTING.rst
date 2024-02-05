@@ -1,3 +1,5 @@
+.. _contributor_guidelines:
+
 Contributors Guidelines
 ===========================
 
@@ -19,69 +21,51 @@ We use `GitHub flow <https://docs.github.com/en/get-started/quickstart/github-fl
 So all code changes happen through Pull Requests (PRs).
 
 
-Before adding your contribution, please make sure to take a moment and read through the following documnents :
+**First Time Contributors ?**
 
-- `Code of Conduct <https://github.com/ghiggi/pycolorbar/blob/main/CODE_OF_CONDUCT.md>`__
-- `Contributing environment setup <#contributing-environment-setup>`__
-- `Contributing process <#contributing-process>`__
-- `Code review checklist <#code-review-checklist>`__
+Before adding your contribution, please take a moment to read through the following sections:
+
+- The :ref:`Installation for contributors <installation_contributor>` help you to set up the developing environment and the pre-commit hooks.
+- The section `Contributing process <#contributing-process>`__ provides you with a brief overview of the steps that each pycolorbar developer must follow to contribute to the repository.
+- The `Code review checklist <#code-review-checklist>`__ enable to speed up the code review process.
+- The `Code of conduct <https://github.com/ghiggi/pycolorbar/blob/main/CODE_OF_CONDUCT.md>`__ details the expected behavior of all contributors.
+
+Initiating a discussion about your ideas or proposed implementations is a vital step before starting your contribution !
+Engaging with the community early on can provide valuable insights, ensure alignment with the project's goals, and prevent potential overlap with existing work.
+Here are some guidelines to facilitate this process:
+
+1. Start with a conversation
+
+   Before start coding, open a `GitHub Discussion <https://github.com/ghiggi/pycolorbar/discussions>`__, a `GitHub Feature Request Issue <https://github.com/ghiggi/pycolorbar/issues/new/choose>`__ or
+   just start a discussion in the `pycolorbar Slack Workspace <https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g>`__.
+   These channels of communication provides an opportunity to gather feedback, understand the project's current state, and improve your contributions.
+
+2. Seek guidance and suggestions
+
+   Utilize the community's expertise. Experienced contributors and maintainers can offer guidance, suggest best practices, and help you navigate any complexities you might encounter.
+
+3. Collaborate on the approach
+
+   Discussing your implementation strategy allows for a collaborative approach to problem-solving.
+   It ensures that your contribution is in line with the project's design principles and technical direction.
+
+By following these steps, you not only enhance the quality and relevance of your contribution but also become an integral part of the project's collaborative ecosystem.
+
+If you have any questions, please do not hesitate to ask in the `GitHub Discussions <https://github.com/ghiggi/pycolorbar/discussions>`__ or in the
+`pycolorbar Slack Workspace <https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g>`__.
 
 
 Issue Reporting
 -----------------
 
--  Always use one of the available `GitHub Issue
-   Templates <https://github.com/ghiggi/pycolorbar/issues/new/choose>`__
--  If you do not find the required GitHub Issue Template, please ask for a new template.
+To facilitate and enhance the issue reporting process, it is important to utilize the predefined GitHub Issue Templates.
+These templates are designed to ensure you provide all the essential information in your report, allowing for a faster and more effective response from the maintainers.
+You can access and use these templates by visiting the `GitHub Issue Templates page here <https://github.com/ghiggi/pycolorbar/issues/new/choose>`__.
 
-
-Setup the contributor environment
------------------------------------
-
-**First Time Contributors ?**
-
-Please follow the following steps to install your developing environment :
-
--  Set up the development environment
--  Install pre-commit hooks
-
-Set up the development environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You will need python to set up the development environment.
-See `the installation guide <https://pycolorbar.readthedocs.io/en/latest/installation.html>`__ for further explanations.
-
-Install pre-commit hooks
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-After setting up your development environment, install the git pre-commit hook by executing the following command in the repository’s root:
-
-::
-
-   pre-commit install
-
-
-The pre-commit hooks are scripts executed automatically in every commit
-to identify simple code quality issues. When an issue is identified
-(the pre-commit script exits with non-zero status), the hook aborts the
-commit and prints the error. Currently, pycolorbar only tests that the
-code to be committed complies with `black`'s format style, the `ruff` linter and the `codespell` spelling checker.
-
-In case that the commit is aborted, you only need to run the precommit hook again.
-This can be done by running   ``black .``,  ``ruff check .`` or ``codespell`` .
-
-.. note::
-	To maintain consistency, please use version and configuration defined into `.pre-commit-config.yaml`.
-
-
-
-This can also be done with  ``pre-commit run --all-files``. This is recommended since it
-indicates if the commit contained any formatting errors (that are automatically corrected).
-
-
-More info on pre-commit and CI tools are provided in the Code quality and testing section
-`Code quality and testing section <https://pycolorbar.readthedocs.io/en/latest/contributors_guidelines.html#code-quality-control>`__
-
+However, if you find that the existing templates don't quite match the specifics of the issue you're encountering, please feel free to suggest a new template.
+Your feedback is invaluable in refining our processes and ensuring we address a broader spectrum of concerns.
+To do this, simply create a general issue in the repository, clearly stating that you're requesting a new template and include detailed suggestions about what this new template should entail.
+This proactive approach helps us continuously evolve and better serve the needs of the project and its contributors.
 
 
 Contributing process
@@ -103,28 +87,17 @@ Here is a brief overview of the steps that each pycolorbar developer must follow
 .. image:: /static/collaborative_process.png
 
 
-
-
 1. Fork the repository
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Once you have set the development environment (see `Set up the development environment`_), the next step is to create
-your local copy of the repository, where you will commit your
-modifications. The steps to follow are:
+If you do not have a GitHub account yet, please create one `here <https://github.com/join>`__.
+If you do not have yet Git installed on your computer, please install it following `these instructions <https://github.com/git-guides/install-git>`__.
+Then, please follow the guidelines in the :ref:`Installation for contributors <installation_contributor>` section
+to create the local copy of the pycolorbar repository, set up the developing environment and the pre-commit hooks.
 
-1. Set up Git on your computer
+Once you have have a local copy of the pycolorbar repository on your machine, you are ready to
+contribute to the project!
 
-2. Create a GitHub account (if you do not have one)
-
-3. Fork the repository in your GitHub.
-
-4. Clone a local copy of your fork. For example:
-
-::
-
-   git clone https://github.com/<your-account>/pycolorbar.git
-
-Done! Now you have a local copy of the pycolorbar repository.
 
 2. Create a new branch
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -135,8 +108,7 @@ Core Contributors are developers that actively work and maintain the repository.
 They are the only ones who accept Pull Requests and push commits directly to the pycolorbar repository.
 
 For more information on how to create and work with branches, see
-`“Branches in a
-Nutshell” <https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell>`__
+`“Branches in a Nutshell” <https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell>`__
 in the Git documentation.
 
 Please define the name of your branch based on the scope of the contribution. Try to strictly stick to the following guidelines:
@@ -159,23 +131,23 @@ For example, if you are adding new colormaps, you can create a new branch with t
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+When you are working on your changes, please stick with the repository's coding style and documentation rules.
+
+**Code Style**
+
 We follow the `PEP 8 <https://pep8.org/>`__ style guide for python code.
 Another relevant style guide can be found in the `The Hitchhiker's Guide to Python <https://docs.python-guide.org/writing/style/>`__.
 
 To ensure a minimal style consistency, we use `black <https://black.readthedocs.io/en/stable/>`__ to auto-format the source code.
 The `black` configuration used in the pycolorbar project is
-defined in the `pyproject.toml <https://github.com/ghiggi/pycolorbar/blob/main/pyproject.toml>`__ ,
-and it is automatically detected by `black` (see above).
+defined in the `pyproject.toml <https://github.com/ghiggi/pycolorbar/blob/main/pyproject.toml>`__.
 
 
+**Code Documentation**
 
-**Docstrings**
-
-Every module, function, or class must have a docstring that describes its
-purpose and how to use it. The docstrings follows the conventions
-described in the `PEP 257 <https://www.python.org/dev/peps/pep-0257/#multi-line-docstrings>`__
-and the `Numpy’s docstrings
-format <https://numpydoc.readthedocs.io/en/latest/format.html>`__.
+Every module, function, or class must have a docstring that describes its purpose and how to use it.
+The docstrings follows the conventions described in the `PEP 257 <https://www.python.org/dev/peps/pep-0257/#multi-line-docstrings>`__
+and the `Numpy's docstrings format <https://numpydoc.readthedocs.io/en/latest/format.html>`__.
 
 Here is a summary of the most important rules:
 
@@ -222,15 +194,17 @@ You should configure VS code as follow :
 
 The convention we adopt for our docstrings is the numpydoc string convention.
 
+.. _code_quality_control:
 
-Code quality control
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+4. Code quality control
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-To maintain a high code quality, `Black`, `Ruff` and `codespell` are defined in the
-`.pre-commit-config.yaml <https://github.com/ghiggi/pycolorbar/blob/main/.pre-commit-config.yaml>`_ file.
-These tools are run for every Pull Request on GitHub and can also be run locally.
+Pre-commit hooks are automated scripts that run during each commit to detect basic code quality issues.
+If a hook identifies an issue (signified by the pre-commit script exiting with a non-zero status), it halts the commit process and displays the error messages.
 
+Currently, pycolorbar tests that the code to be committed complies with `black's  <https://github.com/psf/black>`__ format style,
+the `ruff <https://github.com/charliermarsh/ruff>`__ linter and the `codespell <https://github.com/codespell-project/codespell>`__ spelling checker.
 
 +-----------------------------------------------------------------------------------------------+------------------------------------------------------------------+------------+-------+
 |  Tool                                                                                         | Aim                                                              | pre-commit | CI/CD |
@@ -242,66 +216,19 @@ These tools are run for every Pull Request on GitHub and can also be run locally
 | `Codespell  <https://github.com/codespell-project/codespell>`__                               | Spelling checker                                                 | 👍         | 👍    |
 +-----------------------------------------------------------------------------------------------+------------------------------------------------------------------+------------+-------+
 
+The versions of the software used in the pre-commit hooks is specified in the `.pre-commit-config.yaml <https://github.com/ghiggi/pycolorbar/blob/main/.pre-commit-config.yaml>`__ file.
+This file serves as a configuration guide, ensuring that the hooks are executed with the correct versions of each tool, thereby maintaining consistency and reliability in the code quality checks.
 
+If a commit is blocked due to these checks, you can manually correct the issues by running locally the appropriate tool:
+ ``black .`` for Black, ``ruff check .`` for Ruff, or ``codespell`` for Codespell.
+Alternatively, you can use the ``pre-commit run --all-files`` command to attempt automatic corrections of all formatting errors across all files.
 
-**pre-commit**
+The Continuous Integration (CI) tools integrated within GitHub employ the same pre-commit hooks to consistently uphold code quality for every Pull Request.
 
-To run pre-commit (black + Ruff) locally :
+In addition to the pre-commit hooks, the Continuous Integration (CI) setup on GitHub incorporates an extended suite of tools.
+These tools, which are not installable on a local setup, perform advanced code quality analyses and reviews after each update to a Pull Request.
 
-.. code-block:: bash
-
-   pre-commit run --all-files
-
-
-This is recommended since it indicates if the commit contained any formatting errors (that are automatically corrected).
-
-
-
-**Black**
-
-To run `Black` locally :
-
-.. code-block:: bash
-
-	black .
-
-
-
-.. note::
-	To maintain consistency, make sure to stick to the version defined in the `.pre-commit-config.yaml <https://github.com/ghiggi/pycolorbar/blob/main/.pre-commit-config.yaml>`_ file. This version will be used in the CI.
-
-
-
-**Ruff**
-
-To run `Ruff` locally :
-
-.. code-block:: bash
-
-	ruff check .
-
-
-.. note::
-	To maintain consistency, make sure to stick to the version and the rule configuration defined in the `.pre-commit-config.yaml <https://github.com/ghiggi/pycolorbar/blob/main/.pre-commit-config.yaml>`_ file. This version will be used in the CI.
-
-
-
-**Codespell**
-
-To run `Codespell` locally :
-
-.. code-block:: bash
-
-	codespell
-
-
-.. note::
-	To maintain consistency, make sure to stick to the version and the rule configuration defined in the `.pre-commit-config.yaml <https://github.com/ghiggi/pycolorbar/blob/main/.pre-commit-config.yaml>`_ file. This version will be used in the CI.
-
-
-In the table below, some CI tools are mentioned for your information, but does not need to be installed on your computer.
-They are automatically run when you push your changes to the main repository via a GitHub Pull Request.
-
+Refer to the table below for a comprehensive summary of all CI tools employed to assess the code quality of a Pull Request.
 
 +----------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | Tool                                               | Aim                                                                                                                                 |
@@ -317,31 +244,18 @@ They are automatically run when you push your changes to the main repository via
 
 
 
-4. Code testing
-~~~~~~~~~~~~~~~~
+5. Code testing with pytest
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+pycolorbar tests are written using the third-party `pytest <https://docs.pytest.org>`_ package. Every code change must be tested !
 
-Every code change must be tested !
+The tests are organized within the ``/pycolorbar/tests`` directory and are structured to comprehensively assess various aspects of the code.
 
+These tests are integral to the development process and are automatically triggered on GitHub upon any new commits or updates to a Pull Request.
+The Continuous Integration (CI) on GitHub runs tests and analyzes code coverage using multiple versions of Python,
+multiple operating systems, and multiple versions of dependency libraries. This is done to ensure that the code works in a variety of environments.
 
-
-
-**Pytest**
-
-pycolorbar tests are written using the third-party `pytest <https://docs.pytest.org>`_ package.
-
-
-
-The tests located in the ``/pycolorbar/tests`` directory are used to test various functions of the code and are automatically run
-when changes are pushed to the main repository through a GitHub Pull Request.
-
-.. code-block:: bash
-
-	pytest pycolorbar/tests
-
-
-The Continuous Integration (CI) on GitHub runs tests and analyzes code coverage. The following tools are used:
-
+The following tools are used:
 
 +-----------------------------------------------------------------------------------------------+------------------------------------------------------------------+
 |  Tool                                                                                         | Aim                                                              |
@@ -356,70 +270,83 @@ The Continuous Integration (CI) on GitHub runs tests and analyzes code coverage.
 +-----------------------------------------------------------------------------------------------+------------------------------------------------------------------+
 
 
-5. Push your changes to your fork repository
+For contributors interested in running the tests locally:
+
+1. Ensure you have the :ref:`development environment <installation_standard>` correctly set up.
+2. Navigate to the pycolorbar root directory.
+3. Execute the following command to run the entire test suite:
+
+.. code-block:: bash
+
+	pytest
+
+For more focused testing or during specific feature development, you may run subsets of tests.
+This can be done by specifying either a sub-directory or a particular test module.
+
+Run tests in a specific sub-directory:
+
+.. code-block:: bash
+
+    pytest pycolorbar/tests/<test_subdirectory>/
+
+Run a particular test module:
+
+.. code-block:: bash
+
+    pytest pycolorbar/tests/<test_subdirectory>/test_<module_name>.py
+
+These options provide flexibility, allowing you to efficiently target and validate specific components of the pycolorbar software.
+
+.. note::
+   Each test module must be prefixed with ``test_`` to be recognized and selected by pytest.
+   This naming pattern is a standard convention in pytest and helps in the automatic discovery of test files.
+
+
+6. Push your changes to your fork repository
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 During this process, pre-commit hooks will be run. Your commit will be
 allowed only if quality requirements are fulfilled.
 
-If you encounter errors, Black and Ruff can be run using the following command:
+If you encounter errors, you can attempt to fix the formatting errors with the following command:
 
 ::
 
    pre-commit run --all-files
 
-We follow a `commit message convention <https://www.conventionalcommits.org/en/v1.0.0/>`__, to have consistent git messages.
-The goal is to increase readability and ease of contribution.
 
-
-
-6. Create a new Pull Request in GitHub.
+7. Create a new Pull Request in GitHub.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once your code has been uploaded into your pycolorbar fork, you can create
-a Pull Request (PR) to the pycolorbar main branch.
 
-**Recommendation for the Pull Request**
+Once your code has been uploaded into your pycolorbar fork, you can create a Pull Request (PR) to the pycolorbar main branch.
 
--  Add screenshots or GIFs for any UI changes. This will help the person reviewing your code to understand what you have changed and how it
-   works.
+Recommendation for the Pull Requests:
 
--  Please use the pertinent template for the Pull Request, and fill it out accurately.
--  It is OK to have multiple small commits as you work on the PR - GitHub  will automatically squash it before merging.
+-  Please fill it out accurately the Pull Request template.
+-  It is perfectly fine to make many small commits as you work on a Pull Request. GitHub will automatically squash all the commits before merging the Pull Request.
 -  If adding a new feature:
 
-   -  Add accompanying test case.
-   -  Provide a convincing reason to add this feature. Ideally, you should open a suggestion issue first and have it approved before working on it.
-   -  Optionally, you can also present your issue in the repository `Discussions <https://github.com/ghiggi/pycolorbar/discussions>`__.
+   -  Provide a convincing reason to add the new feature. Ideally, propose your idea through a `Feature Request Issue <https://github.com/ghiggi/pycolorbar/issues/new/choose>`__ and obtain approval before starting work on it. Alternatively, you can present your ideas in the `GitHub Discussions <https://github.com/ghiggi/pycolorbar/discussions>`__ or in the `pycolorbar Slack Workspace <https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g>`__.
+   -  Implement unit tests to verify the functionality of the new feature. This ensures that your addition works as intended and maintains the quality of the codebase.
 
 -  If fixing bug:
 
-   -  If you are resolving a special issue, add ``(fix #xxxx)`` in your PR title for a better release log. For example: ``Update L0 encoding compression (fix #3899)``.
-   -  Provide a detailed description of the bug in the PR.
-   -  Add appropriate test coverage if applicable.
+   -  Provide a comprehensive description of the bug within your Pull Request. This aids reviewers in understanding the issue and the impact of your fix.
+   -  If your Pull Request addresses a specific issue, add ``(fix #xxxx)`` in your PR title to link the PR to the issue and enhance the clarity of release logs. For example, the title of a PR fixing issue ``#3899`` would be ``<your PR title> (fix #3899)``.
+   -  If applicable, ensure that your fix includes appropriate tests. Adding tests for your bug fix helps prevent future regressions and maintains the stability of the software.
 
-
-
-.. _section-1:
 
 Code review checklist
 ---------------------
 
--  Ask two people to review your code:
-
-   -  a person who knows the domain well and can spot bugs in the business logic;
-   -  an expert in the technologies you are using who can help you improve the code quality.
-
--  When you are done with the changes after a code review, do another  self review of the code and write a comment to notify the reviewer,
+-  Once your Pull Request is ready, ask the maintainers to review your code.
+-  When you are done with the changes suggested by the reviewers, do another  self review of the code and write a comment to notify the reviewer,
    that the Pull Request is ready for another iteration.
 -  Resolve all the review comments, making sure they are all addressed before another review iteration.
--  Make sure you do not have similar issues anywhere else in your Pull Request.
 -  If you are not going to follow a code review recommendations, please add a comment explaining why you think the reviewer suggestion is not relevant.
 -  Avoid writing comment like “done” of “fixed” on each code review comment.
    Reviewers assume you will do all suggested changes, unless you have a reason not to do some of them.
--  Sometimes it is okay to postpone changes — in this case you will need to add a ticket number to the Pull Request and to the code itself.
-
-.. _section-2:
 
 
 Credits

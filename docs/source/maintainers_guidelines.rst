@@ -74,8 +74,8 @@ styled with `Book Theme <https://sphinx-book-theme.readthedocs.io/en/stable/inde
 All documentation source files are neatly organized in the ``docs/`` directory within the project's repository.
 
 
-Local documentation generation
---------------------------------
+Documentation generation
+--------------------------
 
 To build the documentation locally, follow the next three steps.
 
@@ -98,7 +98,7 @@ To build the documentation locally, follow the next three steps.
 
 	.. code-block:: bash
 
-		conda activate build-doc-pycolorbar
+    	conda activate build-doc-pycolorbar
 
 3. Generate the documentation
 
@@ -118,10 +118,11 @@ By following these steps, you should have a local version of the pycolorbar docu
 in the ``docs/build/html/`` directory, ready for review or deployment!
 
 
-Automatic documentation deployement
---------------------------------------
+Documentation deployement
+----------------------------
 
-A webhook is defined in the GitHub repository to trigger the publication process to `ReadTheDocs <https://about.readthedocs.com/?ref=readthedocs.com>`__.
+A webhook is defined in the GitHub repository to trigger automatically the publication process to `ReadTheDocs <https://about.readthedocs.com/?ref=readthedocs.com>`__
+after each Pull Request.
 
 This webhook is linked to the pycolorbar core developer.
 
@@ -142,7 +143,7 @@ The `PyPI <https://pypi.org/>`__ project is shared between the core contributors
 
 
 Reviewing process
-============================
+=====================
 
 
 The main branch is protected and requires at least one review before merging.

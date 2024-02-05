@@ -78,7 +78,7 @@ Step 1: Fork and download the pycolorbar Metadata Archive
    `"Create a pull request documentation" <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`__.
 
    If you struggle with this process, do not hesitate to raise an `issue <https://github.com/ghiggi/pycolorbar/issues/new/choose>`__
-   or ask in the `pycolorbar slack channel <https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g>`__ so that we can help !
+   or ask in the `pycolorbar Slack Workspace <https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g>`__ so that we can help !
 
 
 .. _step2:
@@ -125,7 +125,7 @@ to install your local version of the `pycolorbar python package  <https://github
    `"Create a pull request documentation" <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`__.
 
    If you struggle with this process, do not hesitate to raise an `issue <https://github.com/ghiggi/pycolorbar/issues/new/choose>`__
-   or ask in the `pycolorbar slack channel <https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g>`__ so that we can help !
+   or ask in the `pycolorbar Slack Workspace <https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g>`__ so that we can help !
 
 
 7. Finally, install the pycolorbar python package in editable mode using:

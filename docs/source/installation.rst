@@ -63,6 +63,8 @@ or `conda <https://docs.conda.io/en/latest/>`__ (recommended).
    virtualenv -p python3 pycolorbar-pyXXX
    source pycolorbar-pyXXX/bin/activate
 
+.. _installation_standard:
+
 Installation for standard users
 ==================================
 
@@ -90,6 +92,8 @@ Please install the package in the virtual environment you created before !
    pip install pycolorbar
 
 
+.. _installation_contributor:
+
 Installation for contributors
 ================================
 
@@ -100,16 +104,16 @@ Here below we provide the steps to install the package in editable mode.
 Clone the repository from GitHub
 ......................................
 
-According to the `contributors guidelines <https://pycolorbar.readthedocs.io/en/latest/contributors_guidelines.html>`__,
+According to the ::ref:`contributors guidelines <contributor_guidelines>`,
 you should first
-`create a fork into your personal GitHub account <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo>__`.
+`create a fork into your personal GitHub account <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo>`__.
 
 Then create a local copy of the repository you forked with:
 
 .. code-block:: bash
 
-    git clone https://github.com/<your-account>/pycolorbar.git
-    cd pycolorbar
+   git clone https://github.com/<your-account>/pycolorbar.git
+   cd pycolorbar
 
 Create the development environment
 ......................................
@@ -137,7 +141,7 @@ Install the pycolorbar package in editable mode by executing the following comma
 
 .. code-block:: bash
 
-	pip install -e .
+	pip install -e ".[dev]"
 
 
 Install pre-commit code quality checks
@@ -147,23 +151,16 @@ Install the pre-commit hook by executing the following command in the pycolorbar
 
 .. code-block:: bash
 
-   pip install pre-commit
    pre-commit install
 
 
-The pre-commit hooks are scripts executed automatically in every commit
-to identify simple code quality issues. When an issue is identified
-(the pre-commit script exits with non-zero status), the hook aborts the
-commit and prints the error. Currently, pycolorbar tests that the
-code to be committed complies with `black's  <https://github.com/psf/black>`__ format style
-and the `ruff <https://github.com/charliermarsh/ruff>`__ linter.
-
-In case that the commit is aborted, you only need to run `black` and `ruff` through your code.
-This can be done by running ``black .`` and ``ruff check .`` or alternatively with ``pre-commit run --all-files``.
-The latter is recommended since it indicates if the commit contained any formatting errors (that are automatically corrected).
+Pre-commit hooks are automated scripts that run during each commit to detect basic code quality issues.
+If a hook identifies an issue (signified by the pre-commit script exiting with a non-zero status), it halts the commit process and displays the error messages.
 
 .. note::
-	The software version of pre-commit tools is defined into the `.pre-commit-config.yaml` file.
+	The versions of the software used in the pre-commit hooks is specified in the `.pre-commit-config.yaml <https://github.com/ghiggi/pycolorbar/blob/main/.pre-commit-config.yaml>`__ file. This file serves as a configuration guide, ensuring that the hooks are executed with the correct versions of each tool, thereby maintaining consistency and reliability in the code quality checks.
+
+Further details about pre-commit hooks can be found in the Contributors Guidelines, specifically in the provided in the :ref:`Code quality control <code_quality_control>` section.
 
 
 Run pycolorbar on Jupyter Notebooks
@@ -176,6 +173,6 @@ For example, if your conda/virtual environment is named `pycolorbar-dev`, run:
 
 .. code-block:: bash
 
-    python -m ipykernel install --user --name=pycolorbar-dev
+   python -m ipykernel install --user --name=pycolorbar-dev
 
 When you will use the Jupyter Notebook, by clicking on `Kernel` and then `Change Kernel`, you will be able to select the `pycolorbar-dev` kernel.
