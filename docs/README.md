@@ -1,25 +1,49 @@
-# Introduction
+# pycolorbar documentation
 
-pycolorbar’s documentation is built using Sphinx. All documentation lives in the `docs/` directory of the project repository.
+pycolorbar’s documentation is built using the powerful [Sphinx](https://www.sphinx-doc.org/en/master/) framework, 
+styled with [Book Theme](https://sphinx-book-theme.readthedocs.io/en/stable/index.html).
 
-## Getting started to generate the documentation locally
+All documentation source files are neatly organized in the `docs/` directory within the project's repository.
 
-### Set the python environment
+-----------------------------------------------------------------
 
-Sphinx should be installed within your python environment. Use the virtual environment of the pycolorbar project. More information about the virtual environment can be found in the [installation guide](https://pycolorbar.readthedocs.io/en/latest/installation.html#installation-for-standard-users).
+### Build the documentation
 
+To build the documentation locally, follow the next three steps.
 
+**1. Set up the python environment for building the documentation**
 
-### Generate the documentation
+  The python packages required to build the documentation are listed in the [requirements.txt ](https://github.com/ghiggi/pycolorbar/blob/main/docs/requirements.txt) file.
+  
+  For an efficient setup, we recommend creating a dedicated virtual environment. 
+  Navigate to the `docs/` directory and execute the following command.
+  This will also install [pandoc](https://pandoc.org/), a versatile document conversion tool:
+  
+  ```
+  conda create -f environment.yaml
+  ```
 
-Run the following command to generate the doc :
+**2. Activate the virtual environment**
+  
+  Once the environment is ready, activate it using:
+
+  ```
+  conda activate build-doc-pycolorbar
+  ```
+
+**3. Generate the documentation**
+  
+With the environment set and activated, you're ready to generate the documentation. 
+Execute:
 
 ```
-sphinx-build -b html source build
+make clean html
 ```
 
+This command will build the HTML version of the documentation. 
+It first cleans previous builds (`make clean`) and then generates fresh documentation (`html`).
+  
+**Note**: It's important to review the output of the command. Look out for warnings or errors and address them to ensure the documentation is accurate and complete.
 
-The output of the previous command should be checked for warnings and errors. In case of any changes made to the code such as adding new classes or
-functions, it is necessary to regenerate the pycolorbar documentation files before running the command mentioned above :
-
-    sphinx-apidoc -f -o source/api .. ../setup.py
+By following these steps, you should have a local version of the pycolorbar documentation in the ``docs/build/html/`` directory,
+ready for review or deployment!

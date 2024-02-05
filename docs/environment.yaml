@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python>=3.9
+  - pandoc
   - pip
   - pip:
-    - -r file:requirements.txt
+      - -r requirements.txt

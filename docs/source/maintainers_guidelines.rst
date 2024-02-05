@@ -68,29 +68,60 @@ Refer to the list of Recommended Releases to see current releases and more detai
 Documentation pipeline
 ========================
 
-pycolorbar's documentation is built using Sphinx. All documentation lives in the ``docs/`` directory of the project repository.
+pycolorbar's documentation is built using the powerful `Sphinx <https://www.sphinx-doc.org/en/master/>`_ framework,
+styled with `Book Theme <https://sphinx-book-theme.readthedocs.io/en/stable/index.html>`_.
+
+All documentation source files are neatly organized in the ``docs/`` directory within the project's repository.
 
 
-Manual documentation creation
------------------------------
+Local documentation generation
+--------------------------------
 
-After editing the source files, the documentation can be generated locally:
+To build the documentation locally, follow the next three steps.
+
+1. Set up the python environment for building the documentation
+
+	The python packages required to build the documentation are listed in the `requirements.txt <https://github.com/ghiggi/pycolorbar/blob/main/docs/requirements.txt>`_ file.
+
+	For an efficient setup, we recommend creating a dedicated virtual environment.
+	Navigate to the ``docs/`` directory and execute the following command.
+	This will create a new environment and install the required packages and
+	`pandoc <https://pandoc.org/>`_, a versatile document conversion tool:
+
+	.. code-block:: bash
+
+		conda create -f environment.yaml
+
+2. Activate the virtual environment
+
+	Once the environment is ready, activate it using:
+
+	.. code-block:: bash
+
+		conda activate build-doc-pycolorbar
+
+3. Generate the documentation
+
+	With the environment set and activated, you're ready to generate the documentation.
+	Execute:
+
+	.. code-block:: bash
+
+		make clean html
+
+	This command will build the HTML version of the documentation.
+	It first cleans previous builds (``make clean``) and then generates fresh documentation (``html``).
+
+	.. note:: It's important to review the output of the command. Look out for warnings or errors and address them to ensure the documentation is accurate and complete.
+
+By following these steps, you should have a local version of the pycolorbar documentation 
+in the ``docs/build/html/`` directory, ready for review or deployment!
 
 
-.. code-block:: bash
+Automatic documentation deployement
+--------------------------------------
 
-	cd docs
-	make html
-
-
-The output of the previous command should be checked for warnings and errors. If the code is changed (new functions or classes), then the pycolorbar documentation files located in ``docs/source/api`` are automatically regenerated when building the documentation using the command above.
-
-
-Automatic (GitHub) documentation creation
-------------------------------------------
-
-
-One webhook is defined in the repository to trigger the publication process to readthedoc.io.
+A webhook is defined in the GitHub repository to trigger the publication process to `ReadTheDocs <https://about.readthedocs.com/?ref=readthedocs.com>`__.
 
 This webhook is linked to the pycolorbar core developer.
 
@@ -106,7 +137,7 @@ One  `GitHub Action <https://github.com/ghiggi/pycolorbar/actions>`_ is defined 
 
 .. image:: /static/package_pipeline.png
 
-The `PyPi <https://pypi.org/>`__ project is shared between the core contributors.
+The `PyPI <https://pypi.org/>`__ project is shared between the core contributors.
 
 
 
@@ -145,15 +176,13 @@ Currently, on each Pull Request, GitHub Actions are configured as follow:
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
 | `Coverage   <https://coverage.readthedocs.io/>`__                                                  | Measure the code coverage of the project's unit tests            |                                                                                              |
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
-| `CodeCov    <https://about.codecov.io/>`__                                                         | Uses the "coverage" package to generate a code coverage report.  | `pycolorbar  <https://app.codecov.io/gh/ghiggi/pycolorbar>`__                                |
+| `CodeCov    <https://about.codecov.io/>`__                                                         | Uses Coverage to track and analyze code coverage over time.      | `pycolorbar  <https://app.codecov.io/gh/ghiggi/pycolorbar>`__                                |
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
-| `Coveralls    <https://coveralls.io/>`__                                                           | Uses the "coverage" to track the quality of your code over time. | `pycolorbar  <https://coveralls.io/github/ghiggi/pycolorbar>`__                              |
+| `Coveralls    <https://coveralls.io/>`__                                                           | Uses Coverage to track and analyze code coverage over time.      | `pycolorbar  <https://coveralls.io/github/ghiggi/pycolorbar>`__                              |
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
 | `CodeBeat      <https://codebeat.co/>`__                                                           | Automated code review and analysis tools                         | `pycolorbar <https://codebeat.co/projects/github-com-ghiggi-pycolorbar-main>`__              |
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
 | `CodeScene <https://codescene.com/>`__                                                             | Automated code review and analysis tools                         | `pycolorbar <https://codescene.io/projects/41870/>`__                                        |
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
 | `CodeFactor <https://www.codefactor.io/>`__                                                        | Automated code review and analysis tools                         | `pycolorbar <https://www.codefactor.io/repository/github/ghiggi/pycolorbar>`__               |
-+----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
-| `Snyk Code <https://snyk.io/product/snyk-code/>`__                                                 | Automated code security checks                                   | `pycolorbar <https://app.snyk.io/org/ghiggi/project/57219345-56bd-4fbb-b6eb-2a8d955f9924>`__ |
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
