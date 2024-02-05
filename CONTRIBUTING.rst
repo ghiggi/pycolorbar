@@ -1,5 +1,3 @@
-.. _contributor_guidelines:
-
 Contributors Guidelines
 ===========================
 
@@ -219,8 +217,7 @@ the `ruff <https://github.com/charliermarsh/ruff>`__ linter and the `codespell <
 The versions of the software used in the pre-commit hooks is specified in the `.pre-commit-config.yaml <https://github.com/ghiggi/pycolorbar/blob/main/.pre-commit-config.yaml>`__ file.
 This file serves as a configuration guide, ensuring that the hooks are executed with the correct versions of each tool, thereby maintaining consistency and reliability in the code quality checks.
 
-If a commit is blocked due to these checks, you can manually correct the issues by running locally the appropriate tool:
- ``black .`` for Black, ``ruff check .`` for Ruff, or ``codespell`` for Codespell.
+If a commit is blocked due to these checks, you can manually correct the issues by running locally the appropriate tool: ``black .`` for Black, ``ruff check .`` for Ruff, or ``codespell`` for Codespell.
 Alternatively, you can use the ``pre-commit run --all-files`` command to attempt automatic corrections of all formatting errors across all files.
 
 The Continuous Integration (CI) tools integrated within GitHub employ the same pre-commit hooks to consistently uphold code quality for every Pull Request.
