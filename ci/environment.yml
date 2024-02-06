@@ -5,7 +5,7 @@ dependencies:
   - pyyaml
   - numpy
   - matplotlib
-  - pydantic
+  - pydantic>=2.0.0
   # Docs
   - jupyter
   - sphinx=5.1.1
@@ -13,7 +13,7 @@ dependencies:
   - nbsphinx=0.8.9
   # Testing
   - setuptools
-  - pre_commit
+  - pre-commit
   - coverage
   - pytest
   - pytest-cov
