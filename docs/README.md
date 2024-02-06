@@ -13,23 +13,22 @@ To build the documentation locally, follow the next three steps.
 
 **1. Set up the python environment for building the documentation**
 
-  The python packages required to build the documentation are listed in the [requirements.txt ](https://github.com/ghiggi/pycolorbar/blob/main/docs/requirements.txt) file.
+The python packages required to build the documentation are listed in the [environment.yaml](https://github.com/ghiggi/pycolorbar/blob/main/docs/environment.yaml) file.
 
-  For an efficient setup, we recommend creating a dedicated virtual environment.
-  Navigate to the `docs/` directory and execute the following command.
-  This will also install [pandoc](https://pandoc.org/), a versatile document conversion tool:
+For an efficient setup, we recommend creating a dedicated virtual environment.
+Navigate to the `docs/` directory and execute the following command:
 
-  ```
-  conda create -f environment.yaml
-  ```
+```
+conda create -f environment.yaml
+```
 
 **2. Activate the virtual environment**
 
-  Once the environment is ready, activate it using:
+Once the environment is ready, activate it using:
 
-  ```
-  conda activate build-doc-pycolorbar
-  ```
+```
+conda activate build-doc-pycolorbar
+```
 
 **3. Generate the documentation**
 

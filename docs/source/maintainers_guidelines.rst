@@ -50,8 +50,6 @@ Examples of non-breaking changes include :
 - Internal function refactoring that does not affect the behavior of the software directly.
 
 
-One implication of this policy is that clients should be prepared to ignore the presence of unexpected fields in responses and unexpected values for enums. This is necessary to preserve compatibility between PATCH versions within the same MINOR version range, since optional fields and enum values can be added as non-breaking changes.
-
 
 Ongoing version support
 -----------------------------------
@@ -61,8 +59,6 @@ pycolorbar major releases aims to move the community forward, focusing on specif
 The maintaners do their best but does not guarantee any period of support or maintenance.
 
 Releases that are 2 years or older may be considered as deprecated.
-
-Refer to the list of Recommended Releases to see current releases and more details.
 
 
 Documentation pipeline
@@ -81,7 +77,7 @@ To build the documentation locally, follow the next three steps.
 
 1. Set up the python environment for building the documentation
 
-	The python packages required to build the documentation are listed in the `requirements.txt <https://github.com/ghiggi/pycolorbar/blob/main/docs/requirements.txt>`_ file.
+	The python packages required to build the documentation are listed in the `environment.yaml <https://github.com/ghiggi/pycolorbar/blob/main/docs/environment.yaml>`_ file.
 
 	For an efficient setup, we recommend creating a dedicated virtual environment.
 	Navigate to the ``docs/`` directory and execute the following command.
@@ -173,7 +169,7 @@ Currently, on each Pull Request, GitHub Actions are configured as follow:
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
 | `Ruff  <https://github.com/charliermarsh/ruff>`__                                                  | Python linter                                                    |                                                                                              |
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
-| `pre-commit.ci   <https://pre-commit.ci/>`__                                                       | Run pre-commit as defined in `.pre-commit-config.yaml <https://github.com/ghiggi/pycolorbar/blob/main/.pre-commit-config.yaml>`__  |                            |
+| `pre-commit.ci   <https://pre-commit.ci/>`__                                                       | Run pre-commit as defined in `.pre-commit-config.yaml <https://github.com/ghiggi/pycolorbar/blob/main/.pre-commit-config.yaml>`__                               |
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
 | `Coverage   <https://coverage.readthedocs.io/>`__                                                  | Measure the code coverage of the project's unit tests            |                                                                                              |
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+

@@ -9,7 +9,7 @@ We define here two types of installation:
 
 - `Installation for contributors`_: for contributors who want to enrich the project (eg. add a new reader).
 
-We recommend users and contributors to first set up a `Virtual Environment <#virtual_environment>`_ where to install pycolorbar.
+We recommend users and contributors to first set up a virtual environment where to install pycolorbar.
 
 
 .. _virtual_environment:
@@ -104,7 +104,7 @@ Here below we provide the steps to install the package in editable mode.
 Clone the repository from GitHub
 ......................................
 
-According to the ::ref:`contributors guidelines <contributor_guidelines>`,
+According to the :ref:`contributors guidelines <contributor_guidelines>`,
 you should first
 `create a fork into your personal GitHub account <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo>`__.
 
