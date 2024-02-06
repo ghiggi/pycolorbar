@@ -81,8 +81,7 @@ To build the documentation locally, follow the next three steps.
 
 	For an efficient setup, we recommend creating a dedicated virtual environment.
 	Navigate to the ``docs/`` directory and execute the following command.
-	This will create a new environment and install the required packages and
-	`pandoc <https://pandoc.org/>`_, a versatile document conversion tool:
+    This will create a new environment and install the required packages:
 
 	.. code-block:: bash
 

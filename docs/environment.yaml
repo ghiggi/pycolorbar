@@ -4,6 +4,7 @@ channels:
 dependencies:
   - python>=3.9
   - pandoc
+  - pre-commit
   - nbsphinx==0.9.3
   - sphinx==5.1.1
   - sphinx-book-theme==1.1.0
