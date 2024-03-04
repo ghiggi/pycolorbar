@@ -40,12 +40,15 @@ def convert_colors(colors, color_space):
 
 def create_cmap(cmap_dict, name):
     cmap_type = cmap_dict["type"]
-    colors = cmap_dict["colors"]
     color_space = cmap_dict["color_space"]
+
+    colors = cmap_dict.get("colors", None)
+    segmentdata = cmap_dict.get("segmentdata", None)
 
     # Convert colors to interpolation space
     # - if ListedColormap --> RGBA
     # - if LinearSegmentedColormap --> interpolation_space (default RGBA)
+    # --> TODO: or create ColorMap Classes interpolating in the <interpolation_space>
     colors = convert_colors(colors, color_space)
 
     # Create Colormap

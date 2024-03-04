@@ -73,7 +73,7 @@ def encode_colors(cmap_dict):
 def read_cmap_dict(filepath):
     cmap_dict = read_yaml(filepath)
     cmap_dict = decode_colors(cmap_dict)
-    cmap_dict = validate_cmap_dict(cmap_dict)
+    cmap_dict = validate_cmap_dict(cmap_dict, decoded_colors=True)
     return cmap_dict
 
 
@@ -85,7 +85,7 @@ def write_cmap_dict(cmap_dict, filepath, force=False):
         else:
             raise ValueError(f"The {filepath} already exists !")
     # Validate fields
-    cmap_dict = validate_cmap_dict(cmap_dict=cmap_dict)
+    cmap_dict = validate_cmap_dict(cmap_dict=cmap_dict, decoded_colors=True)
     # Encode colors
     cmap_dict = encode_colors(cmap_dict)
     # Write file

@@ -126,6 +126,9 @@ class ColorEncoderDecoder:
             2D array where each column represents a channel in the color space.
 
         """
+        if not isinstance(colors, np.ndarray):
+            raise ValueError("The colors array must be a numpy 2-dimensional array.")
+
         # Check 2D array
         if colors.ndim != 2:
             raise ValueError("The colors array must be a 2-dimensional array.")
@@ -200,7 +203,7 @@ class ColorEncoderDecoder:
                 internal_min_val, internal_max_val = self.internal_data_range[channel]
                 if ((internal_min_val <= channel_colors) & (channel_colors <= internal_max_val)).all():
                     raise ValueError(
-                        f"All '{channel}' values are within the internal data range"
+                        f"All '{channel}' values are within the internal data range "
                         "while expecting external representation."
                     )
 
@@ -226,7 +229,7 @@ class ColorEncoderDecoder:
             )
             for idx, channel in enumerate(self.internal_data_range.keys())
         ]
-        return np.all(np.vstack(conditions), axis=0)
+        return np.all(np.vstack(conditions))
 
     def is_within_external_data_range(self, colors, strict: bool = False):
         """
@@ -244,10 +247,10 @@ class ColorEncoderDecoder:
         Returns
         -------
         bool
-            True if all channel values are within the external data range
-            (and, if strict is True, not within the internal data range), False otherwise.
+            If strict=False, True if all channel values are within the external data range, False otherwise.
+            If strict=True,  True if all channels values are within the external data range and
+            not also all inside the internal data range, False otherwise.
         """
-
         colors = self.check_colors(colors)
         conditions = [
             np.logical_and(
@@ -256,7 +259,7 @@ class ColorEncoderDecoder:
             )
             for idx, channel in enumerate(self.external_data_range.keys())
         ]
-        is_within = np.all(np.vstack(conditions), axis=0)
+        is_within = np.all(np.vstack(conditions))
         if not strict:
             return is_within
         else:
@@ -456,6 +459,21 @@ class CMYKEncoderDecoder(ColorEncoderDecoder):
         super().__init__(external_data_range, internal_data_range, name="CMYK")
 
 
+def _get_color_space_dict():
+    class_dict = {
+        "RGB": RGBEncoderDecoder,
+        "RGBA": RGBAEncoderDecoder,
+        "HSV": HSVEncoderDecoder,
+        "LCH": LCHEncoderDecoder,
+        "HCL": HCLEncoderDecoder,
+        "CIELUV": CIELUVEncoderDecoder,
+        "CIELAB": CIELABEncoderDecoder,
+        "CIEXYZ": CIEXYZEncoderDecoder,
+        "CMYK": CMYKEncoderDecoder,
+    }
+    return class_dict
+
+
 def get_color_space_class(color_space):
     """
     Retrieve the class associated with the specified color space.
@@ -471,33 +489,13 @@ def get_color_space_class(color_space):
     class
         The class corresponding to the specified color space.
     """
-    class_dict = {
-        "RGB": RGBEncoderDecoder,
-        "RGBA": RGBAEncoderDecoder,
-        "HSV": HSVEncoderDecoder,
-        "LCH": LCHEncoderDecoder,
-        "HCL": HCLEncoderDecoder,
-        "CIELUV": CIELUVEncoderDecoder,
-        "CIELAB": CIELABEncoderDecoder,
-        "CIEXYZ": CIEXYZEncoderDecoder,
-        "CMYK": CMYKEncoderDecoder,
-    }
+    class_dict = _get_color_space_dict()
     if color_space not in class_dict:
         raise ValueError(f"Color space '{color_space}' is not recognized.")
     return class_dict[color_space]
 
 
-IMPLEMENTED_COLOR_SPACES = [
-    "RGB",
-    "RGBA",
-    "HSV",
-    "LCH",
-    "HCL",
-    "CIELUV",
-    "CIELAB",
-    "CIEXYZ",
-    "CMYK",
-]
+COLOR_SPACES = list(_get_color_space_dict())
 
 
 def decode_colors(colors, color_space):
@@ -517,7 +515,7 @@ def decode_colors(colors, color_space):
         Decoded color values in internal representation.
     """
     color_space = color_space.upper()
-    if color_space in IMPLEMENTED_COLOR_SPACES:
+    if color_space in COLOR_SPACES:
         color_class = get_color_space_class(color_space)
         return color_class().decode(colors)
     return colors
@@ -540,7 +538,7 @@ def encode_colors(colors, color_space):
         Encoded color values in external representation.
     """
     color_space = color_space.upper()
-    if color_space in IMPLEMENTED_COLOR_SPACES:
+    if color_space in COLOR_SPACES:
         color_class = get_color_space_class(color_space)
         return color_class().encode(colors)
     return colors

@@ -40,7 +40,6 @@ pycolorbar.register_colormaps(dst_dir)
 
 pycolorbar.colormaps.names
 
-
 pycolorbar.colormaps.unregister("STEPS-MCH")
 
 pycolorbar.colormaps.names

@@ -90,6 +90,10 @@ class ColorMapRegistry:
         """List the names of all registered colormaps."""
         return sorted(list(self.registry))
 
+    def __contains__(self, item):
+        """Test registration of colormap in the registry."""
+        return item in self.names
+
     def _get_subset_names(self, category):
         names = []
         for name in self.names:
@@ -291,7 +295,10 @@ class ColorMapRegistry:
         Invalid colormap configurations are reported.
         """
         if isinstance(name, str):
+            if name not in self.names:
+                raise ValueError(f"{name} is not a registered colormap.")
             names = [name]
+
         else:
             names = self.names
 

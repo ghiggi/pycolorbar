@@ -169,7 +169,6 @@ pycolorbar.show_colorbars(category="imerg")
 # --------------------------------------------------------------------------------
 #### Updated Colorbar Visualization
 
-
 pycolorbar.show_colorbar("whatever_name")
 pycolorbar.show_colorbar("whatever_name", user_plot_kwargs={"vmin": 2})  # do not set because missing vmin
 pycolorbar.show_colorbar("whatever_name", user_plot_kwargs={"vmax": 2})  # do not set because missing vmax

@@ -26,16 +26,17 @@
 # -----------------------------------------------------------------------------.
 """Implementation of pydantic validator for univariate colormap YAML files."""
 import re
-from typing import List, Optional
+from typing import Optional, Union
 
 import numpy as np
 from pydantic import BaseModel, field_validator
 
-from pycolorbar.colors.colors_io import check_valid_internal_data_range
+from pycolorbar.colors.colors_io import check_valid_external_data_range, check_valid_internal_data_range
 from pycolorbar.utils.mpl import get_mpl_named_colors
 
 
-def check_color_space(color_space):
+def get_valid_color_space():
+    """Get list of valid color spaces."""
     valid_names = [
         "hex",
         "name",
@@ -49,8 +50,19 @@ def check_color_space(color_space):
         "ciexyz",
         "cmyk",
     ]
-    if color_space not in valid_names:
+    return valid_names
+
+
+def check_color_space(color_space):
+    """Check color space validity."""
+    valid_names = get_valid_color_space()
+    if color_space.lower() not in valid_names:
         raise ValueError(f"Invalid color_space '{color_space}'. The supported color spaces are {valid_names}.")
+    return color_space.lower()
+
+
+def is_monotonically_increasing(values):
+    return all(x <= y for x, y in zip(values, values[1:]))
 
 
 class ColorMapValidator(BaseModel):
@@ -68,6 +80,10 @@ class ColorMapValidator(BaseModel):
         The color space of the colormap (e.g., "rgb", "hsv").
     colors : np.ndarray
         The array of colors defined for the colormap.
+    colors_decoded: bool
+        If True, assumes that the colors have been already decoded (internal representation).
+        If False, assumes that the colors have not been decoded (external representation).
+        The default is True.
 
     Methods
     -------
@@ -75,20 +91,36 @@ class ColorMapValidator(BaseModel):
         Validates the type field.
     validate_color_space(cls, v):
         Validates the color_space field.
-    validate_colors(cls, v, values, **kwargs):
+    validate_colors(cls, v, values):
         Validates the colors field.
+    validate_segmentdata(cls, v, values)
+        Validates the segmentdata field.
     """
 
+    # NOTE: The order here governs the call and validation order of below methods
+
+    # Internal flag
+    colors_decoded: Optional[bool] = True
+
+    # Mandatory colormap fields
     type: str
-    color_space: str  # colors_type ?
-    colors: np.ndarray
-    n: Optional[float] = None
+    color_space: str
+
     # LinearSegmentedColormap options
-    segmentdata: Optional[List[float]] = None
+    segmentdata: Optional[dict] = None
     # gamma: Optional[float] = None
 
+    # Optional colormap fields
+    colors: Optional[Union[np.ndarray, list]] = None  # mandatory if segmentdata not provided !
+    n: Optional[float] = None
+    auxiliary: Optional[dict] = {}  # auxiliary information of the colormap (not checked !)
+
+    # --------------------------------------------------
     # TODO:
+    # - rename color_space as colors_space or colors_type ?
     # - interpolation_space? 'rgb', ...
+    # - add gamma option
+    # - correctly support segmentdata
 
     class Config:
         arbitrary_types_allowed = True
@@ -108,11 +140,23 @@ class ColorMapValidator(BaseModel):
         check_color_space(color_space=v)
         return v
 
+    @field_validator("colors_decoded")
+    def validate_colors_decoded(cls, v):
+        assert isinstance(v, bool), "colors_decoded must be a boolean."
+        return v
+
     @field_validator("colors")
-    def validate_colors(cls, v, values, **kwargs):
-        v = np.asanyarray(v)
-        color_space = values.data.get("color_space", "")
-        validate_colors_values(v, color_space=color_space)
+    def validate_colors(cls, v, values):
+        if v is not None:
+            v = np.asanyarray(v)
+            color_space = values.data.get("color_space", "")
+            assert len(v) > 0, "The 'colors' array must not be empty."
+            assert len(v) > 1, "The 'colors' array must have at least 2 colors."
+            validate_colors_values(v, color_space=color_space, decoded_colors=values.data.get("colors_decoded"))
+        if v is None:
+            assert (
+                values.data.get("segmentdata", None) is not None
+            ), "'colors' must be provided if 'segmentdata' is not specified"
         return v
 
     @field_validator("segmentdata")
@@ -120,16 +164,61 @@ class ColorMapValidator(BaseModel):
         if v is not None:
             assert (
                 values.data.get("type") == "LinearSegmentedColormap"
-            ), "'segmentdata' requires the 'type' 'LinearSegmentedColormap'"
-            assert isinstance(v, list), "'segmentdata' must be a list."
-            assert all(isinstance(level, (int, float)) for level in v), "'segmentdata' must be a list of numbers."
-            assert all(x < y for x, y in zip(v, v[1:])), "'segmentdata' must be monotonically increasing."
+            ), "'segmentdata' requires the 'type' 'LinearSegmentedColormap'."
+
+            # Check the keys
+            # - alpha can also be provided
+            required_keys = ["red", "green", "blue"]
+            if any(key not in v for key in required_keys):
+                raise ValueError(f"'segmentdata' dictionary must contain keys: {required_keys}.")
+
+            # Validate structure and monotonically increasing positions
+            for key in required_keys:
+                if not all(isinstance(item, tuple) and len(item) == 3 for item in v[key]):
+                    raise ValueError(f"Each item in '{key}' must be a tuple of three floats.")
+                positions = [item[0] for item in v[key]]
+                if not is_monotonically_increasing(positions):
+                    raise ValueError(f"Positions in '{key}' must be monotonically increasing.")
+
+            # TODO:
+            # - Check colors validity (encodded/decoded)
+            # - Support encoding/decoding of the dictionary
+            # - Allow for all color spaces !
+            # - Currently support only rgb and rgba !
+
         return v
 
 
-def validate_cmap_dict(cmap_dict: dict):
+def validate_cmap_dict(cmap_dict: dict, decoded_colors=True):
+    """
+    Check the validity of a colormap dictionary.
+
+    Parameters
+    ----------
+    cmap_dict : dict
+        Colormap dictionary.
+    decoded_colors : bool, optional
+        Whether the colors are decoded (internal representation) or not. The default is True.
+
+    Returns
+    -------
+    cmap_dict : TYPE
+        Validated colormap dictionary.
+
+    """
+    # TODO: currently assumes that colors are already decoded (i.e. in 0-1 range for RGB)]
+    # TODO: set defaults with pydantic?
+    # --> Return what ColorMapValidator returns?
+
+    # Set flag for color validation
+    cmap_dict["colors_decoded"] = decoded_colors
+
     # Validate dictionary
-    ColorMapValidator(**cmap_dict)
+    cmap_dict = ColorMapValidator(**cmap_dict).dict()
+
+    # Remove flag for color validation
+    _ = cmap_dict.pop("colors_decoded")
+
     # Return dictionary
     return cmap_dict
 
@@ -228,7 +317,7 @@ def validate_name_colors(colors: np.ndarray) -> bool:
         raise ValueError(f"Invalid named colors: {invalid_colors}.")
 
 
-def validate_colors_values(colors, color_space):
+def validate_colors_values(colors, color_space, decoded_colors=True):
     """
     Validates the colors array based on the specified color space.
 
@@ -238,6 +327,9 @@ def validate_colors_values(colors, color_space):
         The array of colors to validate.
     color_space : str
         The color space of the colors array (e.g., "hex", "rgb", "rgba", etc.).
+    decoded_colors: bool
+        If True, assumes that the colors are decoded (internal representation).
+        If False, assumes that the colors are not decoded (external representation).
 
     Raises
     ------
@@ -246,14 +338,17 @@ def validate_colors_values(colors, color_space):
         validation checks for the specified color space.
     """
     # Check valid color space
-    check_color_space(color_space)
+    color_space = check_color_space(color_space)
     # Check valid color values
     if color_space == "name":
         validate_name_colors(colors)
     elif color_space == "hex":
         validate_hex_colors(colors)
     else:
-        check_valid_internal_data_range(colors, color_space=color_space.upper())
+        if decoded_colors:
+            check_valid_internal_data_range(colors, color_space=color_space.upper())
+        else:
+            check_valid_external_data_range(colors, color_space=color_space.upper())
 
 
 ####-------------------------------------------------------------------------------------------------------------------.
