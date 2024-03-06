@@ -52,7 +52,7 @@ INVALID_CMAP_DICT = {"type": "BAD_TYPE", "colors": ["#ff0000", "#00ff00", "#0000
 # tmp_path = "/tmp"
 
 
-def TestColorMapRegistry():
+class TestColorMapRegistry:
     def test_register_unregister_colormap(self, colormap_registry, tmp_path):
         """Tests for registering, get a colormap and unregistering the colormaps."""
         # Create a temporary colormap YAML file
