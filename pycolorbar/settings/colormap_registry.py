@@ -31,6 +31,7 @@ import tempfile
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 
 from pycolorbar.settings.colormap_io import read_cmap_dict, write_cmap_dict
 from pycolorbar.settings.utils import get_auxiliary_categories
@@ -115,6 +116,13 @@ class ColorMapRegistry:
             names = [name + "_r" for name in names] + names
         return sorted(names)
 
+    def _check_if_cmap_in_use(self, name, force, verbose):
+        if name in self.registry:
+            if force and verbose:
+                print(f"Warning: Overwriting existing colormap '{name}'")
+            if not force:
+                raise ValueError(f"A colormap named '{name}' already exists. To allow overwriting, set 'force=True'.")
+
     def register(self, filepath: str, verbose: bool = True, force: bool = True):
         """
         Register a colormap by its name and file path.
@@ -124,11 +132,11 @@ class ColorMapRegistry:
         filepath : str
             The file path where the colormap's YAML file is located.
             The name of the colormap correspond to the name of the YAML file !
+        verbose : bool, optional
+            If True, the method will print a warning when overwriting an existing colormap. The default is True.
         force : bool, optional
             If True, it allow to overwrites an existing colormap. The default is True.
             If False, it raise an error if attempting to overwrite an existing colormap.
-        verbose : bool, optional
-            If True, the method will print a warning when overwriting an existing colormap. The default is True.
 
         Notes
         -----
@@ -140,12 +148,9 @@ class ColorMapRegistry:
             raise ValueError(f"The colormap configuration YAML file {filepath} does not exist.")
         # Define colormap name
         name = os.path.splitext(os.path.basename(filepath))[0]
+        # Check if the name is already used
+        self._check_if_cmap_in_use(name=name, force=force, verbose=verbose)
         # Register
-        if name in self.registry:
-            if force and verbose:
-                print(f"Warning: Overwriting existing colormap '{name}'")
-            if not force:
-                raise ValueError(f"A colormap named '{name}' already exists. To allow overwriting, set 'force=True'.")
         self.registry[name] = filepath
 
     def unregister(self, name: str):
@@ -167,7 +172,7 @@ class ColorMapRegistry:
         else:
             raise ValueError(f"The colormap {name} is not registered in pycolorbar.")
 
-    def add_cmap_dict(self, cmap_dict: dict, name: str, verbose: bool = True):
+    def add_cmap_dict(self, cmap_dict: dict, name: str, verbose: bool = True, force=True):
         """
         Add a colormap to the registry by providing a colormap dictionary and the colormap name.
         A temporary file YAML configuration file is created in self.tmp_dir.
@@ -180,6 +185,9 @@ class ColorMapRegistry:
             The name of the colormap.
         verbose : bool, optional
             If True, the method will print a warning when overwriting an existing colormap. The default is True.
+        force : bool, optional
+            If True, it allow to overwrites an existing colormap. The default is True.
+            If False, it raise an error if attempting to overwrite an existing colormap.
 
         Notes
         -----
@@ -190,8 +198,7 @@ class ColorMapRegistry:
         if self.tmp_dir is None:
             self.tmp_dir = tempfile.mkdtemp(prefix="pycolorbar_cmaps_")
         # Check if the name is already used
-        if verbose and name in self.registry:
-            print(f"Warning: Overwriting existing colormap '{name}'")
+        self._check_if_cmap_in_use(name=name, force=force, verbose=verbose)
         # Define filepath
         filename = f"{name}.yaml"
         filepath = os.path.join(self.tmp_dir, filename)
@@ -333,8 +340,15 @@ class ColorMapRegistry:
 
         # Retrieve available colormaps (of a given category)
         names = self.available(category=category, include_reversed=include_reversed)
+        if len(names) == 0:
+            raise ValueError("No colormaps are yet registered in the pycolorbar ColorMapRegistry.")
 
-        # Retrieve colormaps to display
+        # If only 1 colormap registered, plot it with the other method
+        if len(names) == 1:
+            self.show_colormap(name=names[0])
+            return None
+
+        # Else, retrieve colormaps to display
         cmaps = [self.get_cmap(name) for name in sorted(names)]
 
         # Display colormaps
@@ -364,7 +378,7 @@ def register_colormaps(directory: str, name: str = None, verbose: bool = True, f
 
     # List the colormap YAML files to register
     if name is not None:
-        filepaths = [os.path.join(directory, name)]
+        filepaths = [os.path.join(directory, f"{name}.yaml")]
     else:
         # List all YAML files in the directory
         filepaths = list_yaml_files(directory)
@@ -577,6 +591,6 @@ def _get_matplotlib_cmaps(category=None, include_reversed=False):
 def available_colormaps(category=None, include_reversed=False):
     colormaps = ColorMapRegistry.get_instance()
     names = colormaps.available(category=category, include_reversed=include_reversed)
-    mpl_names = _get_matplotlib_cmaps(category=category, include_reversed=include_reversed)
-    names = sorted(names + mpl_names)
+    names += _get_matplotlib_cmaps(category=category, include_reversed=include_reversed)
+    names = sorted(np.unique(names))
     return names
