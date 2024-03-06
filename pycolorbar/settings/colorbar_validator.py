@@ -34,15 +34,18 @@ from pydantic import BaseModel, field_validator, model_validator
 
 from pycolorbar.utils.mpl import get_mpl_colormaps, get_mpl_named_colors
 
+####---------------------------------------------------------------------------------------------------------.
+#### Colormap Settings
+
 
 class UnivariateCmapSettings(BaseModel):
     name: Union[str, List[str]]
     n: Optional[Union[int, List[int]]] = None
-    bad_color: Optional[str] = None
+    bad_color: Optional[Union[str, list, tuple]] = None
     bad_alpha: Optional[float] = None
-    over_color: Optional[str] = None
+    over_color: Optional[Union[str, list, tuple]] = None
     over_alpha: Optional[float] = None
-    under_color: Optional[str] = None
+    under_color: Optional[Union[str, list, tuple]] = None
     under_alpha: Optional[float] = None
 
     class Config:
@@ -65,20 +68,25 @@ class UnivariateCmapSettings(BaseModel):
     @field_validator("n")
     def validate_n(cls, v, values, **kwargs):
         if v is not None:
+            validated_settings = values.data
             # Single colormap
-            if isinstance(values.data.get("name"), str):
+            if isinstance(validated_settings.get("name"), str):
                 assert isinstance(v, int) and v > 0, "'n' must be a positive integer."
             # Multiple colormaps
-            if isinstance(values.data.get("name"), list):
-                assert len(values.data.get("name")) == len(v), "'n' must match the number of color maps in 'name'."
+            if isinstance(validated_settings.get("name"), list):
+                assert len(validated_settings.get("name")) == len(
+                    v
+                ), "'n' must match the number of color maps in 'name'."
                 for n in v:
                     assert isinstance(n, int) and n > 0, "'n' values must be positive integers."
         return v
 
     @field_validator("bad_color", "over_color", "under_color")
     def validate_colors(cls, v):
-        if v is not None and v.lower() != "none":
+        if v is not None:
             if isinstance(v, str):
+                if v == "none":
+                    return v
                 # Check if it's a named color
                 if v in get_mpl_named_colors():
                     return v
@@ -106,10 +114,11 @@ class UnivariateCmapSettings(BaseModel):
 
 
 ####-------------------------------------------------------------------------------------------------------------------.
+#### Norm Settings
 
 
-def _check_norm_invalid_keys(norm_name, values, valid_args):
-    invalid_keys = set(values.keys()) - set(valid_args)
+def _check_norm_invalid_args(norm_name, args, valid_args):
+    invalid_keys = set(args) - set(valid_args)
     if invalid_keys:
         raise ValueError(f"Invalid parameters {invalid_keys} for normalization type '{norm_name}'.")
 
@@ -118,7 +127,7 @@ def _check_vmin_vcenter_vmax(vmin, vcenter, vmax, norm_name):
     if vmin is not None and vcenter is not None:
         assert vmin < vcenter, "'vmin' must be less than 'vcenter' for 'TwoSlopeNorm'."
     if vmax is not None and vcenter is not None:
-        assert vcenter < vmax, "'vcenter' must be less than 'vmax' for 'TwoSlopeNorm'."
+        assert vcenter < vmax, "'vmax' must be larger than 'vcenter' 'TwoSlopeNorm'."
 
 
 def _check_vmin_vmax(vmin, vmax):
@@ -176,7 +185,7 @@ class NormalizeSettings(BaseModel):
     def check_valid_args(cls, values):
         """Check for no excess parameters in Normalize."""
         valid_args = {"vmin", "vmax", "clip"}
-        _check_norm_invalid_keys(norm_name="Normalize", values=values, valid_args=valid_args)
+        _check_norm_invalid_args(norm_name="Normalize", args=values.keys(), valid_args=valid_args)
         return values
 
 
@@ -200,14 +209,20 @@ class CategoryNormSettings(BaseModel):
             assert isinstance(v, int), "'first_value' must be an integer."
         return v
 
+    @model_validator(mode="before")
+    def check_valid_args(cls, values):
+        """Check for no excess parameters in Normalize."""
+        valid_args = {"labels", "first_value"}
+        _check_norm_invalid_args(norm_name="CategoryNorm", args=values.keys(), valid_args=valid_args)
+        return values
+
 
 class BoundaryNormSettings(BaseModel):
-    # "ncolors" if not specified is taken from len(boundaries).
-
+    # "ncolors" if not specified is taken from len(boundaries)
     boundaries: List[float]
-    ncolors: Optional[int] = None
     clip: Optional[bool] = False
     extend: Optional[str] = "neither"
+    ncolors: Optional[int] = None
 
     @field_validator("boundaries")
     def validate_boundaries(cls, v):
@@ -239,8 +254,9 @@ class BoundaryNormSettings(BaseModel):
             # - If extend is "neither" (default) there must be equal or larger than len(boundaries) - 1 colors.
             # - If extend is "min" or "max" ncolors must be equal or larger than len(boundaries)
             # - If extend is "both"  ncolors must be equal or larger than len(boundaries) + 1
-            extend = values.data.get("extend", "neither")
-            required_ncolors = _get_boundary_norm_expected_ncolors(norm_settings=values)
+            validated_settings = values.data
+            extend = validated_settings.get("extend", "neither")
+            required_ncolors = _get_boundary_norm_expected_ncolors(norm_settings=validated_settings)
             if extend == "neither":
                 assert (
                     v >= required_ncolors
@@ -259,7 +275,7 @@ class BoundaryNormSettings(BaseModel):
     def check_valid_args(cls, values):
         """Check for no excess parameters in BoundaryNorm."""
         valid_args = {"boundaries", "ncolors", "clip", "extend"}
-        _check_norm_invalid_keys(norm_name="BoundaryNorm", values=values, valid_args=valid_args)
+        _check_norm_invalid_args(norm_name="BoundaryNorm", args=values.keys(), valid_args=valid_args)
         return values
 
 
@@ -285,7 +301,7 @@ class NoNormSettings(BaseModel):
     def check_valid_args(cls, values):
         """Check for no excess parameters in NoNorm."""
         valid_args = {"vmin", "vmax", "clip"}
-        _check_norm_invalid_keys(norm_name="NoNorm", values=values, valid_args=valid_args)
+        _check_norm_invalid_args(norm_name="NoNorm", args=values.keys(), valid_args=valid_args)
         return values
 
 
@@ -317,7 +333,7 @@ class CenteredNormSettings(BaseModel):
     def check_valid_args(cls, values):
         """Check for no excess parameters in CenteredNorm."""
         valid_args = {"vcenter", "halfrange", "clip"}
-        _check_norm_invalid_keys(norm_name="CenteredNorm", values=values, valid_args=valid_args)
+        _check_norm_invalid_args(norm_name="CenteredNorm", args=values.keys(), valid_args=valid_args)
         return values
 
 
@@ -343,7 +359,7 @@ class TwoSlopeNormSettings(BaseModel):
     def check_valid_args(cls, values):
         """Check for no excess parameters in TwoSlopeNorm."""
         valid_args = {"vcenter", "vmin", "vmax"}
-        _check_norm_invalid_keys(norm_name="TwoSlopeNorm", values=values, valid_args=valid_args)
+        _check_norm_invalid_args(norm_name="TwoSlopeNorm", args=values.keys(), valid_args=valid_args)
         return values
 
 
@@ -363,13 +379,16 @@ class LogNormSettings(BaseModel):
         """Check `vmin` and `vmax` for LogNorm."""
         vmin, vmax = values.get("vmin"), values.get("vmax")
         _check_vmin_vmax(vmin, vmax)
+        if vmin is not None:
+            if vmin <= 0:
+                raise ValueError("LogNorm vmin should be a positive value.")
         return values
 
     @model_validator(mode="before")
     def check_valid_args(cls, values):
         """Check for no excess parameters in LogNorm."""
         valid_args = {"vmin", "vmax", "clip"}
-        _check_norm_invalid_keys(norm_name="LogNorm", values=values, valid_args=valid_args)
+        _check_norm_invalid_args(norm_name="LogNorm", args=values.keys(), valid_args=valid_args)
         return values
 
 
@@ -411,7 +430,7 @@ class SymLogNormSettings(BaseModel):
     def check_valid_args(cls, values):
         """Check for no excess parameters in SymLogNorm."""
         valid_args = ["linthresh", "linscale", "vmin", "vmax", "clip", "base"]
-        _check_norm_invalid_keys(norm_name="SymLogNorm", values=values, valid_args=valid_args)
+        _check_norm_invalid_args(norm_name="SymLogNorm", args=values.keys(), valid_args=valid_args)
         return values
 
 
@@ -444,7 +463,7 @@ class PowerNormSettings(BaseModel):
     def check_valid_args(cls, values):
         """Check for no excess parameters in PowerNorm."""
         valid_args = ["gamma", "vmin", "vmax", "clip"]
-        _check_norm_invalid_keys(norm_name="PowerNorm", values=values, valid_args=valid_args)
+        _check_norm_invalid_args(norm_name="PowerNorm", args=values.keys(), valid_args=valid_args)
         return values
 
 
@@ -477,7 +496,7 @@ class AsinhNormSettings(BaseModel):
     def check_valid_args(cls, values):
         """Check for no excess parameters in AsinhNorm."""
         valid_args = ["linear_width", "vmin", "vmax", "clip"]
-        _check_norm_invalid_keys(norm_name="AsinhNorm", values=values, valid_args=valid_args)
+        _check_norm_invalid_args(norm_name="AsinhNorm", args=values.keys(), valid_args=valid_args)
         return values
 
 
@@ -500,7 +519,8 @@ def _check_valid_norm_name(name):
 
 def check_norm_settings(norm_settings):
     # Check valid *Norm name
-    name = norm_settings.get("name", "Norm")
+    norm_settings = norm_settings.copy()
+    name = norm_settings.pop("name", "Norm")
     _check_valid_norm_name(name)
     # Define *Norm validators
     norm_settings_mapping = {
@@ -515,11 +535,13 @@ def check_norm_settings(norm_settings):
         "AsinhNorm": AsinhNormSettings,
         "CategoryNorm": CategoryNormSettings,
     }
-    # Validate Norm kwargs
+    # Retrieve NormSettings Validator
     validator = norm_settings_mapping[name]
-    norm_kwargs = norm_settings.copy()
-    _ = norm_kwargs.pop("name", None)
-    _ = validator(**norm_kwargs)
+    # Validate settings
+    norm_settings = validator(**norm_settings).dict()
+    # Return validated settings
+    norm_settings["name"] = name
+    return norm_settings
 
 
 ####-------------------------------------------------------------------------------------------------------------------.

@@ -100,7 +100,7 @@ class TestColorMapRegistry:
             colormap_registry.register(filepath=filepath)
         assert f"The colormap configuration YAML file {filepath} does not exist." in str(excinfo.value)
 
-    def test_register_ovewriting(self, colormap_registry, tmp_path, capsys):
+    def test_register_overwriting(self, colormap_registry, tmp_path, capsys):
         """Test registering an already existing colormap."""
 
         # Create a temporary colormap YAML file
@@ -270,11 +270,23 @@ class TestColorMapRegistry:
         dst_filepath = os.path.join(tmp_path, f"{new_cmap_name}.yaml")
         colormap_registry.to_yaml(name=cmap_name, filepath=dst_filepath)
         assert os.path.exists(dst_filepath)
+
+        # Assert overwriting an existing YAML raise an error (by default)
+        with pytest.raises(ValueError):
+            colormap_registry.to_yaml(name=cmap_name, filepath=dst_filepath)
+
+        # Assert overwriting an existing YAML is allowed with force=True
+        colormap_registry.to_yaml(name=cmap_name, filepath=dst_filepath, force=True)
+        assert os.path.exists(dst_filepath)
+
+        # Reset registry
         colormap_registry.reset()
         assert cmap_name not in colormap_registry
+
         # Register YAML
         colormap_registry.register(dst_filepath)
         assert new_cmap_name in colormap_registry
+
         # Assert same cmap
         assert colormap_registry.get_cmap(new_cmap_name) == cmap
 
@@ -398,7 +410,7 @@ class TestGetCmap:
         # Retrieve reversed colormap
         reversed_cmap = get_cmap(name=f"{cmap_name}_r")
         assert isinstance(reversed_cmap, Colormap)
-        # assert cmap.reversed()(0) == reversed_cmap(0)
+        # assert cmap.reversed()(0) == reversed_cmap(0)  # TODO BUG
 
 
 def test_available_colormaps(colormap_registry, tmp_path):
@@ -415,6 +427,10 @@ def test_available_colormaps(colormap_registry, tmp_path):
 
     names = available_colormaps()
     assert cmap_name in names
+
+    # Test empty list for inexisting category
+    names = available_colormaps(category="inexistent")
+    assert names == []
 
 
 @pytest.mark.parametrize("category", ["qualitative", "diverging", "sequential", "perceptual", "cyclic"])

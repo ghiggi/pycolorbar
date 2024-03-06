@@ -44,6 +44,28 @@ class TestColorMapColors:
         validated_dict = validate_cmap_dict(cmap_dict)
         assert isinstance(validated_dict, dict)
 
+    def test_valid_named_colors(self):
+        """Validate a colormap dictionary with valid named colors."""
+        cmap_dict = {"type": "ListedColormap", "color_space": "name", "colors": np.array(["red", "blue"])}
+        validated_dict = validate_cmap_dict(cmap_dict)
+        assert isinstance(validated_dict, dict)
+
+    @pytest.mark.parametrize(
+        "color_space,colors",
+        [
+            ("hex", np.array(["#GGGGGG", "invalid1"])),  # Invalid hex code
+            ("name", np.array(["not_a_color", "not_a_color1"])),  # Invalid color name
+            ("name", np.array([["red", "blue"]])),  # Not 1D
+            ("name", np.array([1, 2])),  # Unexpected type
+            ("hex", np.array([1, 2])),  # Unexpected type
+        ],
+    )
+    def test_invalid_colors(self, color_space, colors):
+        """Validate colormap dictionaries with invalid color specifications."""
+        cmap_dict = {"type": "ListedColormap", "color_space": color_space, "colors": colors}
+        with pytest.raises(ValidationError):
+            validate_cmap_dict(cmap_dict)
+
     def test_colors_list(self):
         """Validate a colormap dictionary with colors not provided as np.ndarray."""
         cmap_dict = {"type": "ListedColormap", "color_space": "hex", "colors": ["#000000", "#FFFFFF"]}
@@ -77,19 +99,6 @@ class TestColorMapColors:
         assert "The 'colors' array must have at least 2 colors." in str(
             excinfo.value
         ), "Array with only 1 color should raise ValueError."
-
-    @pytest.mark.parametrize(
-        "color_space,colors",
-        [
-            ("hex", np.array(["#GGGGGG"])),  # Invalid hex code
-            ("name", np.array(["not_a_color"])),  # Invalid color name
-        ],
-    )
-    def test_invalid_colors(self, color_space, colors):
-        """Validate colormap dictionaries with invalid color specifications."""
-        cmap_dict = {"type": "ListedColormap", "color_space": color_space, "colors": colors}
-        with pytest.raises(ValidationError):
-            validate_cmap_dict(cmap_dict)
 
     def test_rgba_colors_with_valid_alpha(self):
         """Validate a colormap dictionary with valid RGB colors and an alpha channel."""
