@@ -1,3 +1,4 @@
+
  Don't track these files
 
 *~
@@ -38,7 +39,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 pycolorbar/_version.py
-
+lcov.info
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
