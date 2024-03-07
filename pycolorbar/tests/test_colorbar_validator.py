@@ -26,41 +26,94 @@
 # -----------------------------------------------------------------------------.
 """Test ColorbarValidator."""
 import os
+from contextlib import contextmanager
 
 import pytest
 from pydantic import ValidationError
 
+from pycolorbar.settings.colorbar_registry import ColorbarRegistry
 from pycolorbar.settings.colorbar_validator import (
-    UnivariateCmapSettings,
+    ColorbarSettings,
+    ColormapSettings,
     check_norm_settings,
+    validate_cbar_dict,
 )
-from pycolorbar.settings.colormap_registry import ColorMapRegistry
+from pycolorbar.settings.colormap_registry import ColormapRegistry
 from pycolorbar.utils.yaml import write_yaml
+
+TEST_CBAR_NAME = "pycolorbar_test_colorbar"
+TEST_CMAP_NAME = "pycolorbar_test_colormap"
+
+TEST_CBAR_DICT = {
+    "cmap": {"name": "viridis"},
+    "norm": {"name": "Norm", "vmin": 0, "vmax": 1},
+    "cbar": {"extend": "neither"},
+}
+
+TEST_CMAP_DICT = {"type": "ListedColormap", "colors": ["#ff0000", "#00ff00", "#0000ff"], "color_space": "hex"}
 
 
 @pytest.fixture
-def setup_pycolorbar_colormap(tmp_path):
+def setup_colormap_registry(tmp_path):
     """Fixture that register a colormap for testing purpose."""
-    PYCOLORBAR_CMAP_NAME = "pycolorbar_test_colormap"
-    TEST_CMAP_DICT = {"type": "ListedColormap", "colors": ["#ff0000", "#00ff00", "#0000ff"], "color_space": "hex"}
-
     # Initialize pycolorbar.colormap registry
-    registry = ColorMapRegistry.get_instance()
+    registry = ColormapRegistry.get_instance()
     registry.reset()
 
-    cmap_filepath = os.path.join(tmp_path, f"{PYCOLORBAR_CMAP_NAME}.yaml")
+    cmap_filepath = os.path.join(tmp_path, f"{TEST_CMAP_NAME}.yaml")
     write_yaml(TEST_CMAP_DICT, cmap_filepath)
 
     registry.register(cmap_filepath)
 
-    yield PYCOLORBAR_CMAP_NAME  # Provide the colormap name to the test
+    yield TEST_CMAP_NAME  # Provide the colormap name to the test
 
     # Cleanup: Reset the registry after the test to ensure isolation
     registry.reset()
     os.remove(cmap_filepath)
 
 
-class TestCmapSettings:
+@pytest.fixture
+def setup_colorbar_registry(tmp_path):
+    """Fixture that register a colormap for testing purpose."""
+
+    TEST_COLORBAR_DICT = {TEST_CBAR_NAME: TEST_CBAR_DICT}
+
+    # Initialize pycolorbar.colorbar registry
+    registry = ColorbarRegistry.get_instance()
+    registry.reset()
+
+    cbar_filepath = os.path.join(tmp_path, "test_colorbar_settings.yaml")
+    write_yaml(TEST_COLORBAR_DICT, cbar_filepath)
+
+    registry.register(cbar_filepath)
+
+    yield TEST_CBAR_NAME  # Provide the colormap name to the test
+
+    # Cleanup: Reset the registry after the test to ensure isolation
+    registry.reset()
+    os.remove(cbar_filepath)
+
+
+@contextmanager
+def register_temporary_colorbars(input_dict, name=None, multiple=False):
+    """A context manager to register one or multiple dictionaries.
+
+    It resets the registry on exit.
+    """
+    registry = ColorbarRegistry.get_instance()
+    registry.reset()
+    if multiple:
+        _ = [registry.add_cbar_dict(cbar_dict=cbar_dict, name=name) for name, cbar_dict in input_dict.items()]
+    else:
+        registry.add_cbar_dict(cbar_dict=input_dict, name=name)
+    try:
+        yield registry
+
+    finally:
+        registry.reset()
+
+
+class TestColormapSettings:
     @pytest.mark.parametrize(
         "cmap_name",
         [
@@ -69,12 +122,12 @@ class TestCmapSettings:
             "pycolorbar_test_colormap",  # valid single pycolorbar colormap name
         ],
     )
-    def test_valid_cmap_name(self, cmap_name, setup_pycolorbar_colormap):
+    def test_valid_cmap_name(self, cmap_name, setup_colormap_registry):
         """Test valid colormap names."""
         cmap_settings = {"name": cmap_name, "n": 256}
         if isinstance(cmap_name, list):
             cmap_settings["n"] = [256, 256]
-        validated = UnivariateCmapSettings(**cmap_settings)
+        validated = ColormapSettings(**cmap_settings)
         assert validated.name == cmap_name
 
     @pytest.mark.parametrize(
@@ -88,7 +141,7 @@ class TestCmapSettings:
         """Test invalid colormap names."""
         cmap_settings = {"name": cmap_name}
         with pytest.raises(ValidationError):
-            _ = UnivariateCmapSettings(**cmap_settings)
+            _ = ColormapSettings(**cmap_settings)
 
     @pytest.mark.parametrize(
         "n",
@@ -100,7 +153,7 @@ class TestCmapSettings:
     def test_valid_n(self, n):
         """Test valid 'n' values."""
         cmap_settings = {"name": "viridis" if isinstance(n, int) else ["viridis", "plasma"], "n": n}
-        validated = UnivariateCmapSettings(**cmap_settings)
+        validated = ColormapSettings(**cmap_settings)
         assert validated.n == n
 
     @pytest.mark.parametrize(
@@ -114,7 +167,7 @@ class TestCmapSettings:
         """Test invalid 'n' values."""
         cmap_settings = {"name": "viridis" if isinstance(n, int) else ["viridis", "plasma"], "n": n}
         with pytest.raises(ValidationError):
-            _ = UnivariateCmapSettings(**cmap_settings)
+            _ = ColormapSettings(**cmap_settings)
 
     @pytest.mark.parametrize(
         "color",
@@ -124,12 +177,13 @@ class TestCmapSettings:
             [1, 0, 0],  # valid RGB tuple
             (1, 0, 0, 1),  # valid RGBA tuple (if bad/over/under alpha provided ... RGB alpha will be overwritten !)
             "red",  # valid named color
+            "none",
         ],
     )
     def test_valid_colors(self, color):
         """Test valid colors for 'bad_color', 'over_color', 'under_color'."""
         cmap_settings = {"name": "viridis", "bad_color": color, "over_color": color, "under_color": color}
-        validated = UnivariateCmapSettings(**cmap_settings)
+        validated = ColormapSettings(**cmap_settings)
         if isinstance(color, tuple):
             color = list(color)
         assert validated.bad_color == color
@@ -149,7 +203,23 @@ class TestCmapSettings:
         """Test invalid colors for 'bad_color', 'over_color', 'under_color'."""
         cmap_settings = {"name": "viridis", "bad_color": color, "over_color": color, "under_color": color}
         with pytest.raises(ValidationError):
-            _ = UnivariateCmapSettings(**cmap_settings)
+            _ = ColormapSettings(**cmap_settings)
+
+    @pytest.mark.parametrize("alpha", [0, 0.5, 1, None])
+    def test_valid_alpha(self, alpha):
+        """Test valid alpha for 'bad_alpha', 'over_alpha', 'under_alpha'."""
+        cmap_settings = {"name": "viridis", "bad_alpha": alpha, "over_alpha": alpha, "under_alpha": alpha}
+        validated = ColormapSettings(**cmap_settings)
+        assert validated.bad_alpha == alpha
+        assert validated.over_alpha == alpha
+        assert validated.under_alpha == alpha
+
+    @pytest.mark.parametrize("alpha", [-0.1, 2, 100, "none"])
+    def test_invalid_alpha(self, alpha):
+        """Test invalid alpha for 'bad_alpha', 'over_alpha', 'under_alpha'."""
+        cmap_settings = {"name": "viridis", "bad_alpha": alpha, "over_alpha": alpha, "under_alpha": alpha}
+        with pytest.raises(ValidationError):
+            ColormapSettings(**cmap_settings)
 
 
 class TestNormSettings:
@@ -257,25 +327,223 @@ class TestNormSettings:
             check_norm_settings(norm_settings)
 
 
-# @pytest.mark.parametrize("cmap_settings", [
-#     ({"name": "viridis"}),  # valid single name
-#     ({"name": ["viridis", "plasma"], "n": [256, 256]}),  # valid list
-#     # Add more...
-# ])
-# def test_validate_cmap_settings(cmap_settings):
-#     """Test cmap settings validation."""
-#     # Assuming a simplified cbar_dict structure for illustration
-#     cbar_dict = {"cmap": cmap_settings, "norm": {}, "cbar": {}}
-#     assert validate_cbar_dict(cbar_dict) == cbar_dict  # Expects to pass without ValidationError
+class TestColorbarSettings:
+    @pytest.mark.parametrize("extend", ["neither", "both", "min", "max", None])
+    def test_valid_extend(self, extend):
+        """Test valid extend options."""
+        cbar_settings = ColorbarSettings(extend=extend)
+        assert cbar_settings.extend == extend
 
-# # two cmaps --> twoslopenorm required ?
+    @pytest.mark.parametrize("extend", ["invalid_option", 123, []])
+    def test_invalid_extend(self, extend):
+        """Test invalid extend options."""
+        with pytest.raises(ValidationError):
+            ColorbarSettings(extend=extend)
+
+    @pytest.mark.parametrize("extendfrac", [0.5, [0.1, 0.2], "auto", None])
+    def test_valid_extendfrac(self, extendfrac):
+        """Test valid extendfrac options."""
+        cbar_settings = ColorbarSettings(extendfrac=extendfrac)
+        assert cbar_settings.extendfrac == extendfrac
+
+    @pytest.mark.parametrize("extendfrac", [[-0.1], 1.1, [1, 2], "not_a_number"])
+    def test_invalid_extendfrac(self, extendfrac):
+        """Test invalid extendfrac options."""
+        with pytest.raises(ValidationError):
+            ColorbarSettings(extendfrac=extendfrac)
+
+    @pytest.mark.parametrize("extendrect", [True, False, None])
+    def test_valid_extendrect(self, extendrect):
+        """Test valid extendrect options."""
+        cbar_settings = ColorbarSettings(extendrect=extendrect)
+        assert cbar_settings.extendrect == extendrect
+
+    @pytest.mark.parametrize("extendrect", [123, []])
+    def test_invalid_extendrect(self, extendrect):
+        """Test invalid extendrect options."""
+        with pytest.raises(ValidationError):
+            ColorbarSettings(extendrect=extendrect)
+
+    @pytest.mark.parametrize("label", ["Valid label", "", None])
+    def test_valid_label(self, label):
+        """Test valid label options."""
+        cbar_settings = ColorbarSettings(label=label)
+        assert cbar_settings.label == label
+
+    @pytest.mark.parametrize("label", [123, False, []])
+    def test_invalid_label(self, label):
+        """Test invalid label options."""
+        with pytest.raises(ValidationError):
+            ColorbarSettings(label=label)
 
 
-# @pytest.mark.parametrize("norm_settings", [
-#     ({"name": "Normalize", "vmin": 0, "vmax": 1}),  # valid Normalize settings
-#     # Add more for each norm type...
-# ])
-# def test_validate_norm_settings(norm_settings):
-#     """Test norm settings validation."""
-#     cbar_dict = {"cmap": {}, "norm": norm_settings, "cbar": {}}
-#     assert validate_cbar_dict(cbar_dict) == cbar_dict
+def assert_is_superset_dict(cbar_dict, validated_dict):
+    """Test that the validated dictionary contains all key-values of the original dictionary."""
+    for setting, sub_dict in cbar_dict.items():
+        for field, value in sub_dict.items():
+            assert field in validated_dict[setting]
+            assert value == validated_dict[setting][field]
+
+
+class TestValidateCbarDict:
+    def test_valid_cbar_dict(self, setup_colormap_registry):
+        """Test validate_cbar_dict with a valid colorbar dictionary."""
+        cbar_dict = {
+            "cmap": {"name": "viridis"},
+            "norm": {"name": "Norm", "vmin": 0, "vmax": 1},
+            "cbar": {"extend": "neither"},
+        }
+        assert_is_superset_dict(cbar_dict=cbar_dict, validated_dict=validate_cbar_dict(cbar_dict, name="dummy"))
+
+    def test_valid_reference(self, setup_colormap_registry, setup_colorbar_registry):
+        """Test validate_cbar_dict with a valid reference to another colorbar."""
+        # setup_colorbar_registry set up a registry with the pycolorbar_test_colorbar reference
+        cbar_dict = {"reference": "pycolorbar_test_colorbar"}
+        validated_dict = validate_cbar_dict(cbar_dict, name="dummy")
+        assert validated_dict == cbar_dict, "Valid reference should pass validation."
+
+    def test_inexisting_reference(self):
+        """Test validate_cbar_dict with an invalid reference."""
+        cbar_dict = {"reference": "invalid_reference"}
+        with pytest.raises(ValueError) as excinfo:
+            validate_cbar_dict(cbar_dict, name="dummy")
+        assert "Invalid reference" in str(excinfo.value), "Invalid reference should raise ValueError."
+
+    def test_reference_dict_keys(self):
+        """Test validate_cbar_dict with excess key."""
+        # Register valid colorbar
+        valid_cbar_dict = {"cmap": {"name": "viridis"}}
+        valid_reference = "original_colorbar"
+        with register_temporary_colorbars(valid_cbar_dict, name=valid_reference):
+            # Now validate valid reference colorbar dictionary
+            reference_cbar_dict = {"reference": valid_reference, "auxiliary": {"whatever_key": "value"}}
+            validate_cbar_dict(reference_cbar_dict, name="dummy")
+            # Now test that if whatever other 'key' is specified, it raise error
+            reference_cbar_dict = {
+                "reference": valid_reference,
+                "auxiliary": {"whatever_key": "value"},
+                "cmap": {"whatever_key": "value"},
+            }
+            with pytest.raises(ValueError):
+                validate_cbar_dict(reference_cbar_dict, name="dummy")
+
+    def test_valid_recursive_reference(self):
+        """Test validate_cbar_dict with a recursive reference."""
+        valid_cbar_dict = {"cmap": {"name": "viridis"}}
+        multiple_dict = {}
+        multiple_dict["original_colorbar"] = valid_cbar_dict
+        multiple_dict["first_reference"] = {"reference": "original_colorbar"}
+        multiple_dict["second_reference"] = {"reference": "first_reference"}
+        multiple_dict["third_reference"] = {"reference": "second_reference"}
+        with register_temporary_colorbars(multiple_dict, multiple=True):
+            cbar_dict = {"reference": "third_reference"}
+            validate_cbar_dict(cbar_dict, name="dummy")
+
+    def test_circular_recursive_reference(self):
+        """Test validate_cbar_dict with a recursive reference."""
+        valid_cbar_dict = {"cmap": {"name": "viridis"}}
+        multiple_dict = {}
+        multiple_dict["original_colorbar"] = valid_cbar_dict
+        multiple_dict["first_reference"] = {"reference": "original_colorbar"}
+        multiple_dict["second_reference"] = {"reference": "first_reference"}
+        multiple_dict["third_reference"] = {"reference": "second_reference"}
+        with register_temporary_colorbars(multiple_dict, multiple=True):
+            cbar_dict = {"reference": "third_reference"}
+            with pytest.raises(ValueError) as excinfo:
+                validate_cbar_dict(cbar_dict, name="first_reference")
+                assert "Circular reference detected with" in str(
+                    excinfo.value
+                ), "Circular reference should raise ValueError."
+
+    def test_invalid_cbar_dict(self):
+        """Test validate_cbar_dict with an invalid colorbar dictionary."""
+        cbar_dict = {
+            "cmap": {"name": "nonexistent_cmap"},
+            "norm": {"name": "InvalidNorm"},
+            "cbar": {"extend": "invalid_option"},
+        }
+        with pytest.raises(ValueError) as excinfo:
+            validate_cbar_dict(cbar_dict, name="dummy")
+        assert "Invalid configuration" in str(excinfo.value), "Invalid colorbar dictionary should raise ValueError."
+
+    def test_simple_cbar_dict(self):
+        """Test validate_cbar_dict with the simplest allowed colorbar dictionary."""
+        cbar_dict = {
+            "cmap": {"name": "viridis"},
+        }
+        validated_dict = validate_cbar_dict(cbar_dict, name="dummy")
+        assert_is_superset_dict(cbar_dict=cbar_dict, validated_dict=validated_dict)
+
+        # Another option
+        cbar_dict = {"cmap": {"name": "viridis"}, "norm": {}, "cbar": {}}
+        validated_dict = validate_cbar_dict(cbar_dict, name="dummy")
+        assert_is_superset_dict(cbar_dict=cbar_dict, validated_dict=validated_dict)
+
+        # 'None' as cmap name is not allowed
+        cbar_dict = {
+            "cmap": {"name": None},
+        }
+        with pytest.raises(ValueError):
+            validated_dict = validate_cbar_dict(cbar_dict, name="dummy")
+
+        # Empty dictionary is not allowed
+        with pytest.raises(ValueError) as excinfo:
+            validate_cbar_dict(cbar_dict={}, name="dummy")
+        assert "The colorbar dictionary can not be empty." in str(excinfo.value)
+
+        # None is not allowed
+        with pytest.raises(TypeError) as excinfo:
+            validate_cbar_dict(cbar_dict=None, name="dummy")
+        assert "The colorbar dictionary must be a dictionary" in str(excinfo.value)
+
+    def test_categorical_norm_consistency_checks(self):
+        """Test consistency checks for CategoricalNorm and BoundaryNorm."""
+        # Check valid combinations
+        cbar_dict = {
+            "cmap": {"name": "viridis", "n": 3},
+            "norm": {"name": "CategoryNorm", "labels": ["A", "B", "C"]},
+            "cbar": {"extend": "neither"},
+        }
+        validate_cbar_dict(cbar_dict, name="dummy")
+
+        cbar_dict = {
+            "cmap": {"name": ["viridis", "Spectral"], "n": [2, 2]},
+            "norm": {"name": "CategoryNorm", "labels": ["A", "B", "C", "D"]},
+            "cbar": {"extend": "neither"},
+        }
+        validate_cbar_dict(cbar_dict, name="dummy")
+
+        # Check invalid combinations
+        cbar_dict = {
+            "cmap": {"name": "viridis", "n": 4},
+            "norm": {"name": "CategoryNorm", "labels": ["A", "B", "C"]},
+            "cbar": {"extend": "neither"},
+        }
+        with pytest.raises(ValueError):
+            validate_cbar_dict(cbar_dict, name="dummy")
+
+    def test_boundary_norm_consistency_checks(self):
+        """Test consistency checks for CategoricalNorm and BoundaryNorm."""
+        # Check valid combinations
+        cbar_dict = {
+            "cmap": {"name": "viridis", "n": 2},
+            "norm": {"name": "BoundaryNorm", "boundaries": [0, 1, 2]},
+            "cbar": {"extend": "neither"},
+        }
+        validate_cbar_dict(cbar_dict, name="dummy")
+
+        cbar_dict = {
+            "cmap": {"name": ["viridis", "Spectral"], "n": [2, 2]},
+            "norm": {"name": "BoundaryNorm", "boundaries": [0, 1, 2, 3, 4]},
+            "cbar": {"extend": "neither"},
+        }
+        validate_cbar_dict(cbar_dict, name="dummy")
+
+        # Check invalid combinations
+        cbar_dict = {
+            "cmap": {"name": "viridis", "n": 4},
+            "norm": {"name": "BoundaryNorm", "boundaries": [0, 1, 2]},
+            "cbar": {"extend": "neither"},
+        }
+        with pytest.raises(ValueError):
+            validate_cbar_dict(cbar_dict, name="dummy")

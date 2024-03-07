@@ -24,7 +24,7 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
-"""Test ColorMapRegistry."""
+"""Test ColormapRegistry."""
 
 import os
 
@@ -34,7 +34,7 @@ from matplotlib.colors import Colormap, ListedColormap
 from pytest_mock import mocker  # noqa
 
 from pycolorbar.settings.colormap_registry import (
-    ColorMapRegistry,
+    ColormapRegistry,
     available_colormaps,
     get_cmap,
     get_cmap_dict,
@@ -46,7 +46,7 @@ from pycolorbar.utils.yaml import write_yaml
 
 @pytest.fixture
 def colormap_registry():
-    registry = ColorMapRegistry.get_instance()
+    registry = ColormapRegistry.get_instance()
     registry.reset()
     return registry
 
@@ -62,12 +62,12 @@ TEST_CMAP_DICT = {"type": "ListedColormap", "colors": ["#ff0000", "#00ff00", "#0
 INVALID_CMAP_DICT = {"type": "BAD_TYPE", "colors": ["#ff0000", "#00ff00", "#0000ff"], "color_space": "hex"}
 
 
-# colormap_registry =ColorMapRegistry.get_instance()
+# colormap_registry =ColormapRegistry.get_instance()
 # colormap_registry.reset()
 # tmp_path = "/tmp"
 
 
-class TestColorMapRegistry:
+class TestColormapRegistry:
     def test_register_unregister_colormap(self, colormap_registry, tmp_path):
         """Tests for registering, get a colormap and unregistering the colormaps."""
         # Create a temporary colormap YAML file
@@ -308,7 +308,7 @@ class TestColorMapRegistry:
         # Test raise error if no colormap registered
         with pytest.raises(ValueError) as excinfo:
             _ = colormap_registry.show_colormaps()
-        assert "No colormaps are yet registered in the pycolorbar ColorMapRegistry." in str(excinfo.value)
+        assert "No colormaps are yet registered in the pycolorbar ColormapRegistry." in str(excinfo.value)
 
         # Register cmap
         cmap_name = "test_cmap"

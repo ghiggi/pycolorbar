@@ -189,7 +189,7 @@ class ColorbarRegistry:
         if verbose and name in self.registry:
             print(f"Warning: Overwriting existing colorbar '{name}'")
         # Validate cmap_dict
-        cbar_dict = validate_cbar_dict(cbar_dict)
+        cbar_dict = validate_cbar_dict(cbar_dict, name=name)
         # Update registry
         self.registry[name] = cbar_dict
 
@@ -223,7 +223,7 @@ class ColorbarRegistry:
         cbar_dict = self.registry[name]
         if resolve_reference and "reference" in cbar_dict:
             cbar_dict = self.registry[cbar_dict["reference"]]
-            validate_cbar_dict(cbar_dict)
+            validate_cbar_dict(cbar_dict, name=name)
         return cbar_dict
 
     def get_cmap(self, name):
@@ -286,7 +286,7 @@ class ColorbarRegistry:
         wrong_names = []
         for name in names:
             try:
-                _ = validate_cbar_dict(self.get_cbar_dict(name, resolve_reference=False))
+                _ = validate_cbar_dict(self.get_cbar_dict(name, resolve_reference=False), name=name)
             except Exception as e:
                 wrong_names.append(name)
                 print(f"{name} has an invalid configuration: {e}")

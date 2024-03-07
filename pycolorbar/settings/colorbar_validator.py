@@ -27,7 +27,7 @@
 """Implementation of pydantic validator for univariate colorbar YAML files."""
 
 import re
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 from pydantic import BaseModel, field_validator, model_validator
@@ -38,9 +38,9 @@ from pycolorbar.utils.mpl import get_mpl_colormaps, get_mpl_named_colors
 #### Colormap Settings
 
 
-class UnivariateCmapSettings(BaseModel):
-    name: Union[str, List[str]]
-    n: Optional[Union[int, List[int]]] = None
+class ColormapSettings(BaseModel):
+    name: Union[str, list[str]]
+    n: Optional[Union[int, list[int]]] = None
     bad_color: Optional[Union[str, list, tuple]] = None
     bad_alpha: Optional[float] = None
     over_color: Optional[Union[str, list, tuple]] = None
@@ -190,7 +190,7 @@ class NormalizeSettings(BaseModel):
 
 
 class CategoryNormSettings(BaseModel):
-    labels: List[str]
+    labels: list[str]
     first_value: Optional[int] = 0
 
     @field_validator("labels")
@@ -219,7 +219,7 @@ class CategoryNormSettings(BaseModel):
 
 class BoundaryNormSettings(BaseModel):
     # "ncolors" if not specified is taken from len(boundaries)
-    boundaries: List[float]
+    boundaries: list[float]
     clip: Optional[bool] = False
     extend: Optional[str] = "neither"
     ncolors: Optional[int] = None
@@ -547,9 +547,9 @@ def check_norm_settings(norm_settings):
 ####-------------------------------------------------------------------------------------------------------------------.
 
 
-class CbarSettings(BaseModel):
+class ColorbarSettings(BaseModel):
     extend: Optional[str] = "neither"
-    extendfrac: Optional[Union[float, List[float]]] = "auto"
+    extendfrac: Optional[Union[float, list[float], str]] = "auto"
     extendrect: Optional[bool] = False
     label: Optional[str] = None  # title of colorbar
 
@@ -571,6 +571,8 @@ class CbarSettings(BaseModel):
                 assert all(
                     isinstance(frac, (float, int)) and 0 <= frac <= 1 for frac in v
                 ), "Each extendfrac in the list must be a float or int between 0 and 1."
+            elif isinstance(v, str):
+                assert v == "auto", "'extendfrac' must not be a string."
             else:
                 assert isinstance(v, (float, int)) and 0 <= v <= 1, "extendfrac must be a float or int between 0 and 1."
         return v
@@ -593,42 +595,71 @@ class CbarSettings(BaseModel):
 ####-------------------------------------------------------------------------------------------------------------------.
 
 
-def _check_cbar_reference(cbar_dict):
+def _check_cbar_reference(cbar_dict, name, checked_references=None):
     import pycolorbar
 
-    if len(list(cbar_dict)) > 1:
-        raise ValueError("If 'reference' is specified, no other parameter is accepted.")
-    reference = cbar_dict["reference"]
-    if reference not in pycolorbar.colorbars.names:
-        raise ValueError(f"The {reference} colorbar is not registered in pycolorbar. Invalid reference !")
-    cbar_ref_dict = pycolorbar.colorbars.get_cbar_dict(reference)
+    keys = list(cbar_dict)
+    if len(keys) > 1:
+        if np.any(np.isin(keys, ["auxiliary", "reference"], invert=True)):
+            raise ValueError("If referencing another colorbar, only 'reference' and 'auxiliary' keys are allowed.")
+
+    # Retrieve reference
+    reference_name = cbar_dict["reference"]
+
+    # Check reference is available
+    if reference_name not in pycolorbar.colorbars.names:
+        raise ValueError(f"The '{reference_name}' colorbar is not registered in pycolorbar. Invalid reference !")
+
+    # Check for circular references
+    if checked_references is None:
+        checked_references = []
+    if reference_name in checked_references:
+        raise ValueError(f"Circular reference detected with '{reference_name}'.")
+
+    # Retrieve new dictionary
+    cbar_ref_dict = pycolorbar.colorbars.get_cbar_dict(reference_name)
+
+    # If another reference, visit recursively the references
     if "reference" in cbar_ref_dict:
-        raise ValueError(f"The {reference} colorbar is again pointing to another colorbar. This is not allowed !")
+        checked_references.append(name)
+        return _check_cbar_reference(cbar_ref_dict, name=reference_name, checked_references=checked_references)
+
+    # Return the original colorbar dictionary
+    return cbar_ref_dict
 
 
 def _check_discrete_norm_cmap_settings(cmap_settings, norm_settings):
     norm = norm_settings.get("name", "Norm")
     if norm not in ["CategoryNorm", "BoundaryNorm"]:
-        return
-    if norm == "CategoryNorm":
-        ncolors = len(norm_settings["labels"])
-    else:  # "BoundaryNorm"
-        ncolors = _get_boundary_norm_expected_ncolors(norm_settings=norm_settings)
+        return None
 
     n = cmap_settings.get("n", None)
     if n is not None:
-        # Single Colormap
+        # Retrieve expected number of colors
+        if norm == "CategoryNorm":
+            ncolors = len(norm_settings["labels"])
+        else:  # "BoundaryNorm"
+            ncolors = _get_boundary_norm_expected_ncolors(norm_settings=norm_settings)
+        # Check it match expectations
+        # - Single Colormap
         if isinstance(n, int):
-            assert n == ncolors, "'n' is optional and must be {ncolors} for the specified discrete norm."
-        # Multiple colormaps
+            assert n == ncolors, f"'n' is optional and must be {ncolors} for the specified discrete norm."
+        # - Multiple colormaps
         else:
-            assert sum(n) == ncolors, "The sum of 'n' must be {ncolors} for the specified discrete norm."
+            assert sum(n) == ncolors, f"The sum of 'n' must be {ncolors} for the specified discrete norm."
 
 
-def validate_cbar_dict(cbar_dict: dict):
+def validate_cbar_dict(cbar_dict: dict, name: str):
+    """Validate a colorbar dictionary."""
+    # Raise error for empty dictionary or wrong type
+    if not isinstance(cbar_dict, dict):
+        raise TypeError("The colorbar dictionary must be a dictionary.")
+    if len(cbar_dict) == 0:
+        raise ValueError("The colorbar dictionary can not be empty.")
+
     # Check if cbar_dict reference to another colorbar settings
     if "reference" in cbar_dict:
-        _check_cbar_reference(cbar_dict)
+        _check_cbar_reference(cbar_dict, name=name)
         return cbar_dict
 
     # Retrieve cmap, norm and cbar settings
@@ -640,19 +671,19 @@ def validate_cbar_dict(cbar_dict: dict):
     invalid_configuration = False
 
     try:
-        _ = UnivariateCmapSettings(**cmap_settings)
+        cmap_settings = ColormapSettings(**cmap_settings).dict()
     except Exception as e:
         invalid_configuration = True
         print(f"Colormap validation error: {e}")
 
     try:
-        check_norm_settings(norm_settings)
+        norm_settings = check_norm_settings(norm_settings)
     except Exception as e:
         invalid_configuration = True
         print(f"Norm validation error: {e}")
 
     try:
-        _ = CbarSettings(**cbar_settings)
+        cbar_settings = ColorbarSettings(**cbar_settings).dict()
     except Exception as e:
         invalid_configuration = True
         print(f"Colorbar validation error: {e}")
@@ -667,5 +698,8 @@ def validate_cbar_dict(cbar_dict: dict):
     if invalid_configuration:
         raise ValueError("Invalid configuration")
 
-    # Return dictionary
+    # Return the validated dictionary
+    cbar_dict["cmap"] = cmap_settings
+    cbar_dict["norm"] = norm_settings
+    cbar_dict["cbar"] = cbar_settings
     return cbar_dict

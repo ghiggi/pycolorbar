@@ -47,7 +47,7 @@ from pycolorbar.utils.yaml import list_yaml_files
 #   globals().update(_colormaps)
 
 
-class ColorMapRegistry:
+class ColormapRegistry:
     """
     A singleton class to manage colormap registrations.
 
@@ -56,8 +56,8 @@ class ColorMapRegistry:
 
     Attributes
     ----------
-    _instance : ColorMapRegistry
-        The singleton instance of the ColorMapRegistry.
+    _instance : ColormapRegistry
+        The singleton instance of the ColormapRegistry.
     registry : dict
         The dictionary holding the registered colormap names and their corresponding configuration YAML file paths.
     tmp_dir : str
@@ -70,7 +70,7 @@ class ColorMapRegistry:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            #  cls._instance = super(ColorMapRegistry, cls).__new__(cls)
+            #  cls._instance = super(ColormapRegistry, cls).__new__(cls)
             cls._instance.registry = {}
             # Create temporary path
             cls._instance.tmp_dir = None
@@ -341,7 +341,7 @@ class ColorMapRegistry:
         # Retrieve available colormaps (of a given category)
         names = self.available(category=category, include_reversed=include_reversed)
         if len(names) == 0:
-            raise ValueError("No colormaps are yet registered in the pycolorbar ColorMapRegistry.")
+            raise ValueError("No colormaps are yet registered in the pycolorbar ColormapRegistry.")
 
         # If only 1 colormap registered, plot it with the other method
         if len(names) == 1:
@@ -374,7 +374,7 @@ def register_colormaps(directory: str, name: str = None, verbose: bool = True, f
     verbose : bool, optional
         If True, the method will print a warning when overwriting existing colormaps. The default is True.
     """
-    colormaps = ColorMapRegistry.get_instance()
+    colormaps = ColormapRegistry.get_instance()
 
     # List the colormap YAML files to register
     if name is not None:
@@ -383,7 +383,7 @@ def register_colormaps(directory: str, name: str = None, verbose: bool = True, f
         # List all YAML files in the directory
         filepaths = list_yaml_files(directory)
 
-    # Add colormaps to the ColorMapRegistry
+    # Add colormaps to the ColormapRegistry
     for filepath in filepaths:
         colormaps.register(filepath, verbose=verbose, force=force)
 
@@ -409,7 +409,7 @@ def register_colormap(filepath: str, verbose: bool = True, force: bool = True):
         If the specified colormap YAML file is not available in the directory or
         if trying to register an already registered colormap and `force=False`.
     """
-    colormaps = ColorMapRegistry.get_instance()
+    colormaps = ColormapRegistry.get_instance()
     colormaps.register(filepath, verbose=verbose, force=force)
 
 
@@ -432,7 +432,7 @@ def get_cmap_dict(name):
     Exception
         If the colormap configuration is invalid or cannot be read.
     """
-    colormaps = ColorMapRegistry.get_instance()
+    colormaps = ColormapRegistry.get_instance()
     return colormaps.get_cmap_dict(name)
 
 
@@ -453,7 +453,7 @@ def get_cmap(name: str = None, lut: int = None):
     -------
     Colormap
     """
-    colormaps = ColorMapRegistry.get_instance()
+    colormaps = ColormapRegistry.get_instance()
 
     # Use default matplotlib colormap
     if name is None:
@@ -589,7 +589,7 @@ def _get_matplotlib_cmaps(category=None, include_reversed=False):
 
 
 def available_colormaps(category=None, include_reversed=False):
-    colormaps = ColorMapRegistry.get_instance()
+    colormaps = ColormapRegistry.get_instance()
     names = colormaps.available(category=category, include_reversed=include_reversed)
     names += _get_matplotlib_cmaps(category=category, include_reversed=include_reversed)
     names = sorted(np.unique(names))

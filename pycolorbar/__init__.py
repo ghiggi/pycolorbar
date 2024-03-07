@@ -37,7 +37,7 @@ from pycolorbar.settings.colorbar_registry import (  # noqa
 from pycolorbar.settings.colorbar_validator import validate_cbar_dict  # noqa
 from pycolorbar.settings.colorbar_visualization import show_colorbar, show_colorbars  # noqa
 from pycolorbar.settings.colormap_registry import (  # noqa
-    ColorMapRegistry,
+    ColormapRegistry,
     available_colormaps,
     get_cmap,
     get_cmap_dict,
@@ -47,8 +47,8 @@ from pycolorbar.settings.colormap_registry import (  # noqa
 from pycolorbar.settings.colormap_validator import validate_cmap_dict  # noqa
 from pycolorbar.settings.colormap_visualization import show_colormap, show_colormaps  # noqa
 
-# Create a module-level instance of ColorMapRegistry
-colormaps = ColorMapRegistry.get_instance()
+# Create a module-level instance of ColormapRegistry
+colormaps = ColormapRegistry.get_instance()
 
 # Create a module-level instance of ColorbarRegistry
 colorbars = ColorbarRegistry.get_instance()

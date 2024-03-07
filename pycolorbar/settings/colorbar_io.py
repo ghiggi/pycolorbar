@@ -45,7 +45,7 @@ def read_cbar_dict(filepath):
     cbar_dict = read_yaml(filepath)
     # CONFIG FILE. pycolorbar.validate_at_registration
     # CONFIG FILE. pycolorbar.validate_at_selection
-    cbar_dict = validate_cbar_dict(cbar_dict)
+    cbar_dict = validate_cbar_dict(cbar_dict, name="dummy")
     return cbar_dict
 
 
@@ -59,7 +59,7 @@ def write_cbar_dict(cbar_dict, filepath, force=False):
     # Check if file exist
     remove_if_exists(filepath, force=force)
     # Validate fields
-    cbar_dict = validate_cbar_dict(cbar_dict=cbar_dict)
+    cbar_dict = validate_cbar_dict(cbar_dict=cbar_dict, name="dummy")
     # Write file
     write_yaml(cbar_dict, filepath, sort_keys=False)
 
@@ -176,7 +176,7 @@ def write_cbar_dicts(cbar_dicts, filepath, names=None, force=False, sort_keys=Fa
     cbar_dicts = {name: tmp_conv_to_new_format(cbar_dict=cbar_dict) for name, cbar_dict in cbar_dicts.items()}
 
     # Validate colorbars
-    cbar_dicts = {name: validate_cbar_dict(cbar_dict=cbar_dict) for name, cbar_dict in cbar_dicts.items()}
+    cbar_dicts = {name: validate_cbar_dict(cbar_dict=cbar_dict, name=name) for name, cbar_dict in cbar_dicts.items()}
 
     # Write file
     write_yaml(cbar_dicts, filepath, sort_keys=sort_keys)
