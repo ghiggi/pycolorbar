@@ -48,7 +48,10 @@ from pycolorbar.utils.yaml import write_yaml
 def colormap_registry():
     registry = ColormapRegistry.get_instance()
     registry.reset()
-    return registry
+
+    yield registry
+
+    registry.reset()
 
 
 @pytest.fixture

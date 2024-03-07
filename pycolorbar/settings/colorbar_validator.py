@@ -595,7 +595,7 @@ class ColorbarSettings(BaseModel):
 ####-------------------------------------------------------------------------------------------------------------------.
 
 
-def _check_cbar_reference(cbar_dict, name, checked_references=None):
+def resolve_colorbar_reference(cbar_dict, name, checked_references=None):
     import pycolorbar
 
     keys = list(cbar_dict)
@@ -617,12 +617,12 @@ def _check_cbar_reference(cbar_dict, name, checked_references=None):
         raise ValueError(f"Circular reference detected with '{reference_name}'.")
 
     # Retrieve new dictionary
-    cbar_ref_dict = pycolorbar.colorbars.get_cbar_dict(reference_name)
+    cbar_ref_dict = pycolorbar.colorbars.get_cbar_dict(reference_name, validate=False)
 
     # If another reference, visit recursively the references
     if "reference" in cbar_ref_dict:
         checked_references.append(name)
-        return _check_cbar_reference(cbar_ref_dict, name=reference_name, checked_references=checked_references)
+        return resolve_colorbar_reference(cbar_ref_dict, name=reference_name, checked_references=checked_references)
 
     # Return the original colorbar dictionary
     return cbar_ref_dict
@@ -649,7 +649,7 @@ def _check_discrete_norm_cmap_settings(cmap_settings, norm_settings):
             assert sum(n) == ncolors, f"The sum of 'n' must be {ncolors} for the specified discrete norm."
 
 
-def validate_cbar_dict(cbar_dict: dict, name: str):
+def validate_cbar_dict(cbar_dict: dict, name: str, resolve_reference=False):
     """Validate a colorbar dictionary."""
     # Raise error for empty dictionary or wrong type
     if not isinstance(cbar_dict, dict):
@@ -659,8 +659,11 @@ def validate_cbar_dict(cbar_dict: dict, name: str):
 
     # Check if cbar_dict reference to another colorbar settings
     if "reference" in cbar_dict:
-        _check_cbar_reference(cbar_dict, name=name)
-        return cbar_dict
+        referenced_cbar_dict = resolve_colorbar_reference(cbar_dict, name=name)
+        if resolve_reference:
+            cbar_dict = referenced_cbar_dict
+        else:
+            return cbar_dict
 
     # Retrieve cmap, norm and cbar settings
     cmap_settings = cbar_dict["cmap"]

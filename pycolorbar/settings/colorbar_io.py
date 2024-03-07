@@ -41,25 +41,46 @@ def remove_if_exists(filepath, force=False):
             raise ValueError(f"The {filepath} already exists !")
 
 
-def read_cbar_dict(filepath):
+# CONFIG FILE. pycolorbar.validate_at_registration
+# CONFIG FILE. pycolorbar.validate_at_selection
+
+
+def read_cbar_dict(filepath, name=None):
+    """Read colorbar YAML file with single colorbar settings."""
     cbar_dict = read_yaml(filepath)
-    # CONFIG FILE. pycolorbar.validate_at_registration
-    # CONFIG FILE. pycolorbar.validate_at_selection
-    cbar_dict = validate_cbar_dict(cbar_dict, name="dummy")
+    filename = os.path.basename(filepath)
+    name = os.path.splitext(filename)[0]
+    cbar_dict = validate_cbar_dict(cbar_dict, name=name)
     return cbar_dict
 
 
+def is_single_colorbar_settings(dictionary):
+    """Determine if a dictionary is a single colorbar settings."""
+    if np.any(np.isin(["cmap", "norm", "cbar", "auxiliary"], list(dictionary))):
+        return True
+    else:
+        return False
+
+
 def read_cbar_dicts(filepath):
-    cbar_dicts = read_yaml(filepath)
-    # TODO: Check is nested dictionary (names does not correspond to keywords ... )
-    return cbar_dicts
+    """Read colorbar YAML file with a single or multiple colorbar settings."""
+    dictionary = read_yaml(filepath)
+    # If not single colorbar settings, returns the cbar_dicts
+    if not is_single_colorbar_settings(dictionary):
+        return dictionary
+    # Otherwise retrieve colorbar name from filename
+    filename = os.path.basename(filepath)
+    name = os.path.splitext(filename)[0]
+    # Return the setting in the cbar_dicts format
+    return {name: dictionary}
 
 
-def write_cbar_dict(cbar_dict, filepath, force=False):
+def write_cbar_dict(cbar_dict, name, filepath, force=False):
+    """Write a single colorbar settings dictionary to a YAML file.."""
     # Check if file exist
     remove_if_exists(filepath, force=force)
     # Validate fields
-    cbar_dict = validate_cbar_dict(cbar_dict=cbar_dict, name="dummy")
+    cbar_dict = validate_cbar_dict(cbar_dict=cbar_dict, name=name)
     # Write file
     write_yaml(cbar_dict, filepath, sort_keys=False)
 
@@ -162,6 +183,7 @@ def tmp_conv_to_new_format(cbar_dict):
 
 
 def write_cbar_dicts(cbar_dicts, filepath, names=None, force=False, sort_keys=False):
+    """Write a multiple colorbar settings dictionary to a YAML file."""
     if isinstance(names, str):
         names = [names]
 

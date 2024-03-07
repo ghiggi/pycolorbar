@@ -430,30 +430,28 @@ class TestValidateCbarDict:
     def test_valid_recursive_reference(self):
         """Test validate_cbar_dict with a recursive reference."""
         valid_cbar_dict = {"cmap": {"name": "viridis"}}
-        multiple_dict = {}
-        multiple_dict["original_colorbar"] = valid_cbar_dict
-        multiple_dict["first_reference"] = {"reference": "original_colorbar"}
-        multiple_dict["second_reference"] = {"reference": "first_reference"}
-        multiple_dict["third_reference"] = {"reference": "second_reference"}
-        with register_temporary_colorbars(multiple_dict, multiple=True):
+        cbar_dicts = {}
+        cbar_dicts["original_colorbar"] = valid_cbar_dict
+        cbar_dicts["first_reference"] = {"reference": "original_colorbar"}
+        cbar_dicts["second_reference"] = {"reference": "first_reference"}
+        cbar_dicts["third_reference"] = {"reference": "second_reference"}
+        with register_temporary_colorbars(cbar_dicts, multiple=True):
             cbar_dict = {"reference": "third_reference"}
             validate_cbar_dict(cbar_dict, name="dummy")
 
     def test_circular_recursive_reference(self):
         """Test validate_cbar_dict with a recursive reference."""
         valid_cbar_dict = {"cmap": {"name": "viridis"}}
-        multiple_dict = {}
-        multiple_dict["original_colorbar"] = valid_cbar_dict
-        multiple_dict["first_reference"] = {"reference": "original_colorbar"}
-        multiple_dict["second_reference"] = {"reference": "first_reference"}
-        multiple_dict["third_reference"] = {"reference": "second_reference"}
-        with register_temporary_colorbars(multiple_dict, multiple=True):
+        cbar_dicts = {}
+        cbar_dicts["original_colorbar"] = valid_cbar_dict
+        cbar_dicts["first_reference"] = {"reference": "original_colorbar"}
+        cbar_dicts["second_reference"] = {"reference": "first_reference"}
+        cbar_dicts["third_reference"] = {"reference": "second_reference"}
+        with register_temporary_colorbars(cbar_dicts, multiple=True):
             cbar_dict = {"reference": "third_reference"}
             with pytest.raises(ValueError) as excinfo:
                 validate_cbar_dict(cbar_dict, name="first_reference")
-                assert "Circular reference detected with" in str(
-                    excinfo.value
-                ), "Circular reference should raise ValueError."
+        assert "Circular reference detected with" in str(excinfo.value), "Circular reference should raise ValueError."
 
     def test_invalid_cbar_dict(self):
         """Test validate_cbar_dict with an invalid colorbar dictionary."""

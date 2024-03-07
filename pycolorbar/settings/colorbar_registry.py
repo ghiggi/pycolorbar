@@ -93,7 +93,7 @@ class ColorbarRegistry:
                 cat_names.append(name)
         return cat_names
 
-    def register(self, filepath: str, verbose: bool = True, force: bool = True):
+    def register(self, filepath: str, verbose: bool = True, force: bool = True, validate=False):
         """
         Register colorbar(s) configuration(s) defined in a YAML file.
 
@@ -108,7 +108,9 @@ class ColorbarRegistry:
             If False, it raise an error if attempting to overwrite an existing colorbar.
         verbose : bool, optional
             If True, the method will print a warning when overwriting existing colorbars. The default is True.
-
+        validate: bool, optional
+            Whether to validate the colorbar configuration file before registering.
+            The default is False.
         Notes
         -----
         If a a colorbar configuration with the same name already exists, it will be overwritten.
@@ -122,6 +124,8 @@ class ColorbarRegistry:
         cbar_dicts = read_cbar_dicts(filepath=filepath)
         # Register colorbars settings
         for name, cbar_dict in cbar_dicts.items():
+            if validate:
+                cbar_dict = validate_cbar_dict(cbar_dict=cbar_dict, name=name)
             if name in self.registry:
                 if force and verbose:
                     print(f"Warning: Overwriting existing colorbar '{name}'")
@@ -193,7 +197,7 @@ class ColorbarRegistry:
         # Update registry
         self.registry[name] = cbar_dict
 
-    def get_cbar_dict(self, name: str, resolve_reference=True):
+    def get_cbar_dict(self, name: str, resolve_reference=True, validate=True):
         """
         Retrieve the colorbar dictionary of a registered colorbar.
 
@@ -206,6 +210,9 @@ class ColorbarRegistry:
             If True, the function resolves the reference by returning the actual colorbar dictionary
             that the reference points to.
             If False, the function returns the original colorbar dictionary, including the 'reference' keyword.
+            The default is True.
+        validate: bool
+            Whether to validate the colorbar dictionary.
             The default is True.
 
         Returns
@@ -221,9 +228,8 @@ class ColorbarRegistry:
         if name not in self.registry:
             raise ValueError(f"The colorbar configuration for {name} is not registered in pycolorbar.")
         cbar_dict = self.registry[name]
-        if resolve_reference and "reference" in cbar_dict:
-            cbar_dict = self.registry[cbar_dict["reference"]]
-            validate_cbar_dict(cbar_dict, name=name)
+        if validate:
+            cbar_dict = validate_cbar_dict(cbar_dict, name=name, resolve_reference=True)
         return cbar_dict
 
     def get_cmap(self, name):
