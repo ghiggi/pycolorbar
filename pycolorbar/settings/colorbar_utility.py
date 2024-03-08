@@ -81,18 +81,19 @@ def _finalize_cmap(cmap, cmap_settings):
     # Set over and under colors
     # - If not specified, do not set ---> It will be filled with the first/last color value
     # - If 'none' --> It will be depicted in white
-    if cmap_settings.get("over_color", None):
-        cmap.set_over(color=cmap_settings.get("over_color"), alpha=cmap_settings.get("over_alpha", None))
-    if cmap_settings.get("under_color", None):
-        cmap.set_under(color=cmap_settings.get("under_color"), alpha=cmap_settings.get("under_alpha", None))
+    if cmap_settings.get("over_color"):
+        cmap.set_over(color=cmap_settings.get("over_color"), alpha=cmap_settings.get("over_alpha"))
+    if cmap_settings.get("under_color"):
+        cmap.set_under(color=cmap_settings.get("under_color"), alpha=cmap_settings.get("under_alpha"))
 
-    # Set bad color
-    # - If not 0, can cause cartopy bug
+    # Set (bad) color for masked values
+    # - If alpha not 0, can cause cartopy bug ?
     # --> https://stackoverflow.com/questions/60324497/specify-non-transparent-color-for-missing-data-in-cartopy-map
-    cmap.set_bad(
-        color=cmap_settings.get("bad_color", "none"),
-        alpha=cmap_settings.get("bad_alpha", None),
-    )
+    if cmap_settings.get("bad_color"):
+        cmap.set_bad(
+            color=cmap_settings.get("bad_color"),
+            alpha=cmap_settings.get("bad_alpha"),
+        )
     return cmap
 
 
@@ -388,6 +389,7 @@ def _create_boundary_norm_from_levels(user_plot_kwargs, default_plot_kwargs):
 def _update_default_norm_using_vmin_and_vmax(user_plot_kwargs, default_plot_kwargs):
     vmin = user_plot_kwargs.get("vmin", None)
     vmax = user_plot_kwargs.get("vmax", None)
+
     if vmin is not None or vmax is not None:
         # If default accept vmin, vmax --> update vmin/vmax attributes
         try:

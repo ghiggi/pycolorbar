@@ -95,27 +95,6 @@ class ColormapRegistry:
         """Test registration of colormap in the registry."""
         return item in self.names
 
-    def _get_subset_names(self, category):
-        names = []
-        for name in self.names:
-            cmap_dict = self.get_cmap_dict(name)
-            categories = get_auxiliary_categories(cmap_dict)
-            categories = [cat.upper() for cat in categories]
-            if category.upper() in categories:
-                names.append(name)
-        return names
-
-    def available(self, category=None, include_reversed=False):
-        """List the name of available colormaps for a specific category."""
-        if category is None:
-            names = self.names
-        else:
-            names = self._get_subset_names(category=category)
-
-        if include_reversed:
-            names = [name + "_r" for name in names] + names
-        return sorted(names)
-
     def _check_if_cmap_in_use(self, name, force, verbose):
         if name in self.registry:
             if force and verbose:
@@ -153,25 +132,6 @@ class ColormapRegistry:
         # Register
         self.registry[name] = filepath
 
-    def unregister(self, name: str):
-        """
-        Remove a colormap from the registry.
-
-        Parameters
-        ----------
-        name : str
-            The name of the colormap to remove.
-
-        Raises
-        ------
-        ValueError
-            If the colormap with the specified name is not registered.
-        """
-        if name in self.registry:
-            _ = self.registry.pop(name)
-        else:
-            raise ValueError(f"The colormap {name} is not registered in pycolorbar.")
-
     def add_cmap_dict(self, cmap_dict: dict, name: str, verbose: bool = True, force=True):
         """
         Add a colormap to the registry by providing a colormap dictionary and the colormap name.
@@ -206,6 +166,25 @@ class ColormapRegistry:
         write_cmap_dict(cmap_dict, filepath=filepath, force=True)
         # Update registry
         self.registry[name] = filepath
+
+    def unregister(self, name: str):
+        """
+        Remove a colormap from the registry.
+
+        Parameters
+        ----------
+        name : str
+            The name of the colormap to remove.
+
+        Raises
+        ------
+        ValueError
+            If the colormap with the specified name is not registered.
+        """
+        if name in self.registry:
+            _ = self.registry.pop(name)
+        else:
+            raise ValueError(f"The colormap {name} is not registered in pycolorbar.")
 
     def get_cmap_filepath(self, name: str):
         """
@@ -326,6 +305,27 @@ class ColormapRegistry:
         """Write the colormap configuration to a YAML file."""
         cmap_dict = self.get_cmap_dict(name)
         write_cmap_dict(cmap_dict=cmap_dict, filepath=filepath, force=force)
+
+    def _get_subset_names(self, category):
+        names = []
+        for name in self.names:
+            cmap_dict = self.get_cmap_dict(name)
+            categories = get_auxiliary_categories(cmap_dict)
+            categories = [cat.upper() for cat in categories]
+            if category.upper() in categories:
+                names.append(name)
+        return names
+
+    def available(self, category=None, include_reversed=False):
+        """List the name of available colormaps for a specific category."""
+        if category is None:
+            names = self.names
+        else:
+            names = self._get_subset_names(category=category)
+
+        if include_reversed:
+            names = [name + "_r" for name in names] + names
+        return sorted(names)
 
     def show_colormap(self, name):
         """Display a colormap."""

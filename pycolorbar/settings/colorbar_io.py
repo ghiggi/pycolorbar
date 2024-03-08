@@ -195,7 +195,7 @@ def write_cbar_dicts(cbar_dicts, filepath, names=None, force=False, sort_keys=Fa
         cbar_dicts = {name: cbar_dicts[name] for name in names}
 
     # Conversion colorbars
-    cbar_dicts = {name: tmp_conv_to_new_format(cbar_dict=cbar_dict) for name, cbar_dict in cbar_dicts.items()}
+    # cbar_dicts = {name: tmp_conv_to_new_format(cbar_dict=cbar_dict) for name, cbar_dict in cbar_dicts.items()}
 
     # Validate colorbars
     cbar_dicts = {name: validate_cbar_dict(cbar_dict=cbar_dict, name=name) for name, cbar_dict in cbar_dicts.items()}

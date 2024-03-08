@@ -54,6 +54,7 @@ def plot_colorbar(plot_kwargs, cbar_kwargs, ax=None, subplot_size=(6, 1)):
         fig, ax = plt.subplots(figsize=subplot_size, layout="constrained")
     # Draw figure
     _ = _draw_colorbar(plot_kwargs=plot_kwargs, cbar_kwargs=cbar_kwargs, fig=fig, ax=None, cax=ax)
+    plt.show()
 
 
 def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
@@ -91,7 +92,6 @@ def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
         ax.axis("off")
 
     fig.tight_layout()
-
     plt.show()
 
 

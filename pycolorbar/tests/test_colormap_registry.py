@@ -33,14 +33,8 @@ import pytest
 from matplotlib.colors import Colormap, ListedColormap
 from pytest_mock import mocker  # noqa
 
-from pycolorbar.settings.colormap_registry import (
-    ColormapRegistry,
-    available_colormaps,
-    get_cmap,
-    get_cmap_dict,
-    register_colormap,
-    register_colormaps,
-)
+import pycolorbar
+from pycolorbar.settings.colormap_registry import ColormapRegistry
 from pycolorbar.utils.yaml import write_yaml
 
 
@@ -332,24 +326,25 @@ class TestColormapRegistry:
 
 def test_utility_methods(colormap_registry, tmp_path):
     """Tests register_colormap, get_cmap and get_cmap_dict utility."""
+
     # Create a temporary colormap YAML file
     cmap_name = "test_cmap"
     cmap_filepath = os.path.join(tmp_path, f"{cmap_name}.yaml")
     write_yaml(TEST_CMAP_DICT, cmap_filepath)
 
     # Test registering the colormap
-    register_colormap(filepath=cmap_filepath, verbose=False, force=True)
+    pycolorbar.register_colormap(filepath=cmap_filepath, verbose=False, force=True)
 
     # Verify the colormap is registered
-    assert cmap_name in colormap_registry.names
-    assert cmap_name in colormap_registry
+    assert cmap_name in pycolorbar.colormaps.names
+    assert cmap_name in pycolorbar.colormaps
 
     # Test retrieving the colormap with get_cmap
-    cmap = get_cmap(cmap_name)
+    cmap = pycolorbar.get_cmap(cmap_name)
     assert isinstance(cmap, (ListedColormap))
 
     # Test retrieving the colormap dictionary with get_cmap_dict
-    cmap_dict = get_cmap_dict(cmap_name)
+    cmap_dict = pycolorbar.get_cmap_dict(cmap_name)
     assert isinstance(cmap_dict, dict)
 
 
@@ -365,38 +360,38 @@ def test_register_colormaps(colormap_registry, tmp_path):
     write_yaml(TEST_CMAP_DICT, cmap_filepath1)
 
     # Test registering all colormaps in a directory
-    register_colormaps(directory=tmp_path)
-    assert cmap_name in colormap_registry
-    assert cmap_name1 in colormap_registry
+    pycolorbar.register_colormaps(directory=tmp_path)
+    assert cmap_name in pycolorbar.colormaps
+    assert cmap_name1 in pycolorbar.colormaps
 
     # Clear the registry
-    colormap_registry.reset()
-    assert cmap_name not in colormap_registry
+    pycolorbar.colormaps.reset()
+    assert cmap_name not in pycolorbar.colormaps
 
     # Test registering only a single colormaps in a directory
-    register_colormaps(directory=tmp_path, name=cmap_name)
-    assert cmap_name in colormap_registry
+    pycolorbar.register_colormaps(directory=tmp_path, name=cmap_name)
+    assert cmap_name in pycolorbar.colormaps
 
 
 class TestGetCmap:
     def test_input_colormap(self):
         """Test providing a matplotlib colormap returns the object itself."""
         cmap = plt.get_cmap("Spectral")
-        assert get_cmap(cmap) == cmap
+        assert pycolorbar.get_cmap(cmap) == cmap
 
     def test_default_mpl_cmap(self):
         """Test that None returns the default matplotlib colormap."""
-        cmap = get_cmap(name=None)
+        cmap = pycolorbar.get_cmap(name=None)
         assert isinstance(cmap, Colormap)
 
     def test_invalid_name(self):
         """Test the retrieval of an undefined colormap."""
         with pytest.raises(ValueError):
-            get_cmap(name="inexisting_cmap_name")
+            pycolorbar.get_cmap(name="inexisting_cmap_name")
 
     def test_mpl_cmap_name(self):
         """Test the retrieval of a matplotlib colormap."""
-        cmap = get_cmap(name="Spectral")
+        cmap = pycolorbar.get_cmap(name="Spectral")
         assert isinstance(cmap, Colormap)
 
     def test_pycolorbar_cmap_name(self, colormap_registry, tmp_path):
@@ -406,12 +401,12 @@ class TestGetCmap:
         cmap_filepath = os.path.join(tmp_path, f"{cmap_name}.yaml")
         write_yaml(TEST_CMAP_DICT, cmap_filepath)
         # Register the colormap
-        register_colormap(filepath=cmap_filepath, verbose=False, force=True)
+        pycolorbar.register_colormap(filepath=cmap_filepath, verbose=False, force=True)
         # Retrieve colormap
-        cmap = get_cmap(name=cmap_name)
+        cmap = pycolorbar.get_cmap(name=cmap_name)
         assert isinstance(cmap, Colormap)
         # Retrieve reversed colormap
-        reversed_cmap = get_cmap(name=f"{cmap_name}_r")
+        reversed_cmap = pycolorbar.get_cmap(name=f"{cmap_name}_r")
         assert isinstance(reversed_cmap, Colormap)
         # assert cmap.reversed()(0) == reversed_cmap(0)  # TODO BUG
 
@@ -419,20 +414,20 @@ class TestGetCmap:
 def test_available_colormaps(colormap_registry, tmp_path):
     """Test available_colormaps returns matplotlib and pycolorbar colormaps."""
     # Assert that matplotlib colormaps are always returned
-    names = available_colormaps()
+    names = pycolorbar.available_colormaps()
     assert len(names) > 1  # matplotlib colormaps
 
     # Now register a pycolorbar cmap and test is inside  the list
     cmap_name = "test_cmap"
     cmap_filepath = os.path.join(tmp_path, f"{cmap_name}.yaml")
     write_yaml(TEST_CMAP_DICT, cmap_filepath)
-    register_colormap(filepath=cmap_filepath)
+    pycolorbar.register_colormap(filepath=cmap_filepath)
 
-    names = available_colormaps()
+    names = pycolorbar.available_colormaps()
     assert cmap_name in names
 
     # Test empty list for inexisting category
-    names = available_colormaps(category="inexistent")
+    names = pycolorbar.available_colormaps(category="inexistent")
     assert names == []
 
 
@@ -440,5 +435,5 @@ def test_available_colormaps(colormap_registry, tmp_path):
 @pytest.mark.parametrize("include_reversed", [True, False])
 def test_available_colormaps_by_category(category, include_reversed):
     """Test available_colormaps returns the colormaps names of the specified category."""
-    names = available_colormaps(category=category, include_reversed=include_reversed)
+    names = pycolorbar.available_colormaps(category=category, include_reversed=include_reversed)
     assert len(names) > 1  # matplotlib colormaps
