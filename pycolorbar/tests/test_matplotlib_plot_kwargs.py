@@ -167,8 +167,8 @@ class TestGetCmapFromCbarDict:
 )
 def test_get_norm(norm_name, expected_type, norm_settings):
     """Test that get_norm correctly creates normalization instances."""
-    cbar_dict = {"norm": {"name": norm_name, **norm_settings}}
-    norm_instance = get_norm(cbar_dict)
+    norm_settings["name"] = norm_name
+    norm_instance = get_norm(norm_settings)
     assert isinstance(norm_instance, expected_type), f"Expected instance of {expected_type}, got {type(norm_instance)}"
 
 

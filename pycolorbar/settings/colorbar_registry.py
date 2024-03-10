@@ -199,7 +199,7 @@ class ColorbarRegistry:
         """
         if name not in self.registry:
             raise ValueError(f"The colorbar configuration for {name} is not registered in pycolorbar.")
-        cbar_dict = self.registry[name]
+        cbar_dict = self.registry[name].copy()
         if validate:
             cbar_dict = validate_cbar_dict(cbar_dict, name=name, resolve_reference=resolve_reference)
         return cbar_dict

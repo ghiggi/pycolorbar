@@ -231,22 +231,28 @@ class TestNormSettings:
         "norm_settings",
         [
             # Testing Normalize settings
+            {"name": "Norm"},
             {"name": "Norm", "vmin": 0, "vmax": 1, "clip": False},
             # Testing NoNorm settings
+            {"name": "NoNorm"},
             {"name": "NoNorm", "vmin": None, "vmax": None, "clip": True},
             # Testing BoundaryNorm settings with valid boundaries and extend options
+            {"name": "BoundaryNorm", "boundaries": [0, 0.5, 1]},
             {"name": "BoundaryNorm", "boundaries": [0, 0.5, 1], "ncolors": 2, "clip": False, "extend": "neither"},
             {"name": "BoundaryNorm", "boundaries": [0, 0.5, 1], "ncolors": 4, "clip": False, "extend": "both"},
             {"name": "BoundaryNorm", "boundaries": [0, 0.5, 1], "ncolors": 3, "clip": False, "extend": "min"},
             {"name": "BoundaryNorm", "boundaries": [0, 0.5, 1], "ncolors": 3, "clip": False, "extend": "max"},
             # Testing TwoSlopeNorm settings
-            {"name": "TwoSlopeNorm", "vcenter": 0.5, "vmin": 0, "vmax": 1},
             {"name": "TwoSlopeNorm", "vcenter": 0.5},
+            {"name": "TwoSlopeNorm", "vcenter": 0.5, "vmin": 0, "vmax": 1},
             # Testing CenteredNorm settings
+            {"name": "CenteredNorm"},
             {"name": "CenteredNorm", "vcenter": 0, "halfrange": 1, "clip": False},
             # Testing LogNorm settings
+            {"name": "LogNorm"},
             {"name": "LogNorm", "vmin": 1, "vmax": 100, "clip": False},
             # Testing SymLogNorm settings
+            {"name": "SymLogNorm", "linthresh": 0.1},
             {
                 "name": "SymLogNorm",
                 "linthresh": 0.1,
@@ -257,10 +263,13 @@ class TestNormSettings:
                 "clip": False,
             },
             # Testing PowerNorm settings
+            {"name": "PowerNorm", "gamma": 0.5},
             {"name": "PowerNorm", "gamma": 0.5, "vmin": 0, "vmax": 1, "clip": False},
             # Testing AsinhNorm settings
+            {"name": "AsinhNorm"},
             {"name": "AsinhNorm", "linear_width": 1, "vmin": -10, "vmax": 10, "clip": False},
             # Testing CategoryNorm settings with a valid list of labels
+            {"name": "CategoryNorm", "labels": ["low", "medium", "high"]},
             {"name": "CategoryNorm", "labels": ["low", "medium", "high"], "first_value": 0},
         ],
     )
@@ -329,6 +338,12 @@ class TestNormSettings:
         norm_settings = {"name": norm_name, **missing_param}
         with pytest.raises(ValueError):
             check_norm_settings(norm_settings)
+
+    def test_set_default_boundary_norm_ncolors(self):
+        """Test that the default values are set correctly."""
+        norm_settings = {"name": "BoundaryNorm", "boundaries": [0, 0.5, 1]}
+        norm_settings = check_norm_settings(norm_settings)
+        assert norm_settings["ncolors"] == 2
 
 
 class TestColorbarSettings:

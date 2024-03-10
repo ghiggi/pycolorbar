@@ -243,33 +243,35 @@ class BoundaryNormSettings(BaseModel):
             _check_extend(v)
         return v
 
-    @field_validator("ncolors")
-    def validate_ncolors(cls, v, values):
+    @model_validator(mode="before")
+    def validate_ncolors(self):
         """Validate `ncolors` for BoundaryNorm."""
-        if v is not None:
-            assert isinstance(v, int), "'ncolors' must be an integer for 'BoundaryNorm'."
-            assert v >= 2, "'ncolors' must be equal or larger than 2."
+        validated_settings = self
+        ncolors = validated_settings.get("ncolors")
+        extend = validated_settings.get("extend")
+        if ncolors is not None:
+            assert isinstance(ncolors, int), "'ncolors' must be an integer for 'BoundaryNorm'."
+            assert ncolors >= 2, "'ncolors' must be equal or larger than 2."
             # - If extend is "neither" (default) there must be equal or larger than len(boundaries) - 1 colors.
             # - If extend is "min" or "max" ncolors must be equal or larger than len(boundaries)
             # - If extend is "both"  ncolors must be equal or larger than len(boundaries) + 1
-            validated_settings = values.data
-            extend = validated_settings.get("extend")
             required_ncolors = _get_boundary_norm_expected_ncolors(norm_settings=validated_settings)
             if extend == "neither":
                 assert (
-                    v >= required_ncolors
+                    ncolors >= required_ncolors
                 ), f"'ncolors' must be equal or larger than len('boundaries') - 1 ({required_ncolors})."
             elif extend in ["min", "max"]:
                 assert (
-                    v >= required_ncolors
+                    ncolors >= required_ncolors
                 ), f"'ncolors' must be equal or larger than len('boundaries') ({required_ncolors})."
             elif extend == "both":
                 assert (
-                    v >= required_ncolors
+                    ncolors >= required_ncolors
                 ), f"'ncolors' must be equal or larger than len('boundaries') + 1 ({required_ncolors})."
         else:
-            v = _get_boundary_norm_expected_ncolors(norm_settings=validated_settings)
-        return v
+            ncolors = _get_boundary_norm_expected_ncolors(norm_settings=validated_settings)
+        self.update({"ncolors": ncolors})
+        return self
 
     @model_validator(mode="before")
     def check_valid_args(cls, values):
@@ -539,7 +541,7 @@ def check_norm_settings(norm_settings):
     validator = norm_settings_mapping[name]
     # Validate settings
     norm_settings = validator(**norm_settings).model_dump()
-    # Return validated settings
+    # Return validated settings (adding back the name !)
     norm_settings["name"] = name
     return norm_settings
 
@@ -667,7 +669,8 @@ def validate_cbar_dict(cbar_dict: dict, name: str, resolve_reference=False):
         raise TypeError("The colorbar dictionary must be a dictionary.")
     if len(cbar_dict) == 0:
         raise ValueError("The colorbar dictionary can not be empty.")
-
+    # Copy the dictionary before modifying it
+    cbar_dict = cbar_dict.copy()
     # Check if cbar_dict reference to another colorbar settings
     if "reference" in cbar_dict:
         referenced_cbar_dict = resolve_colorbar_reference(cbar_dict, name=name)

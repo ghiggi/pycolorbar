@@ -39,13 +39,6 @@ from pycolorbar.settings.colorbar_io import (
 )
 
 
-def check_validated_dictionary_superset(validated_dict, original_dict):
-    """Check the validated_dict is a superset of the original_dict."""
-    for cbar_name, cbar_dict in original_dict.items():
-        for key, values in cbar_dict.items():
-            assert validated_dict[cbar_name][key] == values
-
-
 class TestColorbarIO:
     @pytest.fixture
     def test_cbar_dict(self):
@@ -123,4 +116,7 @@ class TestColorbarIO:
         assert "whatever_name" not in validated_cbar_dicts
 
         # Assert the read validated colorbar dictionary contains the key-value of the written one
-        check_validated_dictionary_superset(validated_dict=validated_cbar_dicts, original_dict=test_cbar_dicts)
+        for cbar_name, cbar_dict in test_cbar_dicts.items():
+            for sub_key, sub_dict in cbar_dict.items():  # cmap, norm, cbar
+                for key, values in sub_dict.items():
+                    assert validated_cbar_dicts[cbar_name][sub_key][key] == values

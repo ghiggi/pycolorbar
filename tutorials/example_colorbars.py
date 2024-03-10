@@ -29,10 +29,11 @@ import os
 from matplotlib.colors import Normalize
 
 import pycolorbar
+from pycolorbar.utils.yaml import read_yaml
 
 # Register colormaps !
-dst_dir = "/home/ghiggi/Python_Packages/pycolorbar/pycolorbar/etc/colormaps"
-pycolorbar.register_colormaps(dst_dir)
+cmap_dst_dir = "/home/ghiggi/Python_Packages/pycolorbar/pycolorbar/etc/colormaps"
+pycolorbar.register_colormaps(cmap_dst_dir)
 
 
 dst_dir = "/home/ghiggi/Python_Packages/pycolorbar/pycolorbar/etc/colorbars"
@@ -85,7 +86,19 @@ pycolorbar.colorbars.get_referenced_settings()
 
 # --------------------------------------------------------------------------------
 #### Retrieve cbar_dict
-pycolorbar.get_cbar_dict("precipRate")
+
+cbar_dicts = read_yaml(os.path.join(dst_dir, "example_colorbar_configurations.yaml"))
+
+cbar_dict = cbar_dicts["discrete_colorbar"]
+cbar_dict = cbar_dicts["probability"]
+
+cbar_dict = pycolorbar.get_cbar_dict("discrete_colorbar")
+cbar_dict = pycolorbar.get_cbar_dict("probability")
+
+pycolorbar.colorbars.validate("probability")
+pycolorbar.colorbars.validate()
+
+
 pycolorbar.get_cbar_dict("precipRate", resolve_reference=False)
 pycolorbar.get_cbar_dict("precipRate", resolve_reference=True)
 
@@ -145,6 +158,10 @@ plot_kwargs, cbar_kwargs = pycolorbar.get_plot_kwargs(name="whatever_name", user
 
 # --------------------------------------------------------------------------------
 #### Colorbar Visualization
+for name in pycolorbar.colorbars.names:
+    pycolorbar.show_colorbar(name)
+pycolorbar.show_colorbar("Brightness_Temperature")
+
 pycolorbar.show_colorbar("Brightness_Temperature")
 pycolorbar.show_colorbar("precipRateNearSurface")
 pycolorbar.show_colorbar("dfrFinal")

@@ -140,17 +140,14 @@ def get_norm_function(name):
     return norm_functions[name]
 
 
-def get_norm(cbar_dict):
+def get_norm(norm_settings):
     """Define the norm instance from a validated cbar_dict."""
-    norm_settings = cbar_dict["norm"]
-    norm_name = norm_settings.get("name", "Norm")
+    norm_settings = norm_settings.copy()
     # Retrieve norm function
+    norm_name = norm_settings.pop("name", "Norm")
     norm_func = get_norm_function(norm_name)
-    # Retrieve norm arguments
-    norm_kwargs = norm_settings.copy()
-    _ = norm_kwargs.pop("name", None)
     # Define norm
-    norm = norm_func(**norm_kwargs)
+    norm = norm_func(**norm_settings)
     return norm
 
 
@@ -184,7 +181,7 @@ def get_plot_cbar_kwargs(cbar_dict):
     # Define cmap, norm, ticks and cbar appearance based on colorbar dictionary settings
     plot_kwargs["cmap"] = get_cmap(cbar_dict)
     if "norm" in cbar_dict:
-        norm = get_norm(cbar_dict)
+        norm = get_norm(cbar_dict["norm"])
         plot_kwargs["norm"] = norm
         ticks, ticklabels = _get_ticks_settings(cbar_dict, norm=norm)
         cbar_kwargs["ticks"] = ticks

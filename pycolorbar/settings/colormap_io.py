@@ -85,7 +85,7 @@ def write_cmap_dict(cmap_dict, filepath, force=False, encode=True, validate=True
     By default, the colormap YAML file are validated before writing it.
     It assumes that the specified colors are in the internal representation (decoded).
     """
-    # Make a copy of the dictionary !
+    # Make a copy of the dictionary (before validation and encoding) !
     cmap_dict = cmap_dict.copy()
     # Check required keys
     _check_presence_required_keys(cmap_dict)
