@@ -90,11 +90,16 @@ def show_colormap(cmap):
 
 
 def show_colormaps(category=None, include_reversed=False, cols=None, subplot_size=None):
-    from pycolorbar import available_colormaps, get_cmap
+    import pycolorbar
+
+    # Retrieve list of colormaps names
+    if category is not None and category == "pycolorbar":
+        names = pycolorbar.colormaps.available(include_reversed=include_reversed)
+    else:  # include also matplotlib
+        names = pycolorbar.available_colormaps(category=category, include_reversed=include_reversed)
 
     # Retrieve colormaps to display
-    names = available_colormaps(category=category, include_reversed=include_reversed)
-    cmaps = [get_cmap(name) for name in sorted(names)]
+    cmaps = [pycolorbar.get_cmap(name) for name in sorted(names)]
 
     # Display colormaps
     if len(cmaps) > 0:

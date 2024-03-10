@@ -30,28 +30,8 @@ import os
 import numpy as np
 
 from pycolorbar.settings.colorbar_validator import validate_cbar_dict
+from pycolorbar.utils.directories import remove_file_if_exists
 from pycolorbar.utils.yaml import read_yaml, write_yaml
-
-
-def remove_if_exists(filepath, force=False):
-    if os.path.exists(filepath):
-        if force:
-            os.remove(filepath)
-        else:
-            raise ValueError(f"The {filepath} already exists !")
-
-
-# CONFIG FILE. pycolorbar.validate_at_registration
-# CONFIG FILE. pycolorbar.validate_at_selection
-
-
-def read_cbar_dict(filepath, name=None):
-    """Read colorbar YAML file with single colorbar settings."""
-    cbar_dict = read_yaml(filepath)
-    filename = os.path.basename(filepath)
-    name = os.path.splitext(filename)[0]
-    cbar_dict = validate_cbar_dict(cbar_dict, name=name)
-    return cbar_dict
 
 
 def is_single_colorbar_settings(dictionary):
@@ -62,8 +42,27 @@ def is_single_colorbar_settings(dictionary):
         return False
 
 
+def read_cbar_dict(filepath, name=None, validate=False):
+    """Read colorbar YAML file with single colorbar settings.
+
+    This is an helper function and is not used by the ColorbarRegistry.
+
+    By default, the colorbar YAML file are not validated at read-time.
+    Set `validate=True` to validate the dictionary at read-time.
+    """
+    cbar_dict = read_yaml(filepath)
+    filename = os.path.basename(filepath)
+    name = os.path.splitext(filename)[0]
+    if validate:
+        cbar_dict = validate_cbar_dict(cbar_dict, name=name)
+    return cbar_dict
+
+
 def read_cbar_dicts(filepath):
-    """Read colorbar YAML file with a single or multiple colorbar settings."""
+    """Read colorbar YAML file with a single or multiple colorbar settings.
+
+    By default, the colorbar YAML file are not validated at read time !
+    """
     dictionary = read_yaml(filepath)
     # If not single colorbar settings, returns the cbar_dicts
     if not is_single_colorbar_settings(dictionary):
@@ -75,130 +74,40 @@ def read_cbar_dicts(filepath):
     return {name: dictionary}
 
 
-def write_cbar_dict(cbar_dict, name, filepath, force=False):
-    """Write a single colorbar settings dictionary to a YAML file.."""
+def write_cbar_dict(cbar_dict, name, filepath, force=False, validate=True):
+    """Write a single colorbar settings dictionary to a YAML file.
+
+    By default, the colorbar YAML file are validated before writing to disk !
+    """
     # Check if file exist
-    remove_if_exists(filepath, force=force)
+    remove_file_if_exists(filepath, force=force)
     # Validate fields
-    cbar_dict = validate_cbar_dict(cbar_dict=cbar_dict, name=name)
+    if validate:
+        cbar_dict = validate_cbar_dict(cbar_dict=cbar_dict, name=name)
     # Write file
     write_yaml(cbar_dict, filepath, sort_keys=False)
 
 
-def tmp_conv_to_new_format(cbar_dict):
-    # cmap
-    cmap_keys = [
-        "cmap",
-        "cmap_n",
-        "bad_alpha",
-        "bad_color",
-        "over_color",
-        "under_color",
-    ]
+def write_cbar_dicts(cbar_dicts, filepath, names=None, force=False, sort_keys=False, validate=True):
+    """Write a multiple colorbar settings dictionary to a YAML file.
 
-    cmap_keys_map = {
-        "cmap": "name",
-        "cmap_n": "n",
-    }
-
-    norm_keys = [
-        "norm",
-        "vmin",
-        "vmax",
-        "linthresh",
-        "linscale",
-        "base",
-        "levels",
-        "labels",
-    ]
-
-    norm_keys_map = {
-        "norm": "name",
-        "levels": "boundaries",
-    }
-
-    cbar_keys = [
-        "extend",
-        "extendfrac",
-        "extendrect",
-        "label",
-    ]
-
-    new_cbar_dict = {}
-
-    # Reference
-    if "reference" in cbar_dict:
-        new_cbar_dict["reference"] = cbar_dict["reference"]
-        return new_cbar_dict
-
-    # Cmap
-    if np.any(np.isin(cmap_keys, list(cbar_dict))):
-        new_cbar_dict["cmap"] = {}
-        for key in cmap_keys:
-            if key in cbar_dict:
-                value = cbar_dict[key]
-                if key in cmap_keys_map:
-                    new_key = cmap_keys_map[key]
-                else:
-                    new_key = key
-                new_cbar_dict["cmap"][new_key] = value
-
-    # Norm
-    if np.any(np.isin(norm_keys, list(cbar_dict))):
-        new_cbar_dict["norm"] = {}
-        if "norm" not in cbar_dict:
-            if "labels" in cbar_dict:
-                new_cbar_dict["norm"]["name"] = "CategoryNorm"
-            elif "levels" in cbar_dict:
-                new_cbar_dict["norm"]["name"] = "BoundaryNorm"
-            else:
-                new_cbar_dict["norm"]["name"] = "Norm"
-
-        for key in norm_keys:
-            if key in cbar_dict:
-                value = cbar_dict[key]
-                if key in norm_keys_map:
-                    new_key = norm_keys_map[key]
-                else:
-                    new_key = key
-                new_cbar_dict["norm"][new_key] = value
-
-    # Cbar
-    if np.any(np.isin(cbar_keys, list(cbar_dict))):
-        new_cbar_dict["cbar"] = {}
-        for key in cbar_keys:
-            if key in cbar_dict:
-                value = cbar_dict[key]
-                new_cbar_dict["cbar"][key] = value
-    # Auxiliary
-    aux_keys = ["citation", "citation_url", "author", "author_url", "comment", "category"]
-    if np.any(np.isin(aux_keys, list(cbar_dict))):
-        new_cbar_dict["auxiliary"] = {}
-        for key in aux_keys:
-            if key in cbar_dict:
-                value = cbar_dict[key]
-                new_cbar_dict["auxiliary"][key] = value
-
-    return new_cbar_dict
-
-
-def write_cbar_dicts(cbar_dicts, filepath, names=None, force=False, sort_keys=False):
-    """Write a multiple colorbar settings dictionary to a YAML file."""
+    By default, the colorbar YAML file are validated before writing to disk !
+    """
     if isinstance(names, str):
         names = [names]
 
     # Check if file exist
-    remove_if_exists(filepath, force=force)
+    remove_file_if_exists(filepath, force=force)
 
     # Select colorbars
     if names is not None:
         cbar_dicts = {name: cbar_dicts[name] for name in names}
 
-    # Conversion colorbars
-    # cbar_dicts = {name: tmp_conv_to_new_format(cbar_dict=cbar_dict) for name, cbar_dict in cbar_dicts.items()}
-
     # Validate colorbars
-    cbar_dicts = {name: validate_cbar_dict(cbar_dict=cbar_dict, name=name) for name, cbar_dict in cbar_dicts.items()}
+    if validate:
+        cbar_dicts = {
+            name: validate_cbar_dict(cbar_dict=cbar_dict, name=name) for name, cbar_dict in cbar_dicts.items()
+        }
 
     # Write file
     write_yaml(cbar_dicts, filepath, sort_keys=sort_keys)

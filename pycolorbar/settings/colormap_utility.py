@@ -29,36 +29,50 @@
 # import numpy as np
 # import matplotlib as mpl
 # import matplotlib.pyplot as plt
+import matplotlib.colors
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap
+
+IMPLEMENTED_COLOR_SPACE = ["name", "rgb", "rgba", "hex", "hsv"]
 
 
 def convert_colors(colors, color_space):
     #  TODO: IMPLEMENT !
-    pass
+    if color_space.lower() not in IMPLEMENTED_COLOR_SPACE:
+        raise NotImplementedError(f"Color space '{color_space}' not yet implemented.")
+    if color_space == "hsv":
+        colors = matplotlib.colors.hsv_to_rgb(colors)
+    # elif
+    #   IMPLEMENT
+    else:  # rgb, rgba, name, hex
+        colors = matplotlib.colors.to_rgba_array(colors)
     return colors
 
 
 def create_cmap(cmap_dict, name):
-    cmap_type = cmap_dict["type"]
+    cmap_type = cmap_dict["colormap_type"]
     color_space = cmap_dict["color_space"]
 
-    colors = cmap_dict.get("colors", None)
+    n = cmap_dict.get("n", None)
+    colors = cmap_dict.get("color_palette", None)
     segmentdata = cmap_dict.get("segmentdata", None)
+    gamma = cmap_dict.get("gamma", 1.0)
 
     # Convert colors to interpolation space
     # - if ListedColormap --> RGBA
     # - if LinearSegmentedColormap --> interpolation_space (default RGBA)
-    # --> TODO: or create ColorMap Classes interpolating in the <interpolation_space>
-    colors = convert_colors(colors, color_space)
+    # --> TODO: or create Colormap Classes interpolating in the <interpolation_space>
+    if colors is not None:
+        colors = convert_colors(colors, color_space)
 
     # Create Colormap
     if cmap_type == "ListedColormap":
-        n = cmap_dict.get("n", None)
         return ListedColormap(colors, name=name, N=n)
     else:
-        n = cmap_dict.get("n", 256)
-        gamma = cmap_dict.get("gamma", 1.0)
-        if "segmentdata" not in cmap_dict:
+        # LinearSegmentedColormap
+        if segmentdata is None:
+            if n is None:
+                n = 256  # matplotlib default
+
             # Retrieve n colors in 'interpolation_space' (when type=LinearSegmentedColormap)
             # TODO
 
@@ -66,4 +80,4 @@ def create_cmap(cmap_dict, name):
             return LinearSegmentedColormap.from_list(name=name, colors=colors, N=n, gamma=gamma)
         else:
             segmentdata = cmap_dict["segmentdata"]
-            return LinearSegmentedColormap(name=name, segmentdata=segmentdata, N=n, gamma=gamma)
+            return LinearSegmentedColormap(name=name, segmentdata=segmentdata, gamma=gamma)

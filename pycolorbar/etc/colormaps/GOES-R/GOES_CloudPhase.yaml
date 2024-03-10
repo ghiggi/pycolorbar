@@ -1,6 +1,6 @@
-type: ListedColormap
+colormap_type: ListedColormap
 color_space: name
-colors:
+color_palette:
 - lightblue
 - darkblue
 - lightgreen

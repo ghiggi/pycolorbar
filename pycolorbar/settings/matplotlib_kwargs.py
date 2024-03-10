@@ -42,38 +42,36 @@ from matplotlib.colors import (
 )
 
 import pycolorbar
+from pycolorbar.settings.colormap_validator import is_monotonically_increasing
+
+
+def _create_combined_cmap(names, n=None, new_n=None):
+    """Combine multiple colormaps together."""
+    # Check for defaults
+    if n is None:
+        n = [None] * len(names)  # 256 for LinearSegmentedColormap, the original number of colors for ListedColormap
+    if new_n is None:  # TODO: define parameter in YAML file
+        new_n = [256] * len(names)
+    # First resample colormaps if asked
+    list_cmaps = [pycolorbar.get_cmap(cmap_name, lut=lut) for cmap_name, lut in zip(names, n)]
+    # Then retrieve a selection of colors from each colormap (256 from each currently !)
+    cmap_colors = np.vstack([cmap(np.linspace(0, 1, lut)) for cmap, lut in zip(list_cmaps, new_n)])
+    # Define the new colormap
+    new_name = "_".join(names)
+    cmap = LinearSegmentedColormap.from_list(name=new_name, colors=cmap_colors)
+    return cmap
 
 
 def _get_cmap(cmap_settings, norm_settings):
-    """Retrieve the colormap for a given colorbar setting."""
-
+    """Retrieve the colormap for a given validated colorbar setting."""
     name = cmap_settings.get("name")
-
-    # Define number of colors required
-    n = cmap_settings.get("n", None)
-    if "labels" in cmap_settings:
-        n = len(cmap_settings["labels"])
-    if "boundaries" in norm_settings:
-        n = len(norm_settings["boundaries"]) - 1
-
+    n = cmap_settings.get("n")
     # Define colormap
     if isinstance(name, str):
         cmap = pycolorbar.get_cmap(name=name, lut=n)
-        return cmap
-    else:  # Colormap combination
-        # - Define default arguments
-        if n is None:
-            n = [None] * len(name)
-
-        new_n = [256] * len(
-            name
-        )  # this could become a YAML parameter (divisible by len(names) (only for stacked cmaps))
-        new_name = "_".join(name)
-        # - Define combined colormap
-        list_cmaps = [pycolorbar.get_cmap(cmap_name, lut=lut) for cmap_name, lut in zip(name, n)]
-        cmap_colors = np.vstack([cmap(np.linspace(0, 1, lut)) for cmap, lut in zip(list_cmaps, new_n)])
-        cmap = LinearSegmentedColormap.from_list(name=new_name, colors=cmap_colors)
-        return cmap
+    else:
+        cmap = _create_combined_cmap(names=name, n=n)
+    return cmap
 
 
 def _finalize_cmap(cmap, cmap_settings):
@@ -98,7 +96,9 @@ def _finalize_cmap(cmap, cmap_settings):
 
 
 def get_cmap(cbar_dict):
-    """Retrieve the colormap from a colorbar configuration dictionary."""
+    """Retrieve the colormap from a validated colorbar configuration dictionary."""
+    if "cmap" not in cbar_dict:
+        return None
     # Retrieve settings
     cmap_settings = cbar_dict["cmap"]
     norm_settings = cbar_dict.get("norm", {})
@@ -125,7 +125,6 @@ def create_category_norm(labels, first_value=0):
 
 def get_norm_function(name):
     """Retrieve the norm function."""
-    # Define norm function mapping
     norm_functions = {
         "Norm": Normalize,
         "NoNorm": NoNorm,
@@ -142,7 +141,7 @@ def get_norm_function(name):
 
 
 def get_norm(cbar_dict):
-    """Define the norm instance."""
+    """Define the norm instance from a validated cbar_dict."""
     norm_settings = cbar_dict["norm"]
     norm_name = norm_settings.get("name", "Norm")
     # Retrieve norm function
@@ -150,11 +149,6 @@ def get_norm(cbar_dict):
     # Retrieve norm arguments
     norm_kwargs = norm_settings.copy()
     _ = norm_kwargs.pop("name", None)
-    # Set default values for BoundaryNorm
-    if norm_name == "BoundaryNorm" and norm_kwargs.get("ncolors", None) is None:
-        boundaries = norm_settings["boundaries"]
-        ncolors = len(boundaries) - 1
-        norm_kwargs["ncolors"] = ncolors
     # Define norm
     norm = norm_func(**norm_kwargs)
     return norm
@@ -167,17 +161,18 @@ def get_norm(cbar_dict):
 # TODO:
 # Check vmin and vmax are None if using BoundaryNorm
 # Check vmin and vmax are None when providing a Norm
-
 # --> Allow labels also for BoundaryNorm ? But remove from kwargs when norm generation ?
-
 # --> Adapt cmap for 'labels' (define n)
+
+# TODO: rename matplotlib_plot_cbar_kwargs
 
 
 def get_plot_cbar_kwargs(cbar_dict):
     # ------------------------------------------------------------------------.
     # Set default colormap
-    if cbar_dict == {}:
-        cbar_dict["cmap"] = {"name": "jet"}
+    # if "cmap" not in  cbar_dict:
+    #     cbar_dict["cmap"] = {"name": "jet"} --> leave to xarray/matplotlib/... defaults !
+    if "norm" not in cbar_dict:
         cbar_dict["norm"] = {"name": "Norm"}
 
     # ------------------------------------------------------------------------.
@@ -187,15 +182,14 @@ def get_plot_cbar_kwargs(cbar_dict):
 
     # ------------------------------------------------------------------------.
     # Define cmap, norm, ticks and cbar appearance based on colorbar dictionary settings
-    if "cmap" in cbar_dict:
-        plot_kwargs["cmap"] = get_cmap(cbar_dict)
+    plot_kwargs["cmap"] = get_cmap(cbar_dict)
     if "norm" in cbar_dict:
         norm = get_norm(cbar_dict)
-        ticks, ticklabels = _get_ticks_settings(cbar_dict, norm=norm)
         plot_kwargs["norm"] = norm
-        # - TODO: Add only if not None ?
+        ticks, ticklabels = _get_ticks_settings(cbar_dict, norm=norm)
         cbar_kwargs["ticks"] = ticks
-        cbar_kwargs["ticklabels"] = ticklabels
+        if ticklabels is not None:  # Temporary condition because matplotlib.colorbar do not accept ticklabels
+            cbar_kwargs["ticklabels"] = ticklabels
     if "cbar" in cbar_dict:
         cbar_kwargs.update(cbar_dict["cbar"])
 
@@ -206,6 +200,7 @@ def get_plot_cbar_kwargs(cbar_dict):
 def get_default_cbar_kwargs():
     cbar_kwargs = {
         "ticks": None,
+        # "ticklabels": None,  --> # Temporary ... because matplotlib.colorbar do not accept ticklabels
         "ticklocation": "auto",
         "spacing": "uniform",  # or proportional
         "extend": "neither",
@@ -218,27 +213,30 @@ def get_default_cbar_kwargs():
     return cbar_kwargs
 
 
-def _dynamic_formatting_floats(float_array):
-    """Function to format the floats defining the class limits of the colorbar."""
-    float_array = np.array(float_array, dtype=float)
-    labels = []
-    for label in float_array:
-        if 0.1 <= label < 1:
-            formatting = ",.2f"
-        elif 0.01 <= label < 0.1:
-            formatting = ",.2f"
-        elif 0.001 <= label < 0.01:
-            formatting = ",.3f"
-        elif 0.0001 <= label < 0.001:
-            formatting = ",.4f"
-        elif label >= 1 and label.is_integer():
-            formatting = "i"
-        else:
-            formatting = ",.1f"
-        if formatting != "i":
-            labels.append(format(label, formatting))
-        else:
-            labels.append(str(int(label)))
+def _decimal_places(value, cap=4):
+    """Determine the number of decimal places needed for formatting."""
+    if value.is_integer():
+        return 0  # No decimal places needed for integer values
+    magnitude = np.abs(value)
+    if magnitude >= 1:
+        return 1  # Default for values >= 1
+    else:
+        # Dynamically calculate decimal places based on magnitude (and cap at i.e. 4 decimals)
+        return min(int(np.ceil(-np.log10(magnitude))) + 1, cap)
+
+
+def _format_label(value, decimal_places):
+    """Format the label based on the number of decimal places."""
+    if decimal_places == 0:
+        return str(int(value))
+    formatting = f"{{:,.{decimal_places}f}}"
+    return formatting.format(value)
+
+
+def _dynamic_formatting_floats(values, cap=4):
+    """Dynamically format floats defining class limits of the colorbar."""
+    values = np.array(values, dtype=float)
+    labels = [_format_label(value, _decimal_places(value, cap=cap)) for value in values]
     return labels
 
 
@@ -265,6 +263,10 @@ def _get_ticks_settings(cbar_dict, norm=None):
     else:
         ticks = None
         ticklabels = None
+    if ticks is not None:
+        ticks = list(ticks)
+    if ticklabels is not None:
+        ticklabels = list(ticklabels)
     return ticks, ticklabels
 
 
@@ -284,12 +286,27 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
 
     # If norm is specified, vmin and vmax must be None !
     _check_no_vmin_vmax_if_norm_specified(user_plot_kwargs=user_plot_kwargs)
+    _check_no_levels_if_norm_specified(user_plot_kwargs=user_plot_kwargs)
 
-    # TODO
-    # - WHAT TO DO IF TICKS AND TICKLABELS SPECIFIED IN user_cbar_kwargs
-    # --> If BoundaryNorm and change length --> Raise error?
-    # --> If no BoundaryNorm?
+    # If norm is not specified in user_plot_kwargs
+    # - Update vmin and vmax if specified in user_plot_kwargs
+    # --> Check the default norm accepts vmin and vmax arguments
+    # --> If yes, update the default norm to use specified vmin and vmax
+    # --> If no, warn and define a Normalize(vmin, vmax)
+    # --> If BoundaryNorm, remove ticks and ticklabels from default_cbar_kwargs !
+    # - Update ticks and tickslabels
+    if user_plot_kwargs.get("norm", None) is None:
+        # Update norm based on user-provided vmin and vmax
+        _update_default_norm_using_vmin_and_vmax(
+            user_plot_kwargs=user_plot_kwargs,
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+        )
+        # Check if valid update for user-specified ticklabels and ticks
+        # --> If already present in defaults_kwargs (i.e. for BoundaryNorm), check that length match
+        _check_valid_ticks_ticklabels(user_cbar_kwargs=user_cbar_kwargs, default_cbar_kwargs=default_cbar_kwargs)
 
+    # -------------------------------------------------------------------------------
     # Deal with categorical/discrete colorbar (when user specify new norm)
     # - Remove ticks and ticklabels when user specify new norm !
     # - Later on:
@@ -299,7 +316,7 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
         _remove_defaults_ticks_and_ticklabels(default_cbar_kwargs=default_cbar_kwargs)
 
     # Deal with categorical/discrete labeled colorbar (when user provides a new cmap)
-    # - Resample user-provided colormap
+    # - If user provided a colormap, resample the colormap
     if default_cbar_kwargs.get("ticklabels", None) is not None:
         _resample_user_cmap_for_labeled_colorbar(
             user_plot_kwargs=user_plot_kwargs, default_cbar_kwargs=default_cbar_kwargs
@@ -310,16 +327,8 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
     if "levels" in user_plot_kwargs:
         _create_boundary_norm_from_levels(user_plot_kwargs=user_plot_kwargs, default_plot_kwargs=default_plot_kwargs)
 
-    # If norm is not specified but vmin and vmax are specified
-    # --> Check the default norm accepts vmin and vmax arguments
-    # --> If yes, update the default norm to use specified vmin and vmax
-    # --> If no, warn and define a Normalize(vmin, vmax)
-    if user_plot_kwargs.get("norm", None) is None:
-        _update_default_norm_using_vmin_and_vmax(
-            user_plot_kwargs=user_plot_kwargs, default_plot_kwargs=default_plot_kwargs
-        )
-
     # Drop vmin and vmax from user_plot_kwargs (not accepted by PolyCollection)
+    # - This avoid also downstream bugs ...
     _ = user_plot_kwargs.pop("vmin", None)
     _ = user_plot_kwargs.pop("vmax", None)
 
@@ -333,6 +342,35 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
     default_cbar_kwargs.update(user_cbar_kwargs)
 
     return default_plot_kwargs, default_cbar_kwargs
+
+
+def _check_valid_ticks_ticklabels(user_cbar_kwargs, default_cbar_kwargs):
+    user_ticks = user_cbar_kwargs.get("ticks", None)
+    user_ticklabels = user_cbar_kwargs.get("ticklabels", None)
+    if user_ticks is not None or user_ticklabels is not None:
+        user_ticks = user_cbar_kwargs.get("ticks", None)
+        user_ticklabels = user_cbar_kwargs.get("ticklabels", None)
+        default_ticks = default_cbar_kwargs.get("ticks", None)
+        default_ticklabels = default_cbar_kwargs.get("ticklabels", None)
+        user_ticks_length = len(user_cbar_kwargs.get("ticks", []))
+        user_ticklabels_length = len(user_cbar_kwargs.get("ticklabels", []))
+        default_ticks_length = len(default_cbar_kwargs.get("ticks", []))
+        default_ticklabels_length = len(default_cbar_kwargs.get("ticklabels", []))
+        if user_ticks is not None and user_ticklabels is not None:
+            if user_ticks_length != user_ticklabels_length:
+                raise ValueError(
+                    "'ticks' and 'ticklabels' must have same length: {user_ticks_length} vs {user_ticklabels_length}."
+                )
+        elif user_ticks is None and default_ticks is not None:  # but user_ticklabels provided
+            if user_ticklabels_length != default_ticks_length:
+                raise ValueError(
+                    "If you don't specify 'ticks', expecting a 'ticklabels' list of length {default_ticks_length}."
+                )
+        elif user_ticklabels is None and default_ticklabels is not None:  # but user_ticks provided
+            if user_ticks_length != default_ticklabels_length:
+                raise ValueError(
+                    "If you don't specify 'ticklabels', expecting a 'ticks' list of length {default_ticklabels_length}."
+                )
 
 
 def _remove_defaults_ticks_and_ticklabels(default_cbar_kwargs):
@@ -353,25 +391,33 @@ def _resample_user_cmap_for_labeled_colorbar(user_plot_kwargs, default_cbar_kwar
             user_plot_kwargs["cmap"] = cmap
 
 
-def _create_boundary_norm_from_levels(user_plot_kwargs, default_plot_kwargs):
-    # xarray user_plot_kwargs 'levels' option
-    # - Resample cmap and define BoundaryNorm
+def _check_no_levels_if_norm_specified(user_plot_kwargs):
+    """Check either 'levels' or 'norm' are specified in user_plot_kwargs."""
+    # Check norm is not defined
+    if "norm" in user_plot_kwargs and "levels" in user_plot_kwargs:
+        raise ValueError("Either specify 'norm' or 'levels'.")
 
+
+def _create_boundary_norm_from_levels(user_plot_kwargs, default_plot_kwargs):
+    """It parse the xarray 'levels' argument to resample the colormap and define a BoundaryNorm."""
     # Get user settings
     vmin = user_plot_kwargs.get("vmin", None)
     vmax = user_plot_kwargs.get("vmax", None)
     levels = user_plot_kwargs["levels"]
 
-    # Check norm is not defined
-    if "norm" in user_plot_kwargs:
-        raise ValueError("Either specify 'norm' or 'levels'.")
     # Define boundaries
-    if isinstance(levels, int):
+    if isinstance(levels, (int, float)):
         if vmin is None or vmax is None:
             raise ValueError("If 'levels' is an integer, you must specify 'vmin' and 'vmax'.")
-        boundaries = np.linspace(vmin, vmax, levels)
+        boundaries = list(np.linspace(vmin, vmax, int(levels + 1)))
     else:
+        if vmin is not None or vmax is not None:
+            raise ValueError("If you specify 'levels' as a list, you don't have to specify 'vmin' and 'vmax'.")
         boundaries = list(levels)
+        # Check levels are monotonic increasing
+        if not is_monotonically_increasing(boundaries):
+            raise ValueError("'levels' must be monotonically increasing !")
+
     ncolors = len(boundaries) - 1
     # Define boundary norm
     norm = BoundaryNorm(boundaries=boundaries, ncolors=ncolors)
@@ -386,26 +432,33 @@ def _create_boundary_norm_from_levels(user_plot_kwargs, default_plot_kwargs):
     _ = user_plot_kwargs.pop("levels")
 
 
-def _update_default_norm_using_vmin_and_vmax(user_plot_kwargs, default_plot_kwargs):
+def _update_default_norm_using_vmin_and_vmax(user_plot_kwargs, default_plot_kwargs, default_cbar_kwargs):
+    """Update the norm vmin and vmax settings if possible."""
     vmin = user_plot_kwargs.get("vmin", None)
     vmax = user_plot_kwargs.get("vmax", None)
-
     if vmin is not None or vmax is not None:
-        # If default accept vmin, vmax --> update vmin/vmax attributes
-        try:
-            if vmin is not None:
-                default_plot_kwargs["norm"].vmin = vmin
-            if vmax is not None:
-                default_plot_kwargs["norm"].vmax = vmax
-            user_plot_kwargs["norm"] = default_plot_kwargs["norm"]
-        # Otherwise define a new Normalize norm
-        except Exception:
+        # If the norm does not accepts vmin or vmax, set a Normalize(vmin, vmax) norm
+        if isinstance(default_plot_kwargs["norm"], (BoundaryNorm, CenteredNorm)):
             norm_class = type(default_plot_kwargs["norm"])
             print(
                 f"The default pycolorbar norm is a {norm_class} and does not accept 'vmin' and 'vmax'.\n "
                 f"Switching the norm to Normalize(vmin={vmin}, vmax={vmax}) !"
             )
             user_plot_kwargs["norm"] = Normalize(vmin=vmin, vmax=vmax)
+            default_plot_kwargs["norm"] = Normalize(vmin=vmin, vmax=vmax)
+            if isinstance(default_plot_kwargs["norm"], BoundaryNorm):
+                _remove_defaults_ticks_and_ticklabels(default_cbar_kwargs=default_cbar_kwargs)
+        # Else update vmin/vmax attributes
+        else:
+            if vmin is not None:
+                default_plot_kwargs["norm"].vmin = vmin
+            if vmax is not None:
+                default_plot_kwargs["norm"].vmax = vmax
+            user_plot_kwargs["norm"] = default_plot_kwargs["norm"]
+
+        # Update also the default_plot_kwargs
+        # --> For possible update/checks of ticks and ticklabels
+        default_plot_kwargs["norm"] = user_plot_kwargs["norm"]
 
 
 def _check_no_vmin_vmax_if_norm_specified(user_plot_kwargs):

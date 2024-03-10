@@ -24,6 +24,7 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
+import os
 from importlib.metadata import PackageNotFoundError, version
 
 from pycolorbar.settings.colorbar_registry import (  # noqa
@@ -52,6 +53,14 @@ colormaps = ColormapRegistry.get_instance()
 
 # Create a module-level instance of ColorbarRegistry
 colorbars = ColorbarRegistry.get_instance()
+
+# Register pycolorbar defaults colormaps and colorbars
+# TODO: donfig config !
+# pycolorbar.register_default_colormaps()
+# pycolorbar.register_default_colorbars()
+_root_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa
+etc_directory = os.path.join(_root_path, "pycolorbar", "etc")
+
 
 __all__ = []
 

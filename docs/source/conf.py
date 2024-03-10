@@ -11,6 +11,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import shutil
 import sys
 
 # sys.path.insert(0, os.path.abspath(".."))
@@ -25,6 +26,18 @@ copyright = "Gionata Ghiggi"
 author = "Gionata Ghiggi"
 
 
+# -- Copy Jupyter Notebook Tutorials------------------------------------------
+root_path = os.path.dirname(os.path.dirname(os.getcwd()))
+filenames = [
+    "Introduction_univariate_colormaps.ipynb",
+    "Introduction_univariate_colorbars.ipynb",
+]
+for filename in filenames:
+    in_path = os.path.join(root_path, "tutorials", filename)
+    out_path = os.path.join(os.getcwd(), "tutorials", filename)
+    shutil.copyfile(in_path, out_path)
+
+
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -34,11 +47,11 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
+    "sphinx.ext.intersphinx",  # to cross-link other projects docs
     # "sphinx.ext.autosectionlabel",
     "nbsphinx",
     "sphinx_mdinclude",
 ]
-
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -47,6 +60,18 @@ templates_path = ["_templates"]
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+# -- Intersphinx configuration ---------------------------------------------------
+intersphinx_mapping = {
+    "matplotlib": ("https://matplotlib.org/stable", None),
+}
+# We recommend adding the following config value.
+# Sphinx defaults to automatically resolve *unresolved* labels using all your Intersphinx mappings.
+# This behavior has unintended side-effects, namely that documentations local references can
+# suddenly resolve to an external location.
+# See also:
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_disabled_reftypes
+intersphinx_disabled_reftypes = ["*"]
 
 
 # -- Options for HTML output -------------------------------------------------

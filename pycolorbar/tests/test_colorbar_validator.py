@@ -50,7 +50,11 @@ TEST_CBAR_DICT = {
     "cbar": {"extend": "neither"},
 }
 
-TEST_CMAP_DICT = {"type": "ListedColormap", "colors": ["#ff0000", "#00ff00", "#0000ff"], "color_space": "hex"}
+TEST_CMAP_DICT = {
+    "colormap_type": "ListedColormap",
+    "color_palette": ["#ff0000", "#00ff00", "#0000ff"],
+    "color_space": "hex",
+}
 
 
 @pytest.fixture

@@ -57,12 +57,12 @@ class ColormapRegistry:
     Attributes
     ----------
     _instance : ColormapRegistry
-        The singleton instance of the ColormapRegistry.
+        The singleton instance of the `ColormapRegistry`.
     registry : dict
         The dictionary holding the registered colormap names and their corresponding configuration YAML file paths.
     tmp_dir : str
         The path of a temporary directory where colormap YAML files are stored when specifying a colormap
-        on-the-fly with add_cmap_dict(cmap_dict).
+        on-the-fly with `add_cmap_dict(cmap_dict)`.
     """
 
     _instance = None
@@ -112,10 +112,10 @@ class ColormapRegistry:
             The file path where the colormap's YAML file is located.
             The name of the colormap correspond to the name of the YAML file !
         verbose : bool, optional
-            If True, the method will print a warning when overwriting an existing colormap. The default is True.
+            If `True`, the method will print a warning when overwriting an existing colormap. The default is `True`.
         force : bool, optional
-            If True, it allow to overwrites an existing colormap. The default is True.
-            If False, it raise an error if attempting to overwrite an existing colormap.
+            If `True`, it allow to overwrites an existing colormap. The default is `True`.
+            If `False`, it raise an error if attempting to overwrite an existing colormap.
 
         Notes
         -----
@@ -135,7 +135,7 @@ class ColormapRegistry:
     def add_cmap_dict(self, cmap_dict: dict, name: str, verbose: bool = True, force=True):
         """
         Add a colormap to the registry by providing a colormap dictionary and the colormap name.
-        A temporary file YAML configuration file is created in self.tmp_dir.
+        A temporary file YAML configuration file is created in `ColormapRegistry.tmp_dir`.
 
         Parameters
         ----------
@@ -144,10 +144,10 @@ class ColormapRegistry:
         name : str
             The name of the colormap.
         verbose : bool, optional
-            If True, the method will print a warning when overwriting an existing colormap. The default is True.
+            If `True`, the method will print a warning when overwriting an existing colormap. The default is `True`.
         force : bool, optional
-            If True, it allow to overwrites an existing colormap. The default is True.
-            If False, it raise an error if attempting to overwrite an existing colormap.
+            If `True`, it allow to overwrites an existing colormap. The default is `True`.
+            If `False`, it raise an error if attempting to overwrite an existing colormap.
 
         Notes
         -----
@@ -163,7 +163,7 @@ class ColormapRegistry:
         filename = f"{name}.yaml"
         filepath = os.path.join(self.tmp_dir, filename)
         # Write cmap_dict (and validate)
-        write_cmap_dict(cmap_dict, filepath=filepath, force=True)
+        write_cmap_dict(cmap_dict, filepath=filepath, force=True, validate=True, encode=True)
         # Update registry
         self.registry[name] = filepath
 
@@ -233,7 +233,7 @@ class ColormapRegistry:
             If the colormap configuration is invalid or cannot be read.
         """
         filepath = self.get_cmap_filepath(name)
-        return read_cmap_dict(filepath)
+        return read_cmap_dict(filepath, validate=True, decode=True)
 
     def get_cmap(self, name: str):
         """
@@ -269,7 +269,7 @@ class ColormapRegistry:
         Parameters
         ----------
         name : str, optional
-            The name of a specific colormap to validate. If None, all registered colormaps are validated.
+            The name of a specific colormap to validate. If `None`, all registered colormaps are validated.
 
         Raises
         ------
@@ -367,12 +367,12 @@ def register_colormaps(directory: str, name: str = None, verbose: bool = True, f
     directory : str
         The directory where colormap YAML files are located.
     name : str, optional
-        The specific name of a colormap to register. If None, all colormaps in the directory are registered.
+        The specific name of a colormap to register. If `None`, all colormaps in the directory are registered.
     force : bool, optional
-        If True, it allow to overwrites existing colormaps. The default is True.
-        If False, it raise an error if attempting to overwrite an existing colormap.
+        If `True`, it allow to overwrites existing colormaps. The default is `True`.
+        If `False`, it raise an error if attempting to overwrite an existing colormap.
     verbose : bool, optional
-        If True, the method will print a warning when overwriting existing colormaps. The default is True.
+        If `True`, the method will print a warning when overwriting existing colormaps. The default is `True`.
     """
     colormaps = ColormapRegistry.get_instance()
 
@@ -398,10 +398,10 @@ def register_colormap(filepath: str, verbose: bool = True, force: bool = True):
         The file path where the colormap's YAML file is located.
         The name of the colormap correspond to the name of the YAML file !
     force : bool, optional
-        If True, it allow to overwrites an existing colormap. The default is True.
-        If False, it raise an error if attempting to overwrite an existing colormap.
+        If `True`, it allow to overwrites an existing colormap. The default is `True`.
+        If `False`, it raise an error if attempting to overwrite an existing colormap.
     verbose : bool, optional
-        If True, the method will print a warning when overwriting an existing colormap. The default is True.
+        If `True`, the method will print a warning when overwriting an existing colormap. The default is `True`.
 
     Raises
     ------
@@ -589,6 +589,26 @@ def _get_matplotlib_cmaps(category=None, include_reversed=False):
 
 
 def available_colormaps(category=None, include_reversed=False):
+    """
+    Return a list with the name of registered colormaps.
+
+    Parameters
+    ----------
+    category : str, optional
+        The name of an optional category to subset the list of registered colormaps.
+        In the colormap YAML file, the `auxiliary/category` field enable to specify the relevant
+        categories of the colormap.
+        Common categories are `'diverging'`, `'cyclic'`, `'sequential'`,
+        `'categorical'`, `'qualitative'`, `'perceptual'`.
+        If `None` (the default), returns all available colormaps.
+    include_reversed : bool, optional
+        Whether to include also the name of the reversed colormap suffixed by `_r`.
+        The default is `False`.
+    Returns
+    -------
+    names : str
+        List of registered colormaps.
+    """
     colormaps = ColormapRegistry.get_instance()
     names = colormaps.available(category=category, include_reversed=include_reversed)
     names += _get_matplotlib_cmaps(category=category, include_reversed=include_reversed)

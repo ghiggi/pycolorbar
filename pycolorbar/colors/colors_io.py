@@ -482,7 +482,8 @@ def get_color_space_class(color_space):
     ----------
     color_space : str
         The name of the color space.
-        Valid color spaces are 'RGB', 'RGBA', 'HSV', 'LCH', 'HCL', 'CIELUV', 'CIELAB', 'CIEXYZ', 'CMYK'.
+        Valid color spaces are `'RGB'`, `'RGBA'`, `'HSV'`, `'LCH'`, `'HCL'`,
+        `'CIELUV'`, `'CIELAB'`, `'CIEXYZ'`, `'CMYK'`.
 
     Returns
     -------
@@ -514,6 +515,7 @@ def decode_colors(colors, color_space):
     np.ndarray
         Decoded color values in internal representation.
     """
+    colors = np.asanyarray(colors)
     color_space = color_space.upper()
     if color_space in COLOR_SPACES:
         color_class = get_color_space_class(color_space)
@@ -537,6 +539,7 @@ def encode_colors(colors, color_space):
     np.ndarray
         Encoded color values in external representation.
     """
+    colors = np.asanyarray(colors)
     color_space = color_space.upper()
     if color_space in COLOR_SPACES:
         color_class = get_color_space_class(color_space)

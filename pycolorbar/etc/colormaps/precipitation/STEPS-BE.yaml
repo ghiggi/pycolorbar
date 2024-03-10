@@ -1,6 +1,6 @@
-type: LinearSegmentedColormap
+colormap_type: LinearSegmentedColormap
 color_space: name
-colors:
+color_palette:
 - cyan
 - deepskyblue
 - dodgerblue

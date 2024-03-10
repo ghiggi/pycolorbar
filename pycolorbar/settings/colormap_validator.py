@@ -29,7 +29,7 @@ import re
 from typing import Optional, Union
 
 import numpy as np
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from pycolorbar.colors.colors_io import check_valid_external_data_range, check_valid_internal_data_range
 from pycolorbar.utils.mpl import get_mpl_named_colors
@@ -65,7 +65,7 @@ def is_monotonically_increasing(values):
     return all(x <= y for x, y in zip(values, values[1:]))
 
 
-class ColorMapValidator(BaseModel):
+class ColormapValidator(BaseModel):
     """
     A validator for colormap configurations using Pydantic.
 
@@ -74,21 +74,21 @@ class ColorMapValidator(BaseModel):
 
     Attributes
     ----------
-    type : str
-        The type of the colormap (e.g., "ListedColormap", "LinearSegmentedColormap").
-    color_space : str
-        The color space of the colormap (e.g., "rgb", "hsv").
-    colors : np.ndarray
-        The array of colors defined for the colormap.
     colors_decoded: bool
         If True, assumes that the colors have been already decoded (internal representation).
         If False, assumes that the colors have not been decoded (external representation).
         The default is True.
+    colormap_type : str
+        The type of the colormap (e.g., "ListedColormap", "LinearSegmentedColormap").
+    color_space : str
+        The color space of the colormap (e.g., "rgb", "hsv").
+    color_palette : np.ndarray
+        The array of colors defined for the colormap.
 
     Methods
     -------
-    validate_type(cls, v):
-        Validates the type field.
+    validate_colormap_type(cls, v):
+        Validates the colormap_type field.
     validate_color_space(cls, v):
         Validates the color_space field.
     validate_colors(cls, v, values):
@@ -97,42 +97,39 @@ class ColorMapValidator(BaseModel):
         Validates the segmentdata field.
     """
 
+    model_config = ConfigDict(extra="forbid", arbitrary_types_allowed=True)
+
     # NOTE: The order here governs the call and validation order of below methods
 
     # Internal flag
     colors_decoded: Optional[bool] = True
 
     # Mandatory colormap fields
-    type: str
+    colormap_type: str
     color_space: str
 
-    # LinearSegmentedColormap options
-    segmentdata: Optional[dict] = None
-    # gamma: Optional[float] = None
-
     # Optional colormap fields
-    colors: Optional[Union[np.ndarray, list]] = None  # mandatory if segmentdata not provided !
-    n: Optional[float] = None
+    color_palette: Optional[Union[np.ndarray, list]] = None  # mandatory if segmentdata not provided !
+    segmentdata: Optional[dict] = None  # LinearSegmentedColormap
+    # gamma: Optional[float] = None   # LinearSegmentedColormap
+
+    n: Optional[float] = None  # None for ListedColormap, 256 for LinearSegmentedColormap
     auxiliary: Optional[dict] = {}  # auxiliary information of the colormap (not checked !)
 
     # --------------------------------------------------
     # TODO:
-    # - rename color_space as colors_space or colors_type ?
     # - interpolation_space? 'rgb', ...
     # - add gamma option
     # - correctly support segmentdata
 
-    class Config:
-        arbitrary_types_allowed = True
-
-    @field_validator("type")
-    def validate_type(cls, v):
-        valid_types = [
+    @field_validator("colormap_type")
+    def validate_colormap_type(cls, v):
+        valid_colormap_types = [
             "ListedColormap",
             "LinearSegmentedColormap",
         ]
-        assert isinstance(v, str), "Colormap 'type' must be a string."
-        assert v in valid_types, f"Colormap 'type' must be one of {valid_types}"
+        assert isinstance(v, str), "'colormap_type' must be a string."
+        assert v in valid_colormap_types, f"'colormap_type' must be one of {valid_colormap_types}"
         return v
 
     @field_validator("color_space")
@@ -145,26 +142,26 @@ class ColorMapValidator(BaseModel):
         assert isinstance(v, bool), "colors_decoded must be a boolean."
         return v
 
-    @field_validator("colors")
-    def validate_colors(cls, v, values):
+    @field_validator("color_palette")
+    def validate_color_palette(cls, v, values):
         if v is not None:
             v = np.asanyarray(v)
             color_space = values.data.get("color_space", "")
-            assert len(v) > 0, "The 'colors' array must not be empty."
-            assert len(v) > 1, "The 'colors' array must have at least 2 colors."
+            assert len(v) > 0, "The 'color_palette' array must not be empty."
+            assert len(v) > 1, "The 'color_palette' array must have at least 2 colors."
             validate_colors_values(v, color_space=color_space, decoded_colors=values.data.get("colors_decoded"))
         if v is None:
             assert (
                 values.data.get("segmentdata", None) is not None
-            ), "'colors' must be provided if 'segmentdata' is not specified"
+            ), "'color_palette' must be provided if 'segmentdata' is not specified"
         return v
 
     @field_validator("segmentdata")
     def validate_segmentdata(cls, v, values):
         if v is not None:
             assert (
-                values.data.get("type") == "LinearSegmentedColormap"
-            ), "'segmentdata' requires the 'type' 'LinearSegmentedColormap'."
+                values.data.get("colormap_type") == "LinearSegmentedColormap"
+            ), "'segmentdata' requires the 'colormap_type' 'LinearSegmentedColormap'."
 
             # Check the keys
             # - alpha can also be provided
@@ -188,6 +185,17 @@ class ColorMapValidator(BaseModel):
 
         return v
 
+    # TODO: check 'name' is not a key
+    # TODO: check not invalid kwargs !
+
+
+def _set_default_n(cmap_dict):
+    if cmap_dict["n"] is None:
+        # Set default value for LinearSegmentedColormap
+        if cmap_dict["colormap_type"] == "LinearSegmentedColormap":
+            cmap_dict["n"] = 256
+    return cmap_dict
+
 
 def validate_cmap_dict(cmap_dict: dict, decoded_colors=True):
     """
@@ -202,19 +210,20 @@ def validate_cmap_dict(cmap_dict: dict, decoded_colors=True):
 
     Returns
     -------
-    cmap_dict : TYPE
+    cmap_dict : dict
         Validated colormap dictionary.
 
     """
     # TODO: currently assumes that colors are already decoded (i.e. in 0-1 range for RGB)]
     # TODO: set defaults with pydantic?
-    # --> Return what ColorMapValidator returns?
+    # --> Return what ColormapValidator returns?
 
     # Set flag for color validation
     cmap_dict["colors_decoded"] = decoded_colors
 
     # Validate dictionary
-    cmap_dict = ColorMapValidator(**cmap_dict).dict()
+    cmap_dict = ColormapValidator(**cmap_dict).model_dump()
+    cmap_dict = _set_default_n(cmap_dict)
 
     # Remove flag for color validation
     _ = cmap_dict.pop("colors_decoded")

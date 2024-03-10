@@ -10,7 +10,7 @@
 
 # def test_get_cmap():
 #     cmap = pycolorbar.get_cmap("STEPS-MCH")
-#     assert isinstance(cmap, pycolorbar.ColorMap)
+#     assert isinstance(cmap, pycolorbar.Colormap)
 
 # def test_show_colormaps():
 #     pycolorbar.show_colormaps()

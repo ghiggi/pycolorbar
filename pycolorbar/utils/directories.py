@@ -29,6 +29,20 @@ import os
 import pathlib
 
 
+def remove_file_if_exists(filepath, force=False):
+    """Remove a file if exists.
+
+    Raise an error if the filepath is an existing directory.
+    """
+    if os.path.exists(filepath):
+        if os.path.isdir(filepath):
+            raise ValueError("The specified {filepath} file path is an existing directory !")
+        if force:
+            os.remove(filepath)
+        else:
+            raise ValueError(f"The {filepath} already exists !")
+
+
 def _recursive_glob(dir_path, glob_pattern):
     # ** search for all files recursively
     # glob_pattern = os.path.join(base_dir, "**", "metadata", f"{station_name}.yml")

@@ -44,7 +44,7 @@ class ColorbarRegistry:
     Attributes
     ----------
     _instance : ColorbarRegistry
-        The singleton instance of the ColorbarRegistry.
+        The singleton instance of the `ColorbarRegistry`.
     registry : dict
         The dictionary holding the registered colorbar settings.
     """
@@ -97,13 +97,13 @@ class ColorbarRegistry:
             A single YAML file can contain the configuration of multiple colorbars !
             The name of the YAML files it's not used !
         force : bool, optional
-            If True, it allow to overwrites existing colorbar settings. The default is True.
-            If False, it raise an error if attempting to overwrite an existing colorbar.
+            If `True`, it allow to overwrites existing colorbar settings. The default is `True`.
+            If `False`, it raise an error if attempting to overwrite an existing colorbar.
         verbose : bool, optional
-            If True, the method will print a warning when overwriting existing colorbars. The default is True.
+            If `True`, the method will print a warning when overwriting existing colorbars. The default is `True`.
         validate: bool, optional
             Whether to validate the colorbar configuration file before registering.
-            The default is False.
+            The default is `False`.
         Notes
         -----
         If a a colorbar configuration with the same name already exists, it will be overwritten.
@@ -133,10 +133,10 @@ class ColorbarRegistry:
         name : str
             The name of the colorbar.
         verbose : bool, optional
-            If True, the method will print a warning when overwriting an existing colorbar. The default is True.
+            If `True`, the method will print a warning when overwriting an existing colorbar. The default is `True`.
         force : bool, optional
-            If True, it allow to overwrites existing colorbar settings. The default is True.
-            If False, it raise an error if attempting to overwrite an existing colorbar.
+            If `True`, it allow to overwrites existing colorbar settings. The default is `True`.
+            If `False`, it raise an error if attempting to overwrite an existing colorbar.
 
         Notes
         -----
@@ -178,14 +178,14 @@ class ColorbarRegistry:
         name : str
             The name of the colorbar.
         resolve_reference: bool
-            Determines the behavior when the colorbar dictionary contains the 'reference' keyword.
-            If True, the function resolves the reference by returning the actual colorbar dictionary
+            Determines the behavior when the colorbar dictionary contains the `'reference'` keyword.
+            If `True`, the function resolves the reference by returning the actual colorbar dictionary
             that the reference points to.
-            If False, the function returns the original colorbar dictionary, including the 'reference' keyword.
-            The default is True.
+            If `False`, the function returns the original colorbar dictionary, including the `'reference'` keyword.
+            The default is `True`.
         validate: bool
             Whether to validate the colorbar dictionary.
-            The default is True.
+            The default is `True`.
 
         Returns
         -------
@@ -216,14 +216,14 @@ class ColorbarRegistry:
         Returns
         -------
         matplotlib.colors.Colormap
-            The matplotlib Colormap.
+            The matplotlib `Colormap`.
 
         Notes
         -----
         This function also sets the over/under and bad colors specified in the colorbar configuration.
 
         """
-        from pycolorbar.settings.colorbar_utility import get_cmap
+        from pycolorbar.settings.matplotlib_kwargs import get_cmap
 
         cbar_dict = self.get_cbar_dict(name=name, resolve_reference=True)
         return get_cmap(cbar_dict)
@@ -244,7 +244,7 @@ class ColorbarRegistry:
         Parameters
         ----------
         name : str, optional
-            The name of a specific colorbar to validate. If None, all registered colorbars are validated.
+            The name of a specific colorbar to validate. If `None`, all registered colorbars are validated.
 
         Raises
         ------
@@ -344,7 +344,7 @@ class ColorbarRegistry:
 
     def get_plot_kwargs(self, name=None, user_plot_kwargs={}, user_cbar_kwargs={}):
         """Get pycolorbar plot kwargs (updated with optional user arguments)."""
-        from pycolorbar.settings.colorbar_utility import (
+        from pycolorbar.settings.matplotlib_kwargs import (
             get_plot_cbar_kwargs,
             update_plot_cbar_kwargs,
         )
@@ -380,10 +380,10 @@ def register_colorbars(directory: str, verbose: bool = True, force: bool = True)
     directory : str
         The directory where colorbar YAML files are located.
     force : bool, optional
-        If True, it allow to overwrites existing colorbar settings. The default is True.
-        If False, it raise an error if attempting to overwrite an existing colorbar.
+        If `True`, it allow to overwrites existing colorbar settings. The default is `True`.
+        If `False`, it raise an error if attempting to overwrite an existing colorbar.
     verbose : bool, optional
-        If True, the method will print a warning when overwriting existing colorbars. The default is True.
+        If `True`, the method will print a warning when overwriting existing colorbars. The default is `True`.
 
     Notes
     -----
@@ -409,10 +409,10 @@ def register_colorbar(filepath: str, verbose: bool = True, force: bool = True):
     filepath : str
         The file path where the colorbar's YAML file is located.
     force : bool, optional
-        If True, it allow to overwrites existing colorbar settings. The default is True.
-        If False, it raise an error if attempting to overwrite an existing colorbar.
+        If `True`, it allow to overwrites existing colorbar settings. The default is `True`.
+        If `False`, it raise an error if attempting to overwrite an existing colorbar.
     verbose : bool, optional
-        If True, the method will print a warning when overwriting existing colorbars. The default is True.
+        If `True`, the method will print a warning when overwriting existing colorbars. The default is `True`.
 
     Raises
     ------
@@ -438,11 +438,11 @@ def get_cbar_dict(name, resolve_reference=True):
     name : str
         The name of the colorbar.
     resolve_reference: bool
-        Determines the behavior when the colorbar dictionary contains the 'reference' keyword.
-        If True, the function resolves the reference by returning the
+        Determines the behavior when the colorbar dictionary contains the `'reference'` keyword.
+        If `True`, the function resolves the reference by returning the
         actual colorbar dictionary that the reference points to.
-        If False, the function returns the original colorbar dictionary, including the 'reference' keyword.
-        The default is True.
+        If `False`, the function returns the original colorbar dictionary, including the `'reference'` keyword.
+        The default is `True`.
 
     Returns
     -------
@@ -455,11 +455,71 @@ def get_cbar_dict(name, resolve_reference=True):
 
 
 def get_plot_kwargs(name=None, user_plot_kwargs={}, user_cbar_kwargs={}):
+    """
+    Get matplotlib, xarray and geopandas compatible plot and colorbar kwargs.
+
+    Parameters
+    ----------
+    name : str, optional
+        Name of the registered colorbar settings.
+        The default is None.
+    user_plot_kwargs : dict, optional
+        User-specific plot_kwargs. Example arguments includes 'vmin', 'vmax', 'norm', 'cmap', 'levels'.
+    user_cbar_kwargs : dict, optional
+       User-specific cbar_kwargs. See :class:`matplotlib.colorbar.Colorbar` for more details.
+
+    Returns
+    -------
+    plot_kwargs, cbar_kwargs
+        A tuple with the `plot_kwargs` and `cbar_kwargs` to pass to the plotting functions.
+
+    Examples
+    --------
+    **xarray Example:**
+
+    .. code-block:: python
+
+        plot_kwargs, cbar_kwargs = get_plot_kwargs("my_variable_name")
+        da.plot.imshow(**plot_kwargs, cbar_kwargs=cbar_kwargs)
+
+    **matplotlib Example:**
+
+    .. code-block:: python
+
+        plt.imshow(**plot_kwargs)
+        plt.colorbar(**cbar_kwargs)
+
+    **geopandas Example:**
+
+    .. code-block:: python
+
+        gdf.plot(**plot_kwargs, legend=False)
+        plt.colorbar(**cbar_kwargs)
+    """
     colorbars = ColorbarRegistry.get_instance()
     return colorbars.get_plot_kwargs(name=name, user_plot_kwargs=user_plot_kwargs, user_cbar_kwargs=user_cbar_kwargs)
 
 
 def available_colorbars(category=None, exclude_referenced=False):
+    """
+    Return a list with the name of registered colorbars settings.
+
+    Parameters
+    ----------
+    category : str, optional
+        The name of an optional category to subset the list of registered colorbars.
+        In the colorbar YAML file, the `auxiliary/category` field enable to specify the relevant
+        categories of the colorbar.
+        If `None` (the default), returns all available colorbars.
+    exclude_referenced : bool, optional
+        If `True`, exclude from the list the registered colorbars that refers to another colorbar for the
+        actual configuration. The default is `False`.
+
+    Returns
+    -------
+    names : str
+        List of registered colorbars.
+    """
     colorbars = ColorbarRegistry.get_instance()
     names = colorbars.available(category=category, exclude_referenced=exclude_referenced)
     return names

@@ -132,8 +132,8 @@ unfixable = []
         "*dev*",
         "*docs*",
         "*tutorials*",
-        "*/pycolorbar/tests*",
-        "*/pycolorbar/cli*",
+        "/pycolorbar/tests*",
+        "/pycolorbar/_version.py"
     ]
 
     [tool.coverage.report]

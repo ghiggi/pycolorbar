@@ -1,6 +1,6 @@
-type: LinearSegmentedColormap
+colormap_type: LinearSegmentedColormap
 color_space: rgb
-colors:
+color_palette:
 - - 255
   - 255
   - 255

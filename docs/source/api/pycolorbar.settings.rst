@@ -23,7 +23,7 @@ pycolorbar.settings.colorbar\_registry module
 pycolorbar.settings.colorbar\_utility module
 --------------------------------------------
 
-.. automodule:: pycolorbar.settings.colorbar_utility
+.. automodule:: pycolorbar.settings.matplotlib_kwargs
    :members:
    :undoc-members:
    :show-inheritance:

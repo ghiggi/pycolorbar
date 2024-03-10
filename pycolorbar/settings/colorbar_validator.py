@@ -30,7 +30,7 @@ import re
 from typing import Optional, Union
 
 import numpy as np
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from pycolorbar.utils.mpl import get_mpl_colormaps, get_mpl_named_colors
 
@@ -39,6 +39,8 @@ from pycolorbar.utils.mpl import get_mpl_colormaps, get_mpl_named_colors
 
 
 class ColormapSettings(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     name: Union[str, list[str]]
     n: Optional[Union[int, list[int]]] = None
     bad_color: Optional[Union[str, list, tuple]] = None
@@ -47,9 +49,6 @@ class ColormapSettings(BaseModel):
     over_alpha: Optional[float] = None
     under_color: Optional[Union[str, list, tuple]] = None
     under_alpha: Optional[float] = None
-
-    class Config:
-        arbitrary_types_allowed = True
 
     @field_validator("name")
     def validate_name(cls, v):
@@ -218,11 +217,10 @@ class CategoryNormSettings(BaseModel):
 
 
 class BoundaryNormSettings(BaseModel):
-    # "ncolors" if not specified is taken from len(boundaries)
     boundaries: list[float]
     clip: Optional[bool] = False
     extend: Optional[str] = "neither"
-    ncolors: Optional[int] = None
+    ncolors: Optional[int] = None  # "ncolors" if not specified is determined based on len(boundaries) and extend
 
     @field_validator("boundaries")
     def validate_boundaries(cls, v):
@@ -255,7 +253,7 @@ class BoundaryNormSettings(BaseModel):
             # - If extend is "min" or "max" ncolors must be equal or larger than len(boundaries)
             # - If extend is "both"  ncolors must be equal or larger than len(boundaries) + 1
             validated_settings = values.data
-            extend = validated_settings.get("extend", "neither")
+            extend = validated_settings.get("extend")
             required_ncolors = _get_boundary_norm_expected_ncolors(norm_settings=validated_settings)
             if extend == "neither":
                 assert (
@@ -269,6 +267,8 @@ class BoundaryNormSettings(BaseModel):
                 assert (
                     v >= required_ncolors
                 ), f"'ncolors' must be equal or larger than len('boundaries') + 1 ({required_ncolors})."
+        else:
+            v = _get_boundary_norm_expected_ncolors(norm_settings=validated_settings)
         return v
 
     @model_validator(mode="before")
@@ -538,7 +538,7 @@ def check_norm_settings(norm_settings):
     # Retrieve NormSettings Validator
     validator = norm_settings_mapping[name]
     # Validate settings
-    norm_settings = validator(**norm_settings).dict()
+    norm_settings = validator(**norm_settings).model_dump()
     # Return validated settings
     norm_settings["name"] = name
     return norm_settings
@@ -548,13 +548,12 @@ def check_norm_settings(norm_settings):
 
 
 class ColorbarSettings(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     extend: Optional[str] = "neither"
     extendfrac: Optional[Union[float, list[float], str]] = "auto"
     extendrect: Optional[bool] = False
     label: Optional[str] = None  # title of colorbar
-
-    class Config:
-        arbitrary_types_allowed = True
 
     @field_validator("extend")
     def validate_extend(cls, v):
@@ -629,24 +628,36 @@ def resolve_colorbar_reference(cbar_dict, name, checked_references=None):
 
 
 def _check_discrete_norm_cmap_settings(cmap_settings, norm_settings):
+    """Validate or set the 'n' default value for discrete colormaps."""
     norm = norm_settings.get("name", "Norm")
     if norm not in ["CategoryNorm", "BoundaryNorm"]:
-        return None
+        return cmap_settings, norm_settings
+
+    # Retrieve expected number of colors
+    if norm == "CategoryNorm":
+        expected_ncolors = len(norm_settings["labels"])
+    else:  # "BoundaryNorm"
+        expected_ncolors = _get_boundary_norm_expected_ncolors(norm_settings=norm_settings)
 
     n = cmap_settings.get("n", None)
+    # If n is specified, check is consistent
     if n is not None:
-        # Retrieve expected number of colors
-        if norm == "CategoryNorm":
-            ncolors = len(norm_settings["labels"])
-        else:  # "BoundaryNorm"
-            ncolors = _get_boundary_norm_expected_ncolors(norm_settings=norm_settings)
         # Check it match expectations
         # - Single Colormap
         if isinstance(n, int):
-            assert n == ncolors, f"'n' is optional and must be {ncolors} for the specified discrete norm."
+            assert (
+                n == expected_ncolors
+            ), f"'n' is optional and must be {expected_ncolors} for the specified discrete norm."
         # - Multiple colormaps
         else:
-            assert sum(n) == ncolors, f"The sum of 'n' must be {ncolors} for the specified discrete norm."
+            assert (
+                sum(n) == expected_ncolors
+            ), f"The sum of 'n' must be {expected_ncolors} for the specified discrete norm."
+    # Else specify the expected value
+    else:
+        n = expected_ncolors
+    cmap_settings["n"] = n
+    return cmap_settings, norm_settings
 
 
 def validate_cbar_dict(cbar_dict: dict, name: str, resolve_reference=False):
@@ -674,7 +685,7 @@ def validate_cbar_dict(cbar_dict: dict, name: str, resolve_reference=False):
     invalid_configuration = False
 
     try:
-        cmap_settings = ColormapSettings(**cmap_settings).dict()
+        cmap_settings = ColormapSettings(**cmap_settings).model_dump()
     except Exception as e:
         invalid_configuration = True
         print(f"Colormap validation error: {e}")
@@ -686,14 +697,16 @@ def validate_cbar_dict(cbar_dict: dict, name: str, resolve_reference=False):
         print(f"Norm validation error: {e}")
 
     try:
-        cbar_settings = ColorbarSettings(**cbar_settings).dict()
+        cbar_settings = ColorbarSettings(**cbar_settings).model_dump()
     except Exception as e:
         invalid_configuration = True
         print(f"Colorbar validation error: {e}")
 
     # Consistency checks
     try:
-        _check_discrete_norm_cmap_settings(cmap_settings=cmap_settings, norm_settings=norm_settings)
+        cmap_settings, norm_settings = _check_discrete_norm_cmap_settings(
+            cmap_settings=cmap_settings, norm_settings=norm_settings
+        )
     except Exception as e:
         invalid_configuration = True
         print(f"Categorical Colormap validation error: {e}")

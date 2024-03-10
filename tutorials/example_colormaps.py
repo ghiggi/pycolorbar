@@ -30,9 +30,10 @@ import pycolorbar
 from pycolorbar.settings.colormap_io import read_cmap_dict
 from pycolorbar.settings.colormap_utility import create_cmap
 
-##### ColorMap Registry
+##### Colormap Registry
 dst_dir = "/home/ghiggi/Python_Packages/pycolorbar/pycolorbar/etc/colormaps"
 name = "STEPS-MCH"
+
 
 pycolorbar.colormaps.names
 
@@ -81,12 +82,12 @@ pycolorbar.available_colormaps(category="perceptual")
 pycolorbar.available_colormaps(category="diverging", include_reversed=True)
 
 # ------------------------------------------------------------------
-#### ColorMap Configuration Filepath
+#### Colormap Configuration Filepath
 filepath = pycolorbar.colormaps.get_cmap_filepath(name)
 cmap_dict = read_cmap_dict(filepath)
 
 # ------------------------------------------------------------------
-#### ColorMap Dictionary Retrieval
+#### Colormap Dictionary Retrieval
 cmap_dict = pycolorbar.colormaps.get_cmap_dict(name)
 
 cmap_dict = pycolorbar.colormaps.get_cmap_dict("IMERG_Liquid")
@@ -94,20 +95,20 @@ cmap_dict = pycolorbar.colormaps.get_cmap_dict("IMERG_Liquid")
 pycolorbar.get_cmap_dict("IMERG_Liquid")
 
 # ------------------------------------------------------------------
-##### ColorMap Validation
+##### Colormap Validation
 cmap_dict = pycolorbar.validate_cmap_dict(cmap_dict)
 
 pycolorbar.colormaps.validate(name=None)
 
 # ------------------------------------------------------------------
-##### ColorMap Dictionary Addition
+##### Colormap Dictionary Addition
 pycolorbar.colormaps.add_cmap_dict(cmap_dict, name="NEW")
 pycolorbar.colormaps.names
 cmap_dict = pycolorbar.colormaps.get_cmap_dict("NEW")
 cmap_dict
 
 # ------------------------------------------------------------------
-#### ColorMap Retrieval
+#### Colormap Retrieval
 cmap_dict = pycolorbar.colormaps.get_cmap_dict("GOES_CloudPhase")
 cmap = create_cmap(cmap_dict=cmap_dict, name="new")
 cmap
@@ -156,7 +157,7 @@ pycolorbar.colorbars.get_cmap("REFC")
 pycolorbar.colorbars.get_cmap("RRQPE")
 
 # --------------------------------------------------------------------------------
-#### ColorMap Visualization
+#### Colormap Visualization
 cmap = pycolorbar.colormaps.get_cmap("STEPS-MCH")
 cmap
 

@@ -1,6 +1,6 @@
-type: LinearSegmentedColormap
+colormap_type: LinearSegmentedColormap
 color_space: hex
-colors:
+color_palette:
 - '#9c7e94'
 - '#640064'
 - '#AF00AF'

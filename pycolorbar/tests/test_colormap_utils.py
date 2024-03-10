@@ -24,7 +24,7 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
-"""Test the ColorMap utilities."""
+"""Test the Colormap utilities."""
 import pytest
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
@@ -34,14 +34,25 @@ from pycolorbar.settings.colormap_utility import create_cmap
 @pytest.mark.parametrize(
     "cmap_dict,expected_type",
     [
-        ({"type": "ListedColormap", "colors": [[1, 0, 0], [0, 1, 0], [0, 0, 1]], "color_space": "RGB"}, ListedColormap),
         (
-            {"type": "LinearSegmentedColormap", "colors": [[1, 0, 0], [0, 1, 0], [0, 0, 1]], "color_space": "RGB"},
+            {
+                "colormap_type": "ListedColormap",
+                "color_palette": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+                "color_space": "RGB",
+            },
+            ListedColormap,
+        ),
+        (
+            {
+                "colormap_type": "LinearSegmentedColormap",
+                "color_palette": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+                "color_space": "RGB",
+            },
             LinearSegmentedColormap,
         ),
         (
             {
-                "type": "LinearSegmentedColormap",
+                "colormap_type": "LinearSegmentedColormap",
                 "segmentdata": {
                     "red": [(0, 1, 1), (1, 0, 0)],
                     "green": [(0, 0, 0), (1, 1, 1)],

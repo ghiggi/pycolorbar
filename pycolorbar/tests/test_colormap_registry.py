@@ -54,9 +54,17 @@ def mock_matplotlib_show(mocker):  # noqa
     yield mock
 
 
-TEST_CMAP_DICT = {"type": "ListedColormap", "colors": ["#ff0000", "#00ff00", "#0000ff"], "color_space": "hex"}
+TEST_CMAP_DICT = {
+    "colormap_type": "ListedColormap",
+    "color_palette": ["#ff0000", "#00ff00", "#0000ff"],
+    "color_space": "hex",
+}
 
-INVALID_CMAP_DICT = {"type": "BAD_TYPE", "colors": ["#ff0000", "#00ff00", "#0000ff"], "color_space": "hex"}
+INVALID_CMAP_DICT = {
+    "colormap_type": "BAD_TYPE",
+    "color_palette": ["#ff0000", "#00ff00", "#0000ff"],
+    "color_space": "hex",
+}
 
 
 # colormap_registry =ColormapRegistry.get_instance()
@@ -222,7 +230,7 @@ class TestColormapRegistry:
     def test_get_cmap_dict(self, colormap_registry):
         """Test get_cmap_dict method.
 
-        Do not check for equality because of the default values set by the ColorMap validator.
+        Do not check for equality because of the default values set by the Colormap validator.
         """
         cmap_name = "test_cmap_dict"
         colormap_registry.add_cmap_dict(cmap_dict=TEST_CMAP_DICT, name=cmap_name, verbose=False)
@@ -437,3 +445,38 @@ def test_available_colormaps_by_category(category, include_reversed):
     """Test available_colormaps returns the colormaps names of the specified category."""
     names = pycolorbar.available_colormaps(category=category, include_reversed=include_reversed)
     assert len(names) > 1  # matplotlib colormaps
+
+
+def test_show_colormap(colormap_registry, mock_matplotlib_show):
+    """Test show_colormap function."""
+    # Register cmap
+    cmap_name = "test_cmap"
+    colormap_registry.add_cmap_dict(cmap_dict=TEST_CMAP_DICT, name=cmap_name, verbose=False)
+    # Test it runs
+    pycolorbar.show_colormap(cmap_name)
+    # Assert matplotlib show() is called
+    mock_matplotlib_show.assert_called_once()
+
+
+def test_show_colormaps(colormap_registry, mock_matplotlib_show):
+    """Test show_colormaps function."""
+    # Test raise error if no colormap registered
+    with pytest.raises(ValueError) as excinfo:
+        _ = colormap_registry.show_colormaps()
+    assert "No colormaps are yet registered in the pycolorbar ColormapRegistry." in str(excinfo.value)
+
+    # Register cmap
+    cmap_name = "test_cmap"
+    colormap_registry.add_cmap_dict(cmap_dict=TEST_CMAP_DICT, name=cmap_name, verbose=False)
+
+    # Test it works also with 1 colormap
+    pycolorbar.show_colormaps()
+    mock_matplotlib_show.assert_called_once()
+
+    # Register another cmap
+    cmap_name = "test_cmap1"
+    colormap_registry.add_cmap_dict(cmap_dict=TEST_CMAP_DICT, name=cmap_name, verbose=False)
+
+    # Test it works also with more than 1 colormap
+    pycolorbar.show_colormaps()
+    assert mock_matplotlib_show.call_count == 2

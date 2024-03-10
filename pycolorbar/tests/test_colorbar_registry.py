@@ -203,7 +203,7 @@ class TestColorbarRegistry:
 
         # Test inexisting colorbar configuration with no custom kwargs
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(name="INEXISTING")
-        assert isinstance(plot_kwargs["cmap"], Colormap)
+        assert plot_kwargs["cmap"] is None
         assert isinstance(plot_kwargs["norm"], Normalize)
         assert plot_kwargs["norm"].vmin is None
         assert plot_kwargs["norm"].vmin is None
@@ -212,7 +212,7 @@ class TestColorbarRegistry:
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(
             name=None, user_plot_kwargs={"vmin": 10, "vmax": 20}, user_cbar_kwargs={}
         )
-        assert isinstance(plot_kwargs["cmap"], Colormap)
+        assert plot_kwargs["cmap"] is None
         assert isinstance(plot_kwargs["norm"], Normalize)
         assert plot_kwargs["norm"].vmin == 10.0
         assert plot_kwargs["norm"].vmax == 20.0
@@ -382,3 +382,36 @@ def test_available_colorbars(colorbar_registry, colorbar_test_filepath):
 
     names = pycolorbar.available_colorbars(exclude_referenced=True)
     assert "TEST_REFERENCE_CBAR" not in names
+
+
+def test_show_colorbar(colorbar_registry, colorbar_test_filepath, mock_matplotlib_show):
+    """Test show_colorbar function."""
+    # Register cbar
+    colorbar_registry.register(colorbar_test_filepath)
+    # Test it runs
+    pycolorbar.show_colorbar("TEST_CBAR_1")
+    # Assert matplotlib show() is called
+    mock_matplotlib_show.assert_called_once()
+
+
+def test_show_colorbars(colorbar_registry, colorbar_test_filepath, mock_matplotlib_show):
+    """Test show_colorbars function."""
+    # Test raise error if no colorbar registered
+    with pytest.raises(ValueError) as excinfo:
+        _ = colorbar_registry.show_colorbars()
+    assert "No colorbars are yet registered in the pycolorbar ColorbarRegistry." in str(excinfo.value)
+
+    # Register cbar
+    colorbar_registry.register(colorbar_test_filepath)
+    colorbar_registry.unregister("TEST_CBAR_2")
+
+    # Test it works also with 1 colorbar
+    pycolorbar.show_colorbars()
+    mock_matplotlib_show.assert_called_once()
+
+    # Register more than 1 colorbar
+    colorbar_registry.register(colorbar_test_filepath)
+
+    # Test it works also with more than 1 colorbar
+    pycolorbar.show_colorbars()
+    assert mock_matplotlib_show.call_count == 2
