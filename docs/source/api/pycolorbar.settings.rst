@@ -20,14 +20,6 @@ pycolorbar.settings.colorbar\_registry module
    :undoc-members:
    :show-inheritance:
 
-pycolorbar.settings.colorbar\_utility module
---------------------------------------------
-
-.. automodule:: pycolorbar.settings.matplotlib_kwargs
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pycolorbar.settings.colorbar\_validator module
 ----------------------------------------------
 
@@ -80,6 +72,14 @@ pycolorbar.settings.colormap\_visualization module
 --------------------------------------------------
 
 .. automodule:: pycolorbar.settings.colormap_visualization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pycolorbar.settings.matplotlib\_kwargs module
+---------------------------------------------
+
+.. automodule:: pycolorbar.settings.matplotlib_kwargs
    :members:
    :undoc-members:
    :show-inheritance:

@@ -81,11 +81,12 @@ To build the documentation locally, follow the next three steps.
 
 	For an efficient setup, we recommend creating a dedicated virtual environment.
 	Navigate to the ``docs/`` directory and execute the following command.
-    This will create a new environment and install the required packages:
+	This will create a new environment and install the required packages:
 
 	.. code-block:: bash
 
 		conda create -f environment.yaml
+
 
 2. Activate the virtual environment
 
@@ -93,12 +94,11 @@ To build the documentation locally, follow the next three steps.
 
 	.. code-block:: bash
 
-    	conda activate build-doc-pycolorbar
+		conda activate build-doc-pycolorbar
 
 3. Generate the documentation
 
-	With the environment set and activated, you're ready to generate the documentation.
-	Execute:
+	With the environment set and activated, you're ready to generate the documentation.	Execute:
 
 	.. code-block:: bash
 

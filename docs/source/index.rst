@@ -56,6 +56,7 @@ Documentation
    :maxdepth: 2
 
    installation
+   quick_start
    contribute_colormaps
    contributors_guidelines
    maintainers_guidelines
