@@ -17,15 +17,13 @@
 
  [**Slack**](https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g) | [**Docs**](https://pycolorbar.readthedocs.io/en/latest/)
 
-The pycolorbar is still in development. Feel free to try it out and to report issues or to suggest changes.
+pycolorbar offers a simple and intuitive interface to define, save, and load colormaps and colorbar configurations.
+It is designed to be used in combination with matplotlib, but it can also be used with other libraries such as cartopy, xarray and geopandas.
 
-## Quick start
+Please read the software documentation available at [https://pycolorbar.readthedocs.io/en/latest/](https://pycolorbar.readthedocs.io/en/latest/) and try
+out the [Jupyter Notebook Tutorials](https://github.com/ghiggi/pycolorbar/tree/main/tutorials)
 
-pycolorbar provides a way to define colormaps and colorbar settings for later use in matplotlib or xarray.
-
-Look at the [Tutorials][tutorial_link] to have an overview of the software !
-
-## Installation
+## 🛠️ Installation
 
 ### pip
 
@@ -36,10 +34,14 @@ Then, install the pycolorbar package by typing the following command in the comm
 
     pip install pycolorbar
 
-To install the latest development version via pip, see the
-[documentation][doc_install_link].
+To install the latest development version, see the
+[documentation][dev_installation].
 
-### conda [NOT YET AVAILABLE]
+[pip_link]: https://pypi.org/project/pycolorbars
+[dev_installation]: https://pycolorbar.readthedocs.io/en/latest/installation.html#installation-for-contributors
+[winpy_link]: https://winpython.github.io/
+
+### conda
 
 pycolorbar can be installed via [conda][conda_link] on Linux, Mac, and Windows.
 Install the package by typing the following command in a command terminal:
@@ -49,55 +51,24 @@ Install the package by typing the following command in a command terminal:
 In case conda forge is not set up for your system yet, see the easy to follow
 instructions on [conda forge][conda_forge_link].
 
+[conda_link]: https://docs.conda.io/en/latest/miniconda.html
+[conda_forge_link]: https://github.com/conda-forge/pycolorbar-feedstock#installing-pycolorbar
 
-## Documentation for pycolorbar
+## 💭 Feedback and Contributing Guidelines
 
-You can find the documentation under [pycolorbar.readthedocs.io][doc_link]
+If you aim to contribute your data or discuss the future development of pycolorbar,
+we highly suggest to join the [**pycolorbar Slack Workspace**](https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g)
 
-### Tutorials and Examples
-
-The documentation also includes some [tutorials][tutorial_link], showing the most important use cases of pycolorbar.
-These tutorial are also available as Jupyter Notebooks and in Google Colab:
-
-- 1. Introduction to colormaps definition [[Notebook][tut3_label_link]][[Colab][colab3_label_link]]
-- 2. Introduction to colorbars definition [[Notebook][tut3_label_link]][[Colab][colab3_label_link]]
-- 3. Introduction to bivariate colorbars  [[Notebook][tut3_label_link]][[Colab][colab3_label_link]]
-- 4. Introduction to trivariate colorbars [[Notebook][tut3_label_link]][[Colab][colab3_label_link]]
-
+Feel free to also open a [GitHub Issue](https://github.com/ghiggi/pycolorbar/issues) or a [GitHub Discussion](https://github.com/ghiggi/pycolorbar/discussions) specific to your questions or ideas.
 
 ## Citation
 
-If you are using pycolorbar in your publication please cite our paper:
+If you are using pycolorbar in your publication please cite our Zenodo repository:
 
-TODO: GMD
-
-You can cite the  code publication of pycolorbar by:
-
-> Ghiggi Gionata & XXXX . ghiggi/pycolorbar. Zenodo. https://doi.org/10.5281/zenodo.10613635
+> Ghiggi Gionata. ghiggi/pycolorbar. Zenodo. [![https://doi.org/10.5281/zenodo.10613635](https://zenodo.org/badge/664671614.svg?style=flat)](https://doi.org/10.5281/zenodo.10613635)
 
 If you want to cite a specific version, have a look at the [Zenodo site](https://doi.org/10.5281/zenodo.10613635).
-
-## Requirements:
-
-- [numpy](https://numpy.org/)
-- [matplotlib](https://matplotlib.org/)
 
 ## License
 
 The content of this repository is released under the terms of the [MIT](LICENSE) license.
-
-
-[pip_link]: https://pypi.org/project/gstools
-[conda_link]: https://docs.conda.io/en/latest/miniconda.html
-[conda_forge_link]: https://github.com/conda-forge/pycolorbar-feedstock#installing-pycolorbar
-[conda_pip]: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-pkgs.html#installing-non-conda-packages
-[pipiflag]: https://pip-python3.readthedocs.io/en/latest/reference/pip_install.html?highlight=i#cmdoption-i
-[winpy_link]: https://winpython.github.io/
-
-[tutorial_link]: https://github.com/ghiggi/pycolorbar/tree/master#tutorials-and-examples
-
-[tut3_label_link]: https://github.com/ghiggi/pycolorbar/tree/master/tutorials
-[colab3_label_link]: https://github.com/ghiggi/pycolorbar/tree/master/tutorials
-
-[tut3_patch_link]: https://github.com/ghiggi/pycolorbar/tree/master/tutorials
-[colab3_patch_link]: https://github.com/ghiggi/pycolorbar/tree/master/tutorials

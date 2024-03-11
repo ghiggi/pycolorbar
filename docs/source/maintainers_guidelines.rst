@@ -153,8 +153,8 @@ The review process is the following:
 
 
 
-Continuous integration (CI) testing tools
-===========================================
+Continuous integration (CI)
+===============================
 
 Currently, on each Pull Request, GitHub Actions are configured as follow:
 
