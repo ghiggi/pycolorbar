@@ -2,46 +2,21 @@
 Contribute Colormaps
 ======================
 
-Do you want to contribute your own colormap to to pycolorbar ? Great! You are in the right place !
+Do you want to contribute your own colormap to the pycolorbar archive ? Great! You are in the right place !
 
-The data contributor is asked to perform the following 4 tasks:
-
--  a
--  b
--  c
--
-
-Before proceeding, you need to start thinking about the ``<DATA_SOURCE>`` and ``<CAMPAIGN_NAME>`` names of your stations.
-The name you adopt for the ``<DATA_SOURCE>`` and ``<CAMPAIGN_NAME>`` will be used to define:
-
--  the name of the directory where the colormaps YAML files will be stored in the pycolorbar archive.
--  the name of the colormaps you want to contribute.
-
-
-.. note:: Guidelines for the naming of the colormaps:
-
-   * The colormap name must not end with `_r`.
-
-   * Usage of dash ( - ) and underscore ( _ ) is allowed.
-
-   * Consider to add the name of source package or colormap collection as a prefix following the pattern `<package_name>.<colormap_name>`
-
-   * Avoid the use of dots ( . ) if not for identify the source package or colormap collection.
-
-
-Here below we provide a detailed description of the steps to follow to contribute your data to pycolorbar:
+Here below we provide a detailed description of the steps to follow to contribute your colormap configuration to pycolorbar:
 
 * `Step 1 <#step1>`_: Fork and download the pycolorbar repository
 * `Step 2 <#step2>`_: Fork and install the pycolorbar python package in editable mode
-* `Step 3 <#step3>`_: Add the colormap YAML files pycolorbar/etc/colormaps
-* `Step 4 <#step4>`_: Test the colormaps can be retrieved using pycolorbar
-* `Step 5 <#step5>`_: Open a Pull Request to submit your colormaps !
+* `Step 3 <#step3>`_: Define and save the colormap configurations
+* `Step 4 <#step4>`_: Test the configurations validity
+* `Step 5 <#step5>`_: Submit your colormaps !
 
 Before going down the road, please also have a look at the `Contributors Guidelines <contributors_guidelines.html>`_.
 
 .. _step1:
 
-Step 1: Fork and download the pycolorbar Metadata Archive
+Step 1: Fork and download the pycolorbar repository
 --------------------------------------------------------------
 
 1. Go to the `pycolorbar repository <https://github.com/ghiggi/pycolorbar>`__, fork the repository on your GitHub account and then clone the forked repository:
@@ -137,50 +112,69 @@ to install your local version of the `pycolorbar python package  <https://github
 
 .. _step3:
 
-Step 3: Add colormaps YAML files
---------------------------------------------
+Step 3: Define and save the colormap configurations
+----------------------------------------------------
 
-TODO: Add the description of the steps to follow to add the colormap YAML files to the pycolorbar/etc/colormaps directory.
+To start defining your colormap configuration YAML files, please refers
+to the :doc:`Introduction to Univariate Colormaps <tutorials/Introduction_univariate_colormaps>`
+documentation.
+
+Consider adding relevant colormap categories within the `category` field of the `auxiliary` subdictionary.
+These categories help differentiate between colormaps based on:
+
+- the type of colormap: `cyclic`, `diverging`, `sequential`, `qualitative`, `perceptual`.
+- the variables for which the colormap is commonly used (i.e. elevation, bathymetry, precipitation, temperature, etc.).
+- the author or source agency of the colormap (i.e. `brewer`, `crameri`, `meteoswiss`, `nasa`, etc.).
+
+Additionally, in the `auxiliary` subdictionary, you can specify custom fields such
+as `comments`, `references`, `url`, `author`, `license`.
+
+Once your colormap configurations are finalized, save the configuration YAML files in the `pycolorbar/etc/colormaps` directory.
+
+Before proceeding, please review the existing directories within `pycolorbar/etc/colormaps`.
+If it seems appropriate, create a new directory and place your colormap configuration YAML files inside it.
+
+.. note:: Guidelines for the naming of the colormap configuration YAML files:
+
+   * The colormap name must not end with `_r`.
+
+   * Usage of dash ( - ) and underscore ( _ ) is allowed.
+
+   * If you're adding colormap configurations of a specific author (i.e. `brewer`, `crameri`), consider naming the new directory after the original author.
+
+   * If you're adding colormap configurations of a specific variable (i.e. `precipitation`, `temperature`), consider naming the new directory after the variable.
+
+
+.. _step4:
+
+Step 4: Test the configurations validity
+------------------------------------------
+
+When you are done with the editing your colormaps YAML files, please verify that
+the colormap configurations you added are valid.
+
+To test the validity of the colormap configurations, you can execute the following command in your terminal:
+
+.. code:: bash
+
+   python -c "import pycolorbar; pycolorbar.check_colormap_archive()"
+
+or alternatively you can run the `check_colormap_archive` function in python:
 
 .. code:: python
 
     import pycolorbar
 
-    base_dir = "<path_to>/pycolorbar/pycolorbar"
-    pycolorbar.colormaps.add_cmap_dict()
-    pycolorbar.colormaps.validate()
+    pycolorbar.check_colormap_archive()
 
-
-The YAML file can contain auxiliary information related to the colormap.
-
-The optional auxiliary metadata keys are:
-
-* the ``category``
-
-
-TODO: check perceptual, check category, check_not_exists_already ...
-
-
-.. _step4:
-
-Step 4: Test colormaps YAML files
---------------------------------------
-
-When you are done with the editing your colormaps YAML files, please run the
-following command to check that the specified colormaps YAML files are valid:
-
-.. code:: bash
-
-   pycolorbar_test_colormaps
-
-
-
+If these commands do not raise errors, congratulations ! Your colormap configurations are valid.
 
 .. _step5:
 
-Step 5: Open a Pull Request to submit your colormaps !
---------------------------------------------------------------
+Step 5: Submit your colormaps
+-------------------------------
 
- If everything looks as expected ... congratulations, you made it !!!
+You are now ready to open a Pull Request and submit your colormaps to the pycolorbar archive.
 
-Your Pull Requests will be merged as soon as a pycolorbar maintainer can check your work, and the data and reader will be available to the pycolorbar community.
+Your Pull Requests will be merged as soon as a pycolorbar maintainer can check your work,
+and the colormap will be available to the pycolorbar community.

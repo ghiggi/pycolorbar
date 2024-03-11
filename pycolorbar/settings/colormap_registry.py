@@ -620,6 +620,12 @@ def check_colormap_archive():
     """Check the pycolorbar colormap archive."""
     import pycolorbar
 
+    # Reset registry
+    pycolorbar.colormaps.reset()
+
+    # Register the pycolorbar default colormaps
     colormap_dir = pycolorbar.etc_directory
-    pycolorbar.register_colormaps(os.path.join(colormap_dir, "colormaps"))
+    pycolorbar.register_colormaps(os.path.join(colormap_dir, "colormaps"), force=False)
+
+    # Validate the colormaps
     pycolorbar.colormaps.validate()  # validate all colormaps in the registry
