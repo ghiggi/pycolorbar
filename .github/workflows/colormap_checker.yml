@@ -1,0 +1,24 @@
+name: Check Colormap Archive Compliance
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up micromamba
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: ci/environment.yml
+          create-args: "python=3.11"
+          init-shell: bash
+      - name: Install pycolorbar
+        run: |
+          pip install pycolorbar
+
+      - name: Run the Colormap Checker
+        run: |
+          python -c "import pycolorbar; pycolorbar.check_colormap_archive()"

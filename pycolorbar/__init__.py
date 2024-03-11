@@ -40,6 +40,7 @@ from pycolorbar.settings.colorbar_visualization import show_colorbar, show_color
 from pycolorbar.settings.colormap_registry import (  # noqa
     ColormapRegistry,
     available_colormaps,
+    check_colormap_archive,
     get_cmap,
     get_cmap_dict,
     register_colormap,

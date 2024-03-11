@@ -614,3 +614,12 @@ def available_colormaps(category=None, include_reversed=False):
     names += _get_matplotlib_cmaps(category=category, include_reversed=include_reversed)
     names = sorted(np.unique(names))
     return names
+
+
+def check_colormap_archive():
+    """Check the pycolorbar colormap archive."""
+    import pycolorbar
+
+    colormap_dir = pycolorbar.etc_directory
+    pycolorbar.register_colormaps(os.path.join(colormap_dir, "colormaps"))
+    pycolorbar.colormaps.validate()  # validate all colormaps in the registry
