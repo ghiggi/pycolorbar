@@ -30,6 +30,7 @@ jobs:
           python -m build
 
       - name: Publish distribution to PyPI
+        if: success() || failure()
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
