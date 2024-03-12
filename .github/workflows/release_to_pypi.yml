@@ -8,6 +8,8 @@ jobs:
   build-n-publish:
     name: Build and publish to PyPI
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout source
@@ -34,12 +36,14 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Get Asset name
+        if: success() || failure()
         run: |
           export PKG=$(ls dist/ | grep tar)
           set -- $PKG
           echo "asset_name=$1" >> $GITHUB_ENV
 
       - name: Create GitHub Release
+        if: success() || failure()
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
