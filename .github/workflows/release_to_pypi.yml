@@ -30,19 +30,20 @@ jobs:
           python -m build
 
       - name: Publish distribution to PyPI
-        if: success() || failure()
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Get Asset name
+        if: success() || failure()
         run: |
           export PKG=$(ls dist/ | grep tar)
           set -- $PKG
           echo "asset_name=$1" >> $GITHUB_ENV
 
       - name: Create GitHub Release
+        if: success() || failure()
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
