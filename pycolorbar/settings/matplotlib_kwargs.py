@@ -341,6 +341,13 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
     return default_plot_kwargs, default_cbar_kwargs
 
 
+def _count_length(v):
+    if v is None:
+        return 0
+    else:
+        return len(v)
+
+
 def _check_valid_ticks_ticklabels(user_cbar_kwargs, default_cbar_kwargs):
     user_ticks = user_cbar_kwargs.get("ticks", None)
     user_ticklabels = user_cbar_kwargs.get("ticklabels", None)
@@ -349,10 +356,10 @@ def _check_valid_ticks_ticklabels(user_cbar_kwargs, default_cbar_kwargs):
         user_ticklabels = user_cbar_kwargs.get("ticklabels", None)
         default_ticks = default_cbar_kwargs.get("ticks", None)
         default_ticklabels = default_cbar_kwargs.get("ticklabels", None)
-        user_ticks_length = len(user_cbar_kwargs.get("ticks", []))
-        user_ticklabels_length = len(user_cbar_kwargs.get("ticklabels", []))
-        default_ticks_length = len(default_cbar_kwargs.get("ticks", []))
-        default_ticklabels_length = len(default_cbar_kwargs.get("ticklabels", []))
+        user_ticks_length = _count_length(user_ticks)
+        user_ticklabels_length = _count_length(user_ticklabels)
+        default_ticks_length = _count_length(default_ticks)
+        default_ticklabels_length = _count_length(default_ticklabels)
         if user_ticks is not None and user_ticklabels is not None:
             if user_ticks_length != user_ticklabels_length:
                 raise ValueError(
@@ -425,7 +432,7 @@ def _create_boundary_norm_from_levels(user_plot_kwargs, default_plot_kwargs):
         default_plot_kwargs["cmap"] = default_plot_kwargs["cmap"].resampled(ncolors)
     # Add "BoundaryNorm" to user_plot_kwargs
     user_plot_kwargs["norm"] = norm
-    # Remove "levels"
+    # Remove "levels" from user kwargs
     _ = user_plot_kwargs.pop("levels")
 
 
