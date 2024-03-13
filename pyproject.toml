@@ -42,7 +42,7 @@ requires-python = ">=3.9"
 dynamic = ["version"]
 
 [project.optional-dependencies]
-dev = ["pre-commit",
+dev = ["pre-commit", "loghub",
        "deepdiff",
        "pytest", "pytest-cov", "pytest-mock",
        "setuptools",
