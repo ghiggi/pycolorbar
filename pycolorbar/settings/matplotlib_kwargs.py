@@ -271,8 +271,11 @@ def _get_ticks_settings(cbar_dict, norm=None):
 #### Update pycolorbar settings based on user arguments
 
 
-def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_kwargs={}, user_cbar_kwargs={}):
+def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_kwargs=None, user_cbar_kwargs=None):
+
     # If no user kwargs, return default kwargs
+    user_plot_kwargs = {} if user_plot_kwargs is None else user_plot_kwargs
+    user_cbar_kwargs = {} if user_cbar_kwargs is None else user_cbar_kwargs
     if user_plot_kwargs == {} and user_cbar_kwargs == {}:
         return default_plot_kwargs, default_cbar_kwargs
 

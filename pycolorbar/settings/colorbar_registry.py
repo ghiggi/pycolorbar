@@ -342,7 +342,7 @@ class ColorbarRegistry:
         list_args = [[name] + list(self.get_plot_kwargs(name=name)) for name in names]
         plot_colorbars(list_args, subplot_size=subplot_size)
 
-    def get_plot_kwargs(self, name=None, user_plot_kwargs={}, user_cbar_kwargs={}):
+    def get_plot_kwargs(self, name=None, user_plot_kwargs=None, user_cbar_kwargs=None):
         """Get pycolorbar plot kwargs (updated with optional user arguments)."""
         from pycolorbar.settings.matplotlib_kwargs import (
             get_plot_cbar_kwargs,
@@ -454,7 +454,7 @@ def get_cbar_dict(name, resolve_reference=True):
     return colorbars.get_cbar_dict(name, resolve_reference=resolve_reference)
 
 
-def get_plot_kwargs(name=None, user_plot_kwargs={}, user_cbar_kwargs={}):
+def get_plot_kwargs(name=None, user_plot_kwargs=None, user_cbar_kwargs=None):
     """
     Get matplotlib, xarray and geopandas compatible plot and colorbar kwargs.
 
