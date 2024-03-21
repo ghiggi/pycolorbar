@@ -556,6 +556,8 @@ class ColorbarSettings(BaseModel):
     extendfrac: Optional[Union[float, list[float], str]] = "auto"
     extendrect: Optional[bool] = False
     label: Optional[str] = None  # title of colorbar
+    ticklabels: Optional[list[str]] = None
+    ticks: Optional[list[Union[int, float]]] = None  # title of colorbar
 
     @field_validator("extend")
     def validate_extend(cls, v):

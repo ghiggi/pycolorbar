@@ -308,12 +308,12 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
         _check_valid_ticks_ticklabels(user_cbar_kwargs=user_cbar_kwargs, default_cbar_kwargs=default_cbar_kwargs)
 
     # -------------------------------------------------------------------------------
-    # Deal with categorical/discrete colorbar (when user specify new norm)
-    # - Remove ticks and ticklabels when user specify new norm !
+    # Deal with categorical/discrete colorbar
+    # - Remove ticks and ticklabels when user specify new norm or 'levels' !
     # - Later on:
     #   - If user specify a new cmap --> the cmap is resampled based on len(ticklabels)
     #   - If vmin or vmax are specified --> a Normalize(vmin, vmax) replace BoundaryNorm
-    if user_plot_kwargs.get("norm", None) is not None:
+    if user_plot_kwargs.get("norm", None) is not None or user_plot_kwargs.get("levels", None) is not None:
         _remove_defaults_ticks_and_ticklabels(default_cbar_kwargs=default_cbar_kwargs)
 
     # Deal with categorical/discrete labeled colorbar (when user provides a new cmap)

@@ -342,6 +342,22 @@ class TestUpdatePlotCbarKwargs:
         # Assert that the others default_cbar_kwargs are kept
         assert "extend" in cbar_kwargs
 
+    def test_user_levels_specified(self, default_plot_kwargs):
+        """Test original ticks and ticklabels are removed from default_cbar_kwargs."""
+        user_plot_kwargs = {"levels": [1000, 2000, 3000]}
+        default_cbar_kwargs = {"ticks": ["whatever"], "ticklabels": ["whatever"], "extend": "both"}
+        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+            user_plot_kwargs=user_plot_kwargs,
+        )
+        # Assert cbar_kwargs does not contain anymore default_cbar_kwargs ticks and ticklabels
+        assert "ticks" not in cbar_kwargs
+        assert "ticklabels" not in cbar_kwargs
+        assert isinstance(plot_kwargs["norm"], BoundaryNorm)
+        # Assert that the others default_cbar_kwargs are kept
+        assert "extend" in cbar_kwargs
+
     def test_user_cmap_for_labeled_colorbar(self, default_plot_kwargs, default_cbar_kwargs):
         """Test resampling user-provided colormap for categorical and discrete colorbar."""
         user_plot_kwargs = {"cmap": plt.get_cmap("Spectral", 256)}
