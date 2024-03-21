@@ -27,6 +27,7 @@
 """Define functions to retrieve the plotting arguments."""
 
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import (
     AsinhNorm,
@@ -282,7 +283,7 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
     # If user cmap
     # - is a string, retrieve colormap
     # - is None --> delete the argument
-    _parse_user_cmap(user_plot_kwargs=user_plot_kwargs)
+    user_plot_kwargs = _parse_user_cmap(user_plot_kwargs=user_plot_kwargs)
 
     # If norm is specified, vmin and vmax must be None !
     _check_no_vmin_vmax_if_norm_specified(user_plot_kwargs=user_plot_kwargs)
@@ -429,9 +430,11 @@ def _create_boundary_norm_from_levels(user_plot_kwargs, default_plot_kwargs):
     # Define boundary norm
     norm = BoundaryNorm(boundaries=boundaries, ncolors=ncolors)
     # Resample colormap
-    if "cmap" in user_plot_kwargs:
+    if user_plot_kwargs.get("cmap", None) is not None:
         user_plot_kwargs["cmap"] = user_plot_kwargs["cmap"].resampled(ncolors)
     else:
+        if default_plot_kwargs.get("cmap", None) is None:
+            default_plot_kwargs["cmap"] = plt.get_cmap()
         default_plot_kwargs["cmap"] = default_plot_kwargs["cmap"].resampled(ncolors)
     # Add "BoundaryNorm" to user_plot_kwargs
     user_plot_kwargs["norm"] = norm
@@ -483,3 +486,4 @@ def _parse_user_cmap(user_plot_kwargs):
         user_plot_kwargs["cmap"] = pycolorbar.get_cmap(name=cmap)
     if cmap is None:
         _ = user_plot_kwargs.pop("cmap", None)
+    return user_plot_kwargs

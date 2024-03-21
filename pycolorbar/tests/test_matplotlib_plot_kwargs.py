@@ -356,6 +356,7 @@ class TestUpdatePlotCbarKwargs:
     def test_create_boundary_norm_from_levels_list(self, default_plot_kwargs, default_cbar_kwargs):
         """Test creating BoundaryNorm and resampling cmap based on 'levels' list in user_plot_kwargs."""
         user_plot_kwargs = {"cmap": plt.get_cmap("Spectral"), "levels": [0, 0.5, 1.0]}
+        default_plot_kwargs["cmap"] = None  # this should also pass
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
