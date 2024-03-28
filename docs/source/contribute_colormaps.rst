@@ -6,10 +6,9 @@ Do you want to contribute your own colormap to the pycolorbar archive ? Great! Y
 
 Here below we provide a detailed description of the steps to follow to contribute your colormap configuration to pycolorbar:
 
-* `Step 1 <#step1>`_: Fork, clone and install the pycolorbar repository
-* `Step 2 <#step2>`_: Define and save the colormap configurations
-* `Step 3 <#step3>`_: Test the configurations validity
-* `Step 4 <#step4>`_: Submit your colormaps !
+.. contents::
+   :depth: 1
+   :local:
 
 Before going down the road, please also have a look at the `Contributors Guidelines <contributors_guidelines.html>`_.
 
