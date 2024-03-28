@@ -558,6 +558,10 @@ class ColorbarSettings(BaseModel):
     label: Optional[str] = None  # title of colorbar
     ticklabels: Optional[list[str]] = None
     ticks: Optional[list[Union[int, float]]] = None  # title of colorbar
+    ticklocation: Optional[str] = "auto"
+    spacing: Optional[str] = "uniform"  # or proportional
+    drawedges: Optional[bool] = False
+    shrink: Optional[float] = 1
 
     @field_validator("extend")
     def validate_extend(cls, v):

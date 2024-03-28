@@ -44,7 +44,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 dev = ["pre-commit", "loghub",
        "deepdiff",
-       "pytest", "pytest-cov", "pytest-mock",
+       "pytest", "pytest-cov", "pytest-mock", "pytest-sugar",
        "setuptools",
        "build", "twine",
 ]

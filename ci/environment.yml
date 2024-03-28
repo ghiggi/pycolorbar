@@ -18,6 +18,7 @@ dependencies:
   - pytest
   - pytest-cov
   - pytest-mock
+  - pytest-sugar
   - deepdiff
   - requests-mock
   - pip

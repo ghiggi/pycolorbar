@@ -270,7 +270,7 @@ class TestPlotCbarKwargs:
 
         # Check for ticklabels
         assert "ticklabels" in cbar_kwargs
-        assert cbar_kwargs["ticklabels"] == ["0", "0.50", "1"]
+        assert cbar_kwargs["ticklabels"] == ["0", "0.5", "1"]
         assert cbar_kwargs["ticks"] == [0, 0.5, 1]
 
     def test_custom_categorical_colorbar(self):

@@ -166,6 +166,8 @@ def get_norm(norm_settings):
 
 
 def get_plot_cbar_kwargs(cbar_dict):
+    cbar_dict = cbar_dict.copy()
+
     # ------------------------------------------------------------------------.
     # Set default colormap
     # if "cmap" not in  cbar_dict:
@@ -179,17 +181,22 @@ def get_plot_cbar_kwargs(cbar_dict):
     cbar_kwargs = get_default_cbar_kwargs()
 
     # ------------------------------------------------------------------------.
-    # Define cmap, norm, ticks and cbar appearance based on colorbar dictionary settings
+    # Define cmap and norm based on colorbar dictionary settings
     plot_kwargs["cmap"] = get_cmap(cbar_dict)
     if "norm" in cbar_dict:
+        # Add norm to plot_kwargs
         norm = get_norm(cbar_dict["norm"])
         plot_kwargs["norm"] = norm
-        ticks, ticklabels = _get_ticks_settings(cbar_dict, norm=norm)
-        cbar_kwargs["ticks"] = ticks
-        if ticklabels is not None:  # Temporary condition because matplotlib.colorbar do not accept ticklabels
-            cbar_kwargs["ticklabels"] = ticklabels
+    else:
+        norm = None
+    # ------------------------------------------------------------------------.
+    # Define cbar_kwargs
     if "cbar" in cbar_dict:
         cbar_kwargs.update(cbar_dict["cbar"])
+
+    # ------------------------------------------------------------------------.
+    # Add default ticks and ticklabels for BoundaryNorm
+    cbar_kwargs = _finalize_ticks_arguments(cbar_kwargs=cbar_kwargs, cbar_dict=cbar_dict, norm=norm)
 
     # ------------------------------------------------------------------------.
     return plot_kwargs, cbar_kwargs
@@ -213,59 +220,96 @@ def get_default_cbar_kwargs():
 
 def _decimal_places(value, cap=4):
     """Determine the number of decimal places needed for formatting."""
+
     if value.is_integer():
         return 0  # No decimal places needed for integer values
     magnitude = np.abs(value)
+    # Add only 1 decimal for values above 1
     if magnitude >= 1:
-        return 1  # Default for values >= 1
+        return 1
     else:
         # Dynamically calculate decimal places based on magnitude (and cap at i.e. 4 decimals)
         return min(int(np.ceil(-np.log10(magnitude))) + 1, cap)
 
 
-def _format_label(value, decimal_places):
+def _count_string_decimals(value):
+    """Count the number of decimal places in a value."""
+    if "." in value:
+        return len(value) - value.index(".") - 1
+    else:
+        return 0
+
+
+def _ensure_increasing_or_equal_values(arr):
+    result = [arr[0]]  # Start with the first element
+    for i in range(1, len(arr)):
+        result.append(max(arr[i], result[-1]))  # Append maximum of current value and previous result
+    return result
+
+
+def _format_label(value, decimals, strip_zero=True):
     """Format the label based on the number of decimal places."""
-    if decimal_places == 0:
+    if decimals == 0:
         return str(int(value))
-    formatting = f"{{:,.{decimal_places}f}}"
-    return formatting.format(value)
+    formatting = f"{{:,.{decimals}f}}"
+    formatted_value = formatting.format(value)
+    if strip_zero:
+        formatted_value = formatted_value.rstrip("0").rstrip(".")  # strip excess 0.080 --> 0.08
+    return formatted_value
 
 
 def _dynamic_formatting_floats(values, cap=4):
-    """Dynamically format floats defining class limits of the colorbar."""
+    """Dynamically format floats defining class limits of the colorbar.
+
+    Assumptions:
+
+    - Only positive values
+    - At least two values
+    """
     values = np.array(values, dtype=float)
-    labels = [_format_label(value, _decimal_places(value, cap=cap)) for value in values]
+    decimals_values = [_decimal_places(value, cap=cap) for value in values]
+    labels = [_format_label(value, decimals) for value, decimals in zip(values, decimals_values)]
+    # Ensure only decreasing decimals
+    actual_decimals = [_count_string_decimals(label) for label in labels]
+    final_decimals = _ensure_increasing_or_equal_values(actual_decimals[::-1])[::-1]
+    labels = [_format_label(value, decimals, strip_zero=False) for value, decimals in zip(values, final_decimals)]
+    labels = ["0" if float(label) == 0 else label for label in labels]
     return labels
 
 
-def _get_ticks_settings(cbar_dict, norm=None):
+def _finalize_ticks_arguments(cbar_kwargs, cbar_dict, norm):
+    """Add ticks and ticklabels arguments for Discrete, Discretized and Categorical Colorbars."""
     # Retrieve settings
-    norm_settings = cbar_dict["norm"]
+    norm_settings = cbar_dict.get("norm", {})
+    norm_name = norm_settings.get("name", "Norm")
+
+    # Define ticks and ticklabels for BoundaryNorm instances
+    if not (norm_name == "BoundaryNorm" or norm_name == "CategoryNorm"):
+        return cbar_kwargs
+
+    # Retrieve discrete norm information
     boundaries = norm_settings.get("boundaries", None)
     labels = norm_settings.get("labels", None)
-    # Define ticks and ticklabels for BoundaryNorm instances
-    if isinstance(norm, BoundaryNorm):
-        # Define ticks
-        if boundaries is not None:  # BoundaryNorm
+    ticks = cbar_kwargs.get("ticks", None)
+    ticklabels = cbar_kwargs.get("ticklabels", None)
+
+    # Define ticks
+    if norm_name == "BoundaryNorm":  # Discrete /Discretized Colorbar
+        if ticks is None and ticklabels is None:
             ticks = boundaries
-        else:  # CategoryNorm
-            ticks = norm.boundaries[:-1] + 0.5
-        # Define ticklabels
-        if labels is None:  # BoundaryNorm
+        if ticklabels is None:
             # Generate color level strings with correct amount of decimal places
             ticklabels = _dynamic_formatting_floats(ticks)  # [f"{tick:.1f}" for tick in ticks] # for 0.1 probability
-        else:
-            # Define tick formatter and ticks
-            fmt = mpl.ticker.FuncFormatter(lambda x, pos: labels[norm(x)])
-            ticklabels = [fmt(tick) for tick in ticks]
-    else:
-        ticks = None
-        ticklabels = None
-    if ticks is not None:
-        ticks = list(ticks)
-    if ticklabels is not None:
-        ticklabels = list(ticklabels)
-    return ticks, ticklabels
+    elif norm_name == "CategoryNorm":  # Categorical Colorbar
+        ticks = norm.boundaries[:-1] + 0.5
+        # Define tick formatter and ticks
+        fmt = mpl.ticker.FuncFormatter(lambda x, pos: labels[norm(x)])
+        ticklabels = [fmt(tick) for tick in ticks]
+
+    # Format back to list
+    cbar_kwargs["ticks"] = list(ticks)
+    cbar_kwargs["ticklabels"] = list(ticklabels)
+    return cbar_kwargs
 
 
 ####--------------------------------------------------------------------------------------------.

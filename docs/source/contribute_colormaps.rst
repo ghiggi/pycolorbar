@@ -6,17 +6,16 @@ Do you want to contribute your own colormap to the pycolorbar archive ? Great! Y
 
 Here below we provide a detailed description of the steps to follow to contribute your colormap configuration to pycolorbar:
 
-* `Step 1 <#step1>`_: Fork and download the pycolorbar repository
-* `Step 2 <#step2>`_: Fork and install the pycolorbar python package in editable mode
-* `Step 3 <#step3>`_: Define and save the colormap configurations
-* `Step 4 <#step4>`_: Test the configurations validity
-* `Step 5 <#step5>`_: Submit your colormaps !
+* `Step 1 <#step1>`_: Fork, clone and install the pycolorbar repository
+* `Step 2 <#step2>`_: Define and save the colormap configurations
+* `Step 3 <#step3>`_: Test the configurations validity
+* `Step 4 <#step4>`_: Submit your colormaps !
 
 Before going down the road, please also have a look at the `Contributors Guidelines <contributors_guidelines.html>`_.
 
 .. _step1:
 
-Step 1: Fork and download the pycolorbar repository
+Step 1: Fork, clone and install the pycolorbar repository
 --------------------------------------------------------------
 
 1. Go to the `pycolorbar repository <https://github.com/ghiggi/pycolorbar>`__, fork the repository on your GitHub account and then clone the forked repository:
@@ -25,7 +24,8 @@ Step 1: Fork and download the pycolorbar repository
 
       git clone https://github.com/<your_username>/pycolorbar.git
 
-2. Go inside the ``pycolorbar`` directory where you have cloned the repository:
+2. Go inside the ``pycolorbar`` directory where you have cloned the repository and install the pycolorbar python package in editable mode
+   following the guidelines reported in the :ref:`Installation for Contributors <installation_contributor>`.
 
 3. Create a new branch:
 
@@ -58,61 +58,7 @@ Step 1: Fork and download the pycolorbar repository
 
 .. _step2:
 
-Step 2: Install pycolorbar in editable mode
--------------------------------------------
-
-In order to contribute a reader to pycolorbar, it is necessary that you follow the steps detailed here below
-to install your local version of the `pycolorbar python package  <https://github.com/ghiggi/pycolorbar>`__ in editable mode.
-
-
-1. Go to the `pycolorbar python package repository <https://github.com/ghiggi/pycolorbar>`__, fork the repository on your GitHub account and then clone the forked repository:
-
-   .. code:: bash
-
-      git clone https://github.com/<your_username>/pycolorbar.git
-
-2. Go inside the ``pycolorbar`` directory where you have cloned the repository
-
-3. Create a new branch where you will add your colormaps:
-
-   .. code:: bash
-
-      git checkout -b "add-colormaps-<name>"
-
-
-4. Set the remote upstream branch:
-
-   .. code:: bash
-
-      git push --set-upstream origin "add-colormaps-<name>"
-
-5. Every time you will now ``git add *`` and ``git commit -m <describe-your-change>`` your changes, you will be able to push them to your forked repository with:
-
-   .. code:: bash
-
-      git push
-
-
-6. When you want to show your changes to the pycolorbar maintainers, you will need to open a Pull Request.
-   To do so, go to the `GitHub pycolorbar repository <https://github.com/ghiggi/pycolorbar>`__, open the Pull Request and ask for a review.
-
-   For more information on GitHub Pull Requests, read the
-   `"Create a pull request documentation" <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`__.
-
-   If you struggle with this process, do not hesitate to raise an `issue <https://github.com/ghiggi/pycolorbar/issues/new/choose>`__
-   or ask in the `pycolorbar Slack Workspace <https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g>`__ so that we can help !
-
-
-7. Finally, install the pycolorbar python package in editable mode using:
-
-   .. code:: bash
-
-      pip install -e .
-
-
-.. _step3:
-
-Step 3: Define and save the colormap configurations
+Step 2: Define and save the colormap configurations
 ----------------------------------------------------
 
 To start defining your colormap configuration YAML files, please refers
@@ -145,9 +91,9 @@ If it seems appropriate, create a new directory and place your colormap configur
    * If you're adding colormap configurations of a specific variable (i.e. `precipitation`, `temperature`), consider naming the new directory after the variable.
 
 
-.. _step4:
+.. _step3:
 
-Step 4: Test the configurations validity
+Step 3: Test the configurations validity
 ------------------------------------------
 
 When you are done with the editing your colormaps YAML files, please verify that
@@ -171,7 +117,7 @@ If these commands do not raise errors, congratulations ! Your colormap configura
 
 .. _step5:
 
-Step 5: Submit your colormaps
+Step 4: Submit your colormaps
 -------------------------------
 
 You are now ready to open a Pull Request and submit your colormaps to the pycolorbar archive.
