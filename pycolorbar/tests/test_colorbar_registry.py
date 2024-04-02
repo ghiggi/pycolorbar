@@ -310,7 +310,6 @@ class TestColorbarRegistry:
 
 def test_utility_methods(colorbar_test_filepath):
     """Tests register_colorbar, get_cbar_dict and get_plot_kwargs utility."""
-
     cbar_name = "TEST_CBAR_1"
     assert cbar_name not in pycolorbar.colorbars
 

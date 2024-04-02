@@ -104,6 +104,7 @@ class ColorbarRegistry:
         validate: bool, optional
             Whether to validate the colorbar configuration file before registering.
             The default is `False`.
+
         Notes
         -----
         If a a colorbar configuration with the same name already exists, it will be overwritten.
@@ -323,7 +324,7 @@ class ColorbarRegistry:
         plot_colorbar(plot_kwargs=plot_kwargs, cbar_kwargs=cbar_kwargs, ax=None, subplot_size=fig_size)
 
     def show_colorbars(self, category=None, exclude_referenced=True, subplot_size=None):
-        """Display available colorbars (optionally of a specific category)"""
+        """Display available colorbars (optionally of a specific category)."""
         from pycolorbar.settings.colorbar_visualization import plot_colorbars
 
         # TODO: allow for names subset ?

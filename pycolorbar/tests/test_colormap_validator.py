@@ -34,9 +34,7 @@ from pycolorbar.settings.colormap_validator import validate_cmap_dict
 
 
 class TestColormapColorPalette:
-    """
-    Tests for validating color map configurations related to colors.
-    """
+    """Tests for validating color map configurations related to colors."""
 
     def test_valid_hex_colors(self):
         """Validate a colormap dictionary with valid hex colors."""
@@ -138,9 +136,7 @@ class TestColormapColorSpace:
     """Tests for validating color map configurations related to color_space."""
 
     def test_invalid_color_space(self):
-        """
-        Test color map validation with an invalid color space.
-        """
+        """Test color map validation with an invalid color space."""
         cmap_dict = {
             "colormap_type": "ListedColormap",
             "color_space": "invalid_color_space",
@@ -155,9 +151,7 @@ class TestColormapSegmentData:
     """Tests for validating color map configurations related to segmentdata."""
 
     def test_valid_segmentdata(self):
-        """
-        Validate a colormap dictionary with valid segmentdata for a LinearSegmentedColormap.
-        """
+        """Validate a colormap dictionary with valid segmentdata for a LinearSegmentedColormap."""
         segment_data = {
             "red": [(0.0, 0.0, 0.0), (0.5, 1.0, 1.0), (1.0, 1.0, 1.0)],
             "green": [(0.0, 0.0, 0.0), (0.25, 0.0, 0.0), (0.75, 1.0, 1.0), (1.0, 1.0, 1.0)],

@@ -70,8 +70,6 @@ addopts = "--cov --cov-report term-missing --cov-report xml --cov-report lcov:lc
 line-length = 120
 # skip-string-normalization = true
 target-version = [
-    "py37",
-    "py38",
     "py39",
     "py310",
     "py311",
@@ -80,7 +78,6 @@ target-version = [
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
-    "dev*",
     ".bzr",
     ".direnv",
     ".eggs",
@@ -105,22 +102,104 @@ exclude = [
 line-length = 120
 indent-width = 4
 
+[tool.ruff.format]
+
+# Enable reformatting of code snippets in docstrings.
+docstring-code-format = true
+
 [tool.ruff.lint]
-select = ["F",
-	  "E",
-	  "I",
-	  "W",
-	  "UP",
-	  "Q",
-	  #"SIM",
-	  #"PTH",
-	  #"RET",
-	 ]
-ignore = ["E722"]
+
+select = [
+    # pydocstyle
+    "D",
+    # Pyflakes
+    "F",
+    # pycodestyle
+    "E",
+    "W",
+    # isort
+    "I",
+    # pyupgrade
+    "UP",
+    # flake8-quotes
+    "Q",
+    # flake8-bugbear
+    # "B",
+    # flake8-return
+    # "RET",
+    # flake8-unused-arguments
+    # "ARG",
+    # flake8-raise
+    # "RSE",
+    # flake8-pytest-style
+    # "PT",
+    # flake8-simplify
+    # "SIM",
+    # Perflint
+    # "PERF",
+    # pandas-vet
+    # "PD",
+    # pylint
+    # "PL",
+    # flake8-commas
+    # "COM",
+    # flake8-slots
+    # "SLOT",
+    # flake8-comprehensions
+    # "C4",
+    # Ruff custom rules
+    # "RUF"
+
+    #---------------------
+    #### Future rules ####
+    # flake8-use-pathlib
+    # "PTH",
+    # NumPy-specific rules  (for 2.0)
+    # "NPY",
+    # refurb
+    # "FURB", # require preview
+]
+
+ignore = [
+    "E722",
+    "B904",
+    "B006", # {} defaults in function arguments
+    "PT011", # pytest raised error must be checked if match the expected error msg
+    "PERF203",
+    "PD901",
+    "PLW2901",
+    "PLW0603",
+    "RUF012",
+    "RUF015",
+    # Docstyle Rules
+    "D404", # Docstring can't start with "This"
+    "D401", # First sentence must be in imperative mood
+    "D100", "D101","D102", "D103", "D104", "D105",  # Missing docstrings
+    # Complexity rules
+    "PLR0913", # restrict max number of function argument
+    "PLR2004",
+    "PLR0912",
+    "PLR0915",
+]
+
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
+
 # fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
 unfixable = []
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+
+# Ignore `E402` (import violations) in all Jupyter Notebooks.
+"*.ipynb" = ["E402"]
+
+# Rules to ignore in test files
+"test_*.py" = [
+    "ARG",  # avoid problems with fixtures
+]
 
 [tool.codespell]
     ignore-words-list = 'nD'

@@ -290,7 +290,6 @@ def validate_hex_colors(colors: np.ndarray) -> bool:
     ValueError
         If the colors array is not 1-D or if any color is not a valid hex string.
     """
-
     _check_ndim(colors, 1)
     _check_type(colors, np.str_)
     hex_color_pattern = re.compile(r"^#(?:[0-9a-fA-F]{3}){1,2}$")

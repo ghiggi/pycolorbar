@@ -79,7 +79,6 @@ def setup_colormap_registry(tmp_path):
 @pytest.fixture
 def setup_colorbar_registry(tmp_path):
     """Fixture that register a colormap for testing purpose."""
-
     TEST_COLORBAR_DICT = {TEST_CBAR_NAME: TEST_CBAR_DICT}
 
     # Initialize pycolorbar.colorbar registry

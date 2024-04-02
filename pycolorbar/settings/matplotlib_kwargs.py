@@ -220,7 +220,6 @@ def get_default_cbar_kwargs():
 
 def _decimal_places(value, cap=4):
     """Determine the number of decimal places needed for formatting."""
-
     if value.is_integer():
         return 0  # No decimal places needed for integer values
     magnitude = np.abs(value)

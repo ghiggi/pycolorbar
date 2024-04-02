@@ -29,8 +29,7 @@ import numpy as np
 
 class ColorEncoderDecoder:
     def __init__(self, external_data_range, internal_data_range, name):
-        """
-        Initialize a color encoder-decoder to convert color values between external and internal representations.
+        """Initialize a color encoder-decoder to convert color values between external and internal representations.
 
         Parameters
         ----------
@@ -145,8 +144,8 @@ class ColorEncoderDecoder:
         return colors
 
     def check_valid_internal_data_range(self, colors):
-        """
-        Check if the color values are within the internal data range for each channel.
+        """Check if the color values are within the internal data range for each channel.
+
         Raises an informative ValueError if a channel does not comply with the data range.
 
         Parameters
@@ -172,6 +171,7 @@ class ColorEncoderDecoder:
     def check_valid_external_data_range(self, colors, strict=False):
         """
         Check if the color values are within the external data range for each channel.
+
         Raises an informative ValueError if a channel does not comply with the data range.
         If 'strict' is True, it ensures that not all values are within the internal data range.
 
@@ -234,6 +234,7 @@ class ColorEncoderDecoder:
     def is_within_external_data_range(self, colors, strict: bool = False):
         """
         Check if the color values of each channels are within the external data range.
+
         Optionally, perform a strict check to ensure that not all values are also within the internal data range.
 
         Parameters
@@ -570,6 +571,7 @@ def is_within_internal_data_range(colors, color_space):
 def is_within_external_data_range(colors, color_space, strict=False):
     """
     Check if the color values are within the external data range for the specified color space.
+
     Optionally, perform a strict check to ensure that not all values are also within the internal data range.
 
     Parameters
@@ -595,6 +597,7 @@ def is_within_external_data_range(colors, color_space, strict=False):
 def check_valid_internal_data_range(colors, color_space):
     """
     Check if the color values are within the internal data range for the specified color space.
+
     Raises an informative ValueError if a channel does not comply with the data range.
 
     Parameters
@@ -616,6 +619,7 @@ def check_valid_internal_data_range(colors, color_space):
 def check_valid_external_data_range(colors, color_space, strict=False):
     """
     Check if the color values are within the external data range for each channel.
+
     Raises an informative ValueError if a channel does not comply with the data range.
     If 'strict' is True, it ensures that not all values are within the internal data range.
 

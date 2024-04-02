@@ -135,6 +135,7 @@ class ColormapRegistry:
     def add_cmap_dict(self, cmap_dict: dict, name: str, verbose: bool = True, force=True):
         """
         Add a colormap to the registry by providing a colormap dictionary and the colormap name.
+
         A temporary file YAML configuration file is created in `ColormapRegistry.tmp_dir`.
 
         Parameters
@@ -335,7 +336,7 @@ class ColormapRegistry:
         plot_colormap(cmap)
 
     def show_colormaps(self, category=None, include_reversed=False, subplot_size=None):
-        """Display available colormaps (optionally of a specific category)"""
+        """Display available colormaps (optionally of a specific category)."""
         from pycolorbar.settings.colormap_visualization import plot_colormaps
 
         # Retrieve available colormaps (of a given category)
@@ -604,6 +605,7 @@ def available_colormaps(category=None, include_reversed=False):
     include_reversed : bool, optional
         Whether to include also the name of the reversed colormap suffixed by `_r`.
         The default is `False`.
+
     Returns
     -------
     names : str
