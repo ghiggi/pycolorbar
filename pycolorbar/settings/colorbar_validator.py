@@ -70,14 +70,16 @@ class ColormapSettings(BaseModel):
             validated_settings = values.data
             # Single colormap
             if isinstance(validated_settings.get("name"), str):
-                assert isinstance(v, int) and v > 0, "'n' must be a positive integer."
+                assert isinstance(v, int), "'n' must be an integer."
+                assert v > 0, "'n' must be a positive integer."
             # Multiple colormaps
             if isinstance(validated_settings.get("name"), list):
                 assert len(validated_settings.get("name")) == len(
                     v
                 ), "'n' must match the number of color maps in 'name'."
                 for n in v:
-                    assert isinstance(n, int) and n > 0, "'n' values must be positive integers."
+                    assert isinstance(n, int), "'n' must be an integer."
+                    assert n > 0, "'n' values must be positive integers."
         return v
 
     @field_validator("bad_color", "over_color", "under_color")
@@ -581,7 +583,8 @@ class ColorbarSettings(BaseModel):
             elif isinstance(v, str):
                 assert v == "auto", "'extendfrac' must not be a string."
             else:
-                assert isinstance(v, (float, int)) and 0 <= v <= 1, "extendfrac must be a float or int between 0 and 1."
+                assert isinstance(v, (float, int)), "extendfrac must be a float or int"
+                assert 0 <= v <= 1, "extendfrac must be between 0 and 1."
         return v
 
     @field_validator("extendrect")

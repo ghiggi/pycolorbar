@@ -53,7 +53,7 @@ from pycolorbar.settings.matplotlib_kwargs import (
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def basic_cbar_dict():
     """Provides a basic colorbar dictionary for testing."""
     return {
@@ -293,11 +293,11 @@ class TestPlotCbarKwargs:
 
 
 class TestUpdatePlotCbarKwargs:
-    @pytest.fixture
+    @pytest.fixture()
     def default_plot_kwargs(self):
         return {"cmap": plt.get_cmap("viridis"), "norm": Normalize(vmin=0, vmax=1)}
 
-    @pytest.fixture
+    @pytest.fixture()
     def default_cbar_kwargs(self):
         return {"extend": "neither", "label": "Default Label"}
 

@@ -35,7 +35,7 @@ from deepdiff import DeepDiff
 from pycolorbar.settings.colormap_io import read_cmap_dict, write_cmap_dict
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_cmap_dict():
     return {
         "colormap_type": "ListedColormap",

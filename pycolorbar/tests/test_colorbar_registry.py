@@ -38,7 +38,7 @@ from pycolorbar.settings.colorbar_registry import ColorbarRegistry
 from pycolorbar.utils.yaml import write_yaml
 
 
-@pytest.fixture
+@pytest.fixture()
 def colorbar_registry():
     """Fixture to initialize and reset the colorbar registry."""
     registry = ColorbarRegistry.get_instance()
@@ -49,13 +49,13 @@ def colorbar_registry():
     registry.reset()
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_matplotlib_show(mocker):  # noqa
     mock = mocker.patch("matplotlib.pyplot.show")
-    yield mock
+    return mock  # noqa
 
 
-@pytest.fixture
+@pytest.fixture()
 def colorbar_test_filepath(tmp_path):
     """Fixture to create a temporary colorbar YAML file."""
     filepath = tmp_path / "temp_colorbar.yaml"
@@ -66,7 +66,7 @@ def colorbar_test_filepath(tmp_path):
     return filepath
 
 
-@pytest.fixture
+@pytest.fixture()
 def invalid_colorbar_test_filepath(tmp_path):
     """Fixture to create a temporary colorbar YAML file."""
     filepath = tmp_path / "invalid_colorbar.yaml"
