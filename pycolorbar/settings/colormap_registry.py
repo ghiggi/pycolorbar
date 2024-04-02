@@ -482,7 +482,7 @@ def get_cmap(name: str = None, lut: int = None):
     raise ValueError(
         f"{name} is not registered in pycolorbar and matplotlib !\n "
         f"Valid matplotlib colormap are {mpl_registered_names}.\n "
-        f"Valid pycolorbar colormap are {pycolorbar_registered_names}."
+        f"Valid pycolorbar colormap are {pycolorbar_registered_names}.",
     )
 
 

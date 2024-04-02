@@ -68,7 +68,8 @@ def basic_cbar_dict():
 
 class TestGetCmapFromCbarDict:
     @pytest.mark.parametrize(
-        ("cmap_name", "expected_type"), [("viridis", ListedColormap), ("Spectral", LinearSegmentedColormap)]
+        ("cmap_name", "expected_type"),
+        [("viridis", ListedColormap), ("Spectral", LinearSegmentedColormap)],
     )
     def test_get_cmap_with_valid_names(self, basic_cbar_dict, cmap_name, expected_type):
         """Test get_cmap function with valid colormap names."""
@@ -119,21 +120,25 @@ class TestGetCmapFromCbarDict:
                 "bad_alpha": 0.5,
                 "over_alpha": 0.5,
                 "under_alpha": 0.5,
-            }
+            },
         )
         cmap = get_cmap(basic_cbar_dict)
         np.testing.assert_equal(
-            cmap.get_bad(), np.array([0, 0, 0, 0.5])
+            cmap.get_bad(),
+            np.array([0, 0, 0, 0.5]),
         ), "The bad color or alpha is not correctly set."
         np.testing.assert_equal(
-            cmap.get_over(), np.array([1, 0, 0, 0.5])
+            cmap.get_over(),
+            np.array([1, 0, 0, 0.5]),
         ), "The over color or alpha is not correctly set."
         np.testing.assert_equal(
-            cmap.get_under(), np.array([0, 1, 0, 0.5])
+            cmap.get_under(),
+            np.array([0, 1, 0, 0.5]),
         ), "The under color or alpha is not correctly set."
 
     @pytest.mark.parametrize(
-        "cmap_dict_update", [{"bad_color": "none"}, {"over_color": "none"}, {"under_color": "none"}]
+        "cmap_dict_update",
+        [{"bad_color": "none"}, {"over_color": "none"}, {"under_color": "none"}],
     )
     def test_finalize_cmap_with_none_colors(self, basic_cbar_dict, cmap_dict_update):
         """Test _finalize_cmap handling of 'none' for colors."""
@@ -306,7 +311,8 @@ class TestUpdatePlotCbarKwargs:
         default_plot_kwargs = "dummy_input"
         default_cbar_kwargs = "dummy_input"
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
-            default_plot_kwargs=default_plot_kwargs, default_cbar_kwargs=default_cbar_kwargs
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
         )
         assert plot_kwargs == default_plot_kwargs, "The returned plot_kwargs are not the default ones"
         assert cbar_kwargs == default_cbar_kwargs, "The returned cbar_kwargs are not the default ones"

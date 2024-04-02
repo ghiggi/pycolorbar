@@ -298,7 +298,7 @@ def validate_hex_colors(colors: np.ndarray) -> bool:
     if not all(hex_color_pattern.match(color) for color in colors):
         raise ValueError(
             "Invalid color format for 'hex'. "
-            "Colors should be strings starting with '#' and followed by 3 or 6 hex digits."
+            "Colors should be strings starting with '#' and followed by 3 or 6 hex digits.",
         )
 
 

@@ -72,10 +72,12 @@ class ColorEncoderDecoder:
         return np.array(
             [
                 self.decoding_functions[channel](
-                    val, *self.external_data_range[channel], *self.internal_data_range[channel]
+                    val,
+                    *self.external_data_range[channel],
+                    *self.internal_data_range[channel],
                 )
                 for channel, val in zip(self.external_data_range.keys(), colors.T)
-            ]
+            ],
         ).T
 
     def encode(self, colors):
@@ -95,10 +97,12 @@ class ColorEncoderDecoder:
         return np.array(
             [
                 self.encoding_functions[channel](
-                    val, *self.internal_data_range[channel], *self.external_data_range[channel]
+                    val,
+                    *self.internal_data_range[channel],
+                    *self.external_data_range[channel],
                 )
                 for channel, val in zip(self.internal_data_range.keys(), colors.T)
-            ]
+            ],
         ).T
 
     def _default_decode(self, value, from_min, from_max, to_min, to_max):
@@ -164,7 +168,7 @@ class ColorEncoderDecoder:
             if not ((min_val <= channel_colors) & (channel_colors <= max_val)).all():
                 raise ValueError(
                     f"Channel '{channel}' values are not within the internal data range. "
-                    f"Expected range ({min_val}, {max_val}), but got values outside this range."
+                    f"Expected range ({min_val}, {max_val}), but got values outside this range.",
                 )
 
     def check_valid_external_data_range(self, colors, strict=False):
@@ -195,7 +199,7 @@ class ColorEncoderDecoder:
             if not ((min_val <= channel_colors) & (channel_colors <= max_val)).all():
                 raise ValueError(
                     f"Channel '{channel}' values are not within the external data range. "
-                    f"Expected range ({min_val}, {max_val}), but got values outside this range."
+                    f"Expected range ({min_val}, {max_val}), but got values outside this range.",
                 )
 
             if strict:
@@ -203,7 +207,7 @@ class ColorEncoderDecoder:
                 if ((internal_min_val <= channel_colors) & (channel_colors <= internal_max_val)).all():
                     raise ValueError(
                         f"All '{channel}' values are within the internal data range "
-                        "while expecting external representation."
+                        "while expecting external representation.",
                     )
 
     def is_within_internal_data_range(self, colors):

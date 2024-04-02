@@ -350,7 +350,8 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
     # - If user provided a colormap, resample the colormap
     if default_cbar_kwargs.get("ticklabels", None) is not None:
         _resample_user_cmap_for_labeled_colorbar(
-            user_plot_kwargs=user_plot_kwargs, default_cbar_kwargs=default_cbar_kwargs
+            user_plot_kwargs=user_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
         )
 
     # Deal with xarray user_plot_kwargs 'levels' option
@@ -396,13 +397,13 @@ def _check_valid_ticks_ticklabels(user_cbar_kwargs, default_cbar_kwargs):
         if user_ticks is not None and user_ticklabels is not None:
             if user_ticks_length != user_ticklabels_length:
                 raise ValueError(
-                    "'ticks' and 'ticklabels' must have same length: {user_ticks_length} vs {user_ticklabels_length}."
+                    "'ticks' and 'ticklabels' must have same length: {user_ticks_length} vs {user_ticklabels_length}.",
                 )
         # Case: user_ticklabels provided
         elif user_ticks is None and default_ticks is not None:
             if user_ticklabels_length != default_ticks_length:
                 raise ValueError(
-                    "If you don't specify 'ticks', expecting a 'ticklabels' list of length {default_ticks_length}."
+                    "If you don't specify 'ticks', expecting a 'ticklabels' list of length {default_ticks_length}.",
                 )
         # Case: user_ticks provided
         elif (
@@ -411,7 +412,7 @@ def _check_valid_ticks_ticklabels(user_cbar_kwargs, default_cbar_kwargs):
             and user_ticks_length != default_ticklabels_length
         ):
             raise ValueError(
-                "If you don't specify 'ticklabels', expecting a 'ticks' list of length {default_ticklabels_length}."
+                "If you don't specify 'ticklabels', expecting a 'ticks' list of length {default_ticklabels_length}.",
             )
 
 
@@ -486,7 +487,7 @@ def _update_default_norm_using_vmin_and_vmax(user_plot_kwargs, default_plot_kwar
             norm_class = type(default_plot_kwargs["norm"])
             print(
                 f"The default pycolorbar norm is a {norm_class} and does not accept 'vmin' and 'vmax'.\n "
-                f"Switching the norm to Normalize(vmin={vmin}, vmax={vmax}) !"
+                f"Switching the norm to Normalize(vmin={vmin}, vmax={vmax}) !",
             )
             user_plot_kwargs["norm"] = Normalize(vmin=vmin, vmax=vmax)
             default_plot_kwargs["norm"] = Normalize(vmin=vmin, vmax=vmax)

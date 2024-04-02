@@ -186,7 +186,9 @@ class TestColorbarRegistry:
 
         # Test with no custom kwargs
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(
-            name="TEST_CBAR_1", user_plot_kwargs={}, user_cbar_kwargs={}
+            name="TEST_CBAR_1",
+            user_plot_kwargs={},
+            user_cbar_kwargs={},
         )
         assert isinstance(plot_kwargs["cmap"], Colormap)
         assert isinstance(plot_kwargs["norm"], Normalize)
@@ -194,7 +196,9 @@ class TestColorbarRegistry:
 
         # Test with custom kwargs
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(
-            name="TEST_CBAR_1", user_plot_kwargs={"vmin": 10, "vmax": 20}, user_cbar_kwargs={}
+            name="TEST_CBAR_1",
+            user_plot_kwargs={"vmin": 10, "vmax": 20},
+            user_cbar_kwargs={},
         )
         assert isinstance(plot_kwargs["cmap"], Colormap)
         assert isinstance(plot_kwargs["norm"], Normalize)
@@ -210,7 +214,9 @@ class TestColorbarRegistry:
 
         # Test inexisting colorbar configuration with no custom kwargs
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(
-            name=None, user_plot_kwargs={"vmin": 10, "vmax": 20}, user_cbar_kwargs={}
+            name=None,
+            user_plot_kwargs={"vmin": 10, "vmax": 20},
+            user_cbar_kwargs={},
         )
         assert plot_kwargs["cmap"] is None
         assert isinstance(plot_kwargs["norm"], Normalize)

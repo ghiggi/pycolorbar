@@ -87,7 +87,9 @@ def test_encode_decode(encoder_decoder_class, color_space):
     encoded_colors = encoder_decoder.encode(test_colors)
     decoded_colors = encoder_decoder.decode(encoded_colors)
     assert np.allclose(
-        test_colors, decoded_colors, atol=1e-2
+        test_colors,
+        decoded_colors,
+        atol=1e-2,
     ), f"Decoded colors should match the original colors for {color_space} within a tolerance."
 
 
@@ -216,7 +218,8 @@ def test_hsv_hue_encoding(input_radians, expected_degrees):
     hsv_encoder_decoder = HSVEncoderDecoder()
     encoded_hue = hsv_encoder_decoder._hue_encode(input_radians, 0, 2 * np.pi, 0, 360)
     assert np.isclose(
-        encoded_hue, expected_degrees
+        encoded_hue,
+        expected_degrees,
     ), "Hue encoding from radians to degrees is incorrect for HSV color space."
 
 
@@ -233,7 +236,8 @@ def test_lch_hue_encoding(input_radians, expected_degrees):
     lch_encoder_decoder = LCHEncoderDecoder()
     encoded_hue = lch_encoder_decoder._hue_encode(input_radians, 0, 2 * np.pi, 0, 360)
     assert np.isclose(
-        encoded_hue, expected_degrees
+        encoded_hue,
+        expected_degrees,
     ), "Hue encoding from radians to degrees is incorrect for LCH color space."
 
 
@@ -292,13 +296,15 @@ def test_not_decode_encode_name_hex_colors(color_space, colors):
     # Test decoding
     decoded_colors = decode_colors(colors, color_space)
     assert np.array_equal(
-        decoded_colors, colors
+        decoded_colors,
+        colors,
     ), f"Decoding should return the original colors for color_space='{color_space}'"
 
     # Test encoding
     encoded_colors = encode_colors(colors, color_space)
     assert np.array_equal(
-        encoded_colors, colors
+        encoded_colors,
+        colors,
     ), f"Encoding should return the original colors for color_space='{color_space}'"
 
 
@@ -312,9 +318,11 @@ def test_decode_encode_name_other_colors(color_space, decoded_colors, encoded_co
     """Test that encode and decode other colors."""
     # Test decoding
     assert np.array_equal(
-        decode_colors(encoded_colors, color_space), decoded_colors
+        decode_colors(encoded_colors, color_space),
+        decoded_colors,
     ), f"Decoding should return the original colors for color_space='{color_space}'"
     # Test encoding
     assert np.array_equal(
-        encode_colors(decoded_colors, color_space), encoded_colors
+        encode_colors(decoded_colors, color_space),
+        encoded_colors,
     ), f"Encoding should return the original colors for color_space='{color_space}'"

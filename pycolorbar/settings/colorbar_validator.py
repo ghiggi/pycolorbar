@@ -75,7 +75,7 @@ class ColormapSettings(BaseModel):
             # Multiple colormaps
             if isinstance(validated_settings.get("name"), list):
                 assert len(validated_settings.get("name")) == len(
-                    v
+                    v,
                 ), "'n' must match the number of color maps in 'name'."
                 for n in v:
                     assert isinstance(n, int), "'n' must be an integer."
@@ -95,7 +95,7 @@ class ColormapSettings(BaseModel):
                 hex_color_pattern = re.compile(r"^#(?:[0-9a-fA-F]{3}){1,2}$")
                 if not hex_color_pattern.match(v):
                     raise ValueError(
-                        'Invalid color format. Expected hex string like "#RRGGBB" or "#RRGGBBAA", or a named color.'
+                        'Invalid color format. Expected hex string like "#RRGGBB" or "#RRGGBBAA", or a named color.',
                     )
             elif isinstance(v, (list, tuple)) and len(v) in [3, 4]:
                 # Check if it's an RGB or RGBA tuple
@@ -715,7 +715,8 @@ def validate_cbar_dict(cbar_dict: dict, name: str, resolve_reference=False):
     # Consistency checks
     try:
         cmap_settings, norm_settings = _check_discrete_norm_cmap_settings(
-            cmap_settings=cmap_settings, norm_settings=norm_settings
+            cmap_settings=cmap_settings,
+            norm_settings=norm_settings,
         )
     except Exception as e:
         invalid_configuration = True

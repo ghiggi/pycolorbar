@@ -83,7 +83,7 @@ class ColorbarRegistry:
                 print(f"Warning: Overwriting existing colorbar '{name}'")
             if not force:
                 raise ValueError(
-                    f"A colorbar setting named '{name}' already exists. To allow overwriting, set 'force=True'."
+                    f"A colorbar setting named '{name}' already exists. To allow overwriting, set 'force=True'.",
                 )
 
     def register(self, filepath: str, verbose: bool = True, force: bool = True, validate=False):
@@ -312,7 +312,9 @@ class ColorbarRegistry:
         from pycolorbar.settings.colorbar_visualization import plot_colorbar
 
         plot_kwargs, cbar_kwargs = self.get_plot_kwargs(
-            name=name, user_plot_kwargs=user_plot_kwargs, user_cbar_kwargs=user_cbar_kwargs
+            name=name,
+            user_plot_kwargs=user_plot_kwargs,
+            user_cbar_kwargs=user_cbar_kwargs,
         )
         plot_colorbar(plot_kwargs=plot_kwargs, cbar_kwargs=cbar_kwargs, ax=None, subplot_size=fig_size)
 

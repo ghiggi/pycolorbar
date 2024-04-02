@@ -70,7 +70,8 @@ def read_cmap_dict(filepath, decode=True, validate=True):
     # By default, convert colors to internal representation  (i.e. rgb: 0-255 --> 0-1)
     if decode:
         cmap_dict["color_palette"] = decode_colors(
-            colors=cmap_dict["color_palette"], color_space=cmap_dict["color_space"]
+            colors=cmap_dict["color_palette"],
+            color_space=cmap_dict["color_space"],
         )
     # By default, validate colors
     if validate:
@@ -96,7 +97,8 @@ def write_cmap_dict(cmap_dict, filepath, force=False, encode=True, validate=True
     # By default, convert colors to external representation (i.e. rgb: 0-1 --> 0-255)
     if encode:
         cmap_dict["color_palette"] = encode_colors(
-            colors=cmap_dict["color_palette"], color_space=cmap_dict["color_space"]
+            colors=cmap_dict["color_palette"],
+            color_space=cmap_dict["color_space"],
         )
     # Ensure colors is a list of list
     cmap_dict["color_palette"] = _ensure_colors_list(cmap_dict["color_palette"])
