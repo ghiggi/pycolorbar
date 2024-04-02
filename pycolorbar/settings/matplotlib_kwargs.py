@@ -157,6 +157,7 @@ def get_norm(norm_settings):
 
 
 def get_plot_cbar_kwargs(cbar_dict):
+    """Retrieve the plot and colorbar kwargs from a validated colorbar dictionary."""
     cbar_dict = cbar_dict.copy()
 
     # ------------------------------------------------------------------------.
@@ -194,6 +195,7 @@ def get_plot_cbar_kwargs(cbar_dict):
 
 
 def get_default_cbar_kwargs():
+    """Define the default colorbar kwargs."""
     return {
         "ticks": None,
         # "ticklabels": None,  --> # Temporary ... because matplotlib.colorbar do not accept ticklabels
@@ -303,7 +305,7 @@ def _finalize_ticks_arguments(cbar_kwargs, cbar_dict, norm):
 
 
 def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_kwargs=None, user_cbar_kwargs=None):
-
+    """Update the default plot and colorbar kwargs with user-provided arguments."""
     # If no user kwargs, return default kwargs
     user_plot_kwargs = {} if user_plot_kwargs is None else user_plot_kwargs
     user_cbar_kwargs = {} if user_cbar_kwargs is None else user_cbar_kwargs

@@ -24,10 +24,13 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
+"""Color encoding and decoding functions."""
 import numpy as np
 
 
 class ColorEncoderDecoder:
+    """Base Color Encoding-Decoding Class."""
+
     def __init__(self, external_data_range, internal_data_range, name):
         """Initialize a color encoder-decoder to convert color values between external and internal representations.
 

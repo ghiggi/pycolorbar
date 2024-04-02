@@ -24,6 +24,7 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
+"""Utility functions for settings module."""
 
 
 def get_auxiliary_categories(dictionary):

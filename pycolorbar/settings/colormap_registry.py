@@ -69,6 +69,7 @@ class ColormapRegistry:
     _instance = None
 
     def __new__(cls):
+        """Create a new instance of the `ColormapRegistry`."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             #  cls._instance = super(ColormapRegistry, cls).__new__(cls)
@@ -79,6 +80,7 @@ class ColormapRegistry:
 
     @classmethod
     def get_instance(cls):
+        """Return the singleton instance of the `ColormapRegistry`."""
         if cls._instance is None:
             cls()  # this will call __new__
         return cls._instance

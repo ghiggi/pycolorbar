@@ -24,6 +24,7 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
+"""Matplotlib utility functions."""
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
@@ -53,4 +54,5 @@ def get_mpl_named_colors():
 
 
 def get_mpl_colormaps():
+    """Get the list of available colormaps in matplotlib."""
     return plt.colormaps()

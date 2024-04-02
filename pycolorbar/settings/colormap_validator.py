@@ -61,6 +61,7 @@ def check_color_space(color_space):
 
 
 def is_monotonically_increasing(values):
+    """Check if a list of values is monotonically increasing."""
     return all(x <= y for x, y in zip(values, values[1:]))
 
 
@@ -74,13 +75,13 @@ class ColormapValidator(BaseModel):
     Attributes
     ----------
     colors_decoded: bool
-        If True, assumes that the colors have been already decoded (internal representation).
-        If False, assumes that the colors have not been decoded (external representation).
-        The default is True.
+        If ``True``, assumes that the colors have been already decoded (internal representation).
+        If ``False``, assumes that the colors have not been decoded (external representation).
+        The default is ``True``.
     colormap_type : str
-        The type of the colormap (e.g., "ListedColormap", "LinearSegmentedColormap").
+        The type of the colormap (e.g., ``ListedColormap``, ``LinearSegmentedColormap``).
     color_space : str
-        The color space of the colormap (e.g., "rgb", "hsv").
+        The color space of the colormap (e.g., ``rgb``, ``hsv``).
     color_palette : np.ndarray
         The array of colors defined for the colormap.
 
@@ -123,6 +124,7 @@ class ColormapValidator(BaseModel):
 
     @field_validator("colormap_type")
     def validate_colormap_type(cls, v):
+        """Validate the ``colormap_type`` field."""
         valid_colormap_types = [
             "ListedColormap",
             "LinearSegmentedColormap",
@@ -133,16 +135,19 @@ class ColormapValidator(BaseModel):
 
     @field_validator("color_space")
     def validate_color_space(cls, v):
+        """Validate the ``color_space`` field."""
         check_color_space(color_space=v)
         return v
 
     @field_validator("colors_decoded")
     def validate_colors_decoded(cls, v):
+        """Validate the ``colors_decoded`` flag."""
         assert isinstance(v, bool), "colors_decoded must be a boolean."
         return v
 
     @field_validator("color_palette")
     def validate_color_palette(cls, v, values):
+        """Validate the ``color_palette`` array."""
         if v is not None:
             v = np.asanyarray(v)
             color_space = values.data.get("color_space", "")
@@ -157,6 +162,7 @@ class ColormapValidator(BaseModel):
 
     @field_validator("segmentdata")
     def validate_segmentdata(cls, v, values):
+        """Validate the ``segmentdata`` dictionary."""
         if v is not None:
             assert (
                 values.data.get("colormap_type") == "LinearSegmentedColormap"

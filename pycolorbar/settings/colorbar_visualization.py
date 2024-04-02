@@ -49,6 +49,7 @@ def _draw_colorbar(plot_kwargs, cbar_kwargs, fig, ax=None, cax=None):
 
 
 def plot_colorbar(plot_kwargs, cbar_kwargs, ax=None, subplot_size=(6, 1)):
+    """Plot a single colorbar."""
     # Initialize figure if necessary
     if ax is None:
         fig, ax = plt.subplots(figsize=subplot_size, layout="constrained")
@@ -58,6 +59,7 @@ def plot_colorbar(plot_kwargs, cbar_kwargs, ax=None, subplot_size=(6, 1)):
 
 
 def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
+    """Plot multiple colorbars in a single figure."""
     # Define subplot_size
     if subplot_size is None:
         subplot_size = (5, 1.2)  # 3 --> 2
@@ -96,6 +98,7 @@ def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
 
 
 def show_colorbar(name=None, user_plot_kwargs=None, user_cbar_kwargs=None, fig_size=(6, 1)):
+    """Show a single pycolorbar colorbar."""
     from pycolorbar import colorbars
 
     if user_cbar_kwargs is None:
@@ -111,6 +114,7 @@ def show_colorbar(name=None, user_plot_kwargs=None, user_cbar_kwargs=None, fig_s
 
 
 def show_colorbars(category=None, exclude_referenced=True, subplot_size=None):
+    """Show pycolorbar colorbars."""
     from pycolorbar import colorbars
 
     colorbars.show_colorbars(category=category, exclude_referenced=exclude_referenced, subplot_size=subplot_size)

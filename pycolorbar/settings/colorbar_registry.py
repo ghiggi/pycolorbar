@@ -53,6 +53,7 @@ class ColorbarRegistry:
     _instance = None
 
     def __new__(cls):
+        """Create a new instance of the ColorbarRegistry."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             #  cls._instance = super(ColorbarRegistry, cls).__new__(cls)
@@ -61,6 +62,7 @@ class ColorbarRegistry:
 
     @classmethod
     def get_instance(cls):
+        """Return the singleton instance of the ColorbarRegistry."""
         if cls._instance is None:
             cls()  # this will call __new__
         return cls._instance
@@ -79,6 +81,7 @@ class ColorbarRegistry:
         return item in self.names
 
     def _check_if_cbar_in_use(self, name, force, verbose):
+        """Check if a colorbar is already registered and if it can be overwritten."""
         if name in self.registry:
             if force and verbose:
                 print(f"Warning: Overwriting existing colorbar '{name}'")
@@ -120,7 +123,7 @@ class ColorbarRegistry:
         # Register colorbars settings
         for name, cbar_dict in cbar_dicts.items():
             if validate:
-                cbar_dict = validate_cbar_dict(cbar_dict=cbar_dict, name=name)
+                cbar_dict = validate_cbar_dict(cbar_dict=cbar_dict, name=name)  # noqa
             self._check_if_cbar_in_use(name=name, force=force, verbose=verbose)
             self.registry[name] = cbar_dict
 
@@ -231,6 +234,7 @@ class ColorbarRegistry:
         return get_cmap(cbar_dict)
 
     def to_yaml(self, filepath, names=None, force=False, sort_keys=False):
+        """Write the registered colorbars settings to a YAML file."""
         write_cbar_dicts(
             cbar_dicts=self.registry,
             filepath=filepath,

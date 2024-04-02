@@ -93,6 +93,7 @@ exclude = [
     ".venv",
     "__pypackages__",
     "_build",
+    "docs",
     "buck-out",
     "build",
     "dist",
@@ -164,13 +165,11 @@ ignore = [
     "E722",
     "PT011", # pytest raised error must be checked if match the expected error msg
     "PERF203",
-    "PLW2901",
-    "PLW0603",
 
     # Docstyle Rules
     "D404", # Docstring can't start with "This"
     "D401", # First sentence must be in imperative mood
-    "D100", "D101","D102", "D103", "D104", "D105",  # Missing docstrings
+
     # Complexity rules
     "PLR0913",
     "PLR2004",
@@ -180,8 +179,6 @@ ignore = [
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
-
-# fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
 unfixable = []
 
 [tool.ruff.lint.pydocstyle]
@@ -195,7 +192,10 @@ convention = "numpy"
 # Rules to ignore in test files
 "test_*.py" = [
     "ARG",  # avoid problems with fixtures
+    "D100", "D101","D102", "D103", "D104", "D105",  # Missing docstrings
 ]
+"setup.py" = ["D100"]
+"*__init__.py" = ["D104"]
 
 [tool.codespell]
     ignore-words-list = 'nD'

@@ -36,6 +36,7 @@ IMPLEMENTED_COLOR_SPACE = ["name", "rgb", "rgba", "hex", "hsv"]
 
 
 def convert_colors(colors, color_space):
+    """Convert colors to the RGB color space."""
     #  TODO: IMPLEMENT !
     if color_space.lower() not in IMPLEMENTED_COLOR_SPACE:
         raise NotImplementedError(f"Color space '{color_space}' not yet implemented.")
@@ -49,6 +50,7 @@ def convert_colors(colors, color_space):
 
 
 def create_cmap(cmap_dict, name):
+    """Create a colormap from the colormap dictionary."""
     cmap_type = cmap_dict["colormap_type"]
     color_space = cmap_dict["color_space"]
 

@@ -60,4 +60,5 @@ def write_yaml(dictionary, filepath, sort_keys=False):
 
 
 def list_yaml_files(directory):
+    """List all YAML files in a directory."""
     return list_files(directory, glob_pattern="*.yaml", recursive=True)

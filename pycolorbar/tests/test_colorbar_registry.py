@@ -81,7 +81,7 @@ class TestColorbarRegistry:
         colorbar_registry.register(colorbar_test_filepath)
         assert len(colorbar_registry.names) > 0, "Colorbar should be registered."
 
-        colorbar_name = list(colorbar_registry.registry.keys())[0]
+        colorbar_name = next(iter(colorbar_registry.registry.keys()))
         colorbar_registry.unregister(colorbar_name)
         assert colorbar_name not in colorbar_registry.names, "Colorbar should be unregistered."
 
@@ -148,7 +148,7 @@ class TestColorbarRegistry:
     def test_get_cbar_dict(self, colorbar_registry, colorbar_test_filepath):
         """Test get_cbar_dict retrieves the colorbar configuration."""
         colorbar_registry.register(colorbar_test_filepath)
-        colorbar_name = list(colorbar_registry.registry.keys())[0]
+        colorbar_name = next(iter(colorbar_registry.registry.keys()))
         cbar_dict = colorbar_registry.get_cbar_dict(colorbar_name)
         assert isinstance(cbar_dict, dict), "Should return a colorbar configuration dictionary."
 
