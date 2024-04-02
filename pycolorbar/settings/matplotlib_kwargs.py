@@ -62,7 +62,7 @@ def _create_combined_cmap(names, n=None, new_n=None):
     return LinearSegmentedColormap.from_list(name=new_name, colors=cmap_colors)
 
 
-def _get_cmap(cmap_settings, norm_settings):
+def _get_cmap(cmap_settings):
     """Retrieve the colormap for a given validated colorbar setting."""
     name = cmap_settings.get("name")
     n = cmap_settings.get("n")
@@ -101,9 +101,8 @@ def get_cmap(cbar_dict):
         return None
     # Retrieve settings
     cmap_settings = cbar_dict["cmap"]
-    norm_settings = cbar_dict.get("norm", {})
     # Retrieve cmap
-    cmap = _get_cmap(cmap_settings=cmap_settings, norm_settings=norm_settings)
+    cmap = _get_cmap(cmap_settings=cmap_settings)
     ### Set bad, under and over colors and transparency
     return _finalize_cmap(cmap, cmap_settings)
 
@@ -294,7 +293,7 @@ def _finalize_ticks_arguments(cbar_kwargs, cbar_dict, norm):
     elif norm_name == "CategoryNorm":  # Categorical Colorbar
         ticks = norm.boundaries[:-1] + 0.5
         # Define tick formatter and ticks
-        fmt = mpl.ticker.FuncFormatter(lambda x, pos: labels[norm(x)])
+        fmt = mpl.ticker.FuncFormatter(lambda x, pos=None: labels[norm(x)])  # noqa
         ticklabels = [fmt(tick) for tick in ticks]
 
     # Format back to list

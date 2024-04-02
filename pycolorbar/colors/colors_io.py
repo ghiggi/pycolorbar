@@ -318,11 +318,11 @@ class HSVEncoderDecoder(ColorEncoderDecoder):
         self.decoding_functions["H"] = self._hue_decode
         self.encoding_functions["H"] = self._hue_encode
 
-    def _hue_decode(self, hue, from_min, from_max, to_min, to_max):
+    def _hue_decode(self, hue, from_min, from_max, to_min, to_max):  # noqa: ARG002
         """Custom decode function for Hue channel (from degrees to radians)."""
         return hue * (2 * np.pi) / 360  # Convert degrees to radians
 
-    def _hue_encode(self, hue, from_min, from_max, to_min, to_max):
+    def _hue_encode(self, hue, from_min, from_max, to_min, to_max):  # noqa: ARG002
         """Custom encode function for Hue channel (from radians to degrees)."""
         return hue * 360 / (2 * np.pi)  # Convert radians to degrees
 
@@ -377,11 +377,11 @@ class LCHEncoderDecoder(ColorEncoderDecoder):
         self.decoding_functions["H"] = self._hue_decode
         self.encoding_functions["H"] = self._hue_encode
 
-    def _hue_decode(self, hue, from_min, from_max, to_min, to_max):
+    def _hue_decode(self, hue, from_min, from_max, to_min, to_max):  # noqa: ARG002
         """Custom decode function for Hue channel (from degrees to radians)."""
         return hue * (2 * np.pi) / 360  # Convert degrees to radians
 
-    def _hue_encode(self, hue, from_min, from_max, to_min, to_max):
+    def _hue_encode(self, hue, from_min, from_max, to_min, to_max):  # noqa: ARG002
         """Custom encode function for Hue channel (from radians to degrees)."""
         return hue * 360 / (2 * np.pi)  # Convert radians to degrees
 

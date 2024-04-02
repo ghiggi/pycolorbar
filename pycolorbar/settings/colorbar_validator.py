@@ -65,7 +65,7 @@ class ColormapSettings(BaseModel):
         return v
 
     @field_validator("n")
-    def validate_n(cls, v, values, **kwargs):
+    def validate_n(cls, v, values):
         if v is not None:
             validated_settings = values.data
             # Single colormap
@@ -124,9 +124,9 @@ def _check_norm_invalid_args(norm_name, args, valid_args):
 
 def _check_vmin_vcenter_vmax(vmin, vcenter, vmax, norm_name):
     if vmin is not None and vcenter is not None:
-        assert vmin < vcenter, "'vmin' must be less than 'vcenter' for 'TwoSlopeNorm'."
+        assert vmin < vcenter, f"'vmin' must be less than 'vcenter' for '{norm_name}'."
     if vmax is not None and vcenter is not None:
-        assert vcenter < vmax, "'vmax' must be larger than 'vcenter' 'TwoSlopeNorm'."
+        assert vcenter < vmax, f"'vmax' must be larger than 'vcenter' '{norm_name}'."
 
 
 def _check_vmin_vmax(vmin, vmax):
@@ -193,7 +193,7 @@ class CategoryNormSettings(BaseModel):
     first_value: Optional[int] = 0
 
     @field_validator("labels")
-    def validate_labels(cls, v, values):
+    def validate_labels(cls, v):
         """Validate labels for CategoryNorm."""
         if v is not None:
             assert isinstance(v, list), "'labels' must be a list."
@@ -202,7 +202,7 @@ class CategoryNormSettings(BaseModel):
         return v
 
     @field_validator("first_value")
-    def validate_first_value(cls, v, values):
+    def validate_first_value(cls, v):
         """Validate first_value for CategoryNorm."""
         if v is not None:
             assert isinstance(v, int), "'first_value' must be an integer."
