@@ -135,6 +135,7 @@ triggers the packaging workflow depicted in the following image:
 
 .. image:: /static/package_release.png
 
+
 Upon the release of the package on PyPI, a conda-forge bot attempts to automatically update the
  `conda-forge recipe <https://github.com/conda-forge/pycolorbar-feedstock/>`__.
 Once the conda-forge recipe is updated, a new conda-forge package is released.
