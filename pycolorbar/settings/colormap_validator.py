@@ -189,10 +189,13 @@ class ColormapValidator(BaseModel):
 
 
 def _set_default_n(cmap_dict):
-    if cmap_dict["n"] is None:
-        # Set default value for LinearSegmentedColormap
-        if cmap_dict["colormap_type"] == "LinearSegmentedColormap":
-            cmap_dict["n"] = 256
+    # Set default value for LinearSegmentedColormap.from_list
+    if (
+        cmap_dict["n"] is None
+        and cmap_dict["segmentdata"] is None
+        and cmap_dict["colormap_type"] == "LinearSegmentedColormap"
+    ):
+        cmap_dict["n"] = 256
     return cmap_dict
 
 

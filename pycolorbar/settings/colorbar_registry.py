@@ -257,10 +257,7 @@ class ColorbarRegistry:
         Invalid colorbar configurations are reported.
         """
         # TODO: allow for list of names ?
-        if isinstance(name, str):
-            names = [name]
-        else:
-            names = self.names
+        names = [name] if isinstance(name, str) else self.names
 
         # Validate colorbars
         wrong_names = []
@@ -296,10 +293,7 @@ class ColorbarRegistry:
 
     def available(self, category=None, exclude_referenced=False):
         """List the name of available colorbars for a specific category."""
-        if exclude_referenced:
-            names = self.get_standalone_settings()
-        else:
-            names = self.names
+        names = self.get_standalone_settings() if exclude_referenced else self.names
 
         if category is None:
             return names

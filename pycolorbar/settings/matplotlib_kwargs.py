@@ -67,11 +67,7 @@ def _get_cmap(cmap_settings):
     name = cmap_settings.get("name")
     n = cmap_settings.get("n")
     # Define colormap
-    if isinstance(name, str):
-        cmap = pycolorbar.get_cmap(name=name, lut=n)
-    else:
-        cmap = _create_combined_cmap(names=name, n=n)
-    return cmap
+    return pycolorbar.get_cmap(name=name, lut=n) if isinstance(name, str) else _create_combined_cmap(names=name, n=n)
 
 
 def _finalize_cmap(cmap, cmap_settings):
@@ -402,16 +398,21 @@ def _check_valid_ticks_ticklabels(user_cbar_kwargs, default_cbar_kwargs):
                 raise ValueError(
                     "'ticks' and 'ticklabels' must have same length: {user_ticks_length} vs {user_ticklabels_length}."
                 )
-        elif user_ticks is None and default_ticks is not None:  # but user_ticklabels provided
+        # Case: user_ticklabels provided
+        elif user_ticks is None and default_ticks is not None:
             if user_ticklabels_length != default_ticks_length:
                 raise ValueError(
                     "If you don't specify 'ticks', expecting a 'ticklabels' list of length {default_ticks_length}."
                 )
-        elif user_ticklabels is None and default_ticklabels is not None:  # but user_ticks provided
-            if user_ticks_length != default_ticklabels_length:
-                raise ValueError(
-                    "If you don't specify 'ticklabels', expecting a 'ticks' list of length {default_ticklabels_length}."
-                )
+        # Case: user_ticks provided
+        elif (
+            user_ticklabels is None
+            and default_ticklabels is not None
+            and user_ticks_length != default_ticklabels_length
+        ):
+            raise ValueError(
+                "If you don't specify 'ticklabels', expecting a 'ticks' list of length {default_ticklabels_length}."
+            )
 
 
 def _remove_defaults_ticks_and_ticklabels(default_cbar_kwargs):
@@ -508,9 +509,8 @@ def _check_no_vmin_vmax_if_norm_specified(user_plot_kwargs):
     vmin = user_plot_kwargs.get("vmin", None)
     vmax = user_plot_kwargs.get("vmax", None)
     norm = user_plot_kwargs.get("norm", None)
-    if norm is not None:
-        if vmin is not None or vmax is not None:
-            raise ValueError("If the 'norm' is specified, 'vmin' and 'vmax' must not be specified.")
+    if norm is not None and (vmin is not None or vmax is not None):
+        raise ValueError("If the 'norm' is specified, 'vmin' and 'vmax' must not be specified.")
 
 
 def _parse_user_cmap(user_plot_kwargs):

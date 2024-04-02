@@ -383,9 +383,8 @@ class LogNormSettings(BaseModel):
         """Check `vmin` and `vmax` for LogNorm."""
         vmin, vmax = values.get("vmin"), values.get("vmax")
         _check_vmin_vmax(vmin, vmax)
-        if vmin is not None:
-            if vmin <= 0:
-                raise ValueError("LogNorm vmin should be a positive value.")
+        if vmin is not None and vmin <= 0:
+            raise ValueError("LogNorm vmin should be a positive value.")
         return values
 
     @model_validator(mode="before")
@@ -609,9 +608,8 @@ def resolve_colorbar_reference(cbar_dict, name, checked_references=None):
     import pycolorbar
 
     keys = list(cbar_dict)
-    if len(keys) > 1:
-        if np.any(np.isin(keys, ["auxiliary", "reference"], invert=True)):
-            raise ValueError("If referencing another colorbar, only 'reference' and 'auxiliary' keys are allowed.")
+    if len(keys) > 1 and np.any(np.isin(keys, ["auxiliary", "reference"], invert=True)):
+        raise ValueError("If referencing another colorbar, only 'reference' and 'auxiliary' keys are allowed.")
 
     # Retrieve reference
     reference_name = cbar_dict["reference"]

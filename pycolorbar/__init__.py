@@ -24,6 +24,7 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
+import contextlib
 import os
 from importlib.metadata import PackageNotFoundError, version
 
@@ -66,8 +67,5 @@ etc_directory = os.path.join(_root_path, "pycolorbar", "etc")
 __all__ = []
 
 # Get version
-try:
+with contextlib.suppress(PackageNotFoundError):
     __version__ = version("pycolorbar")
-except PackageNotFoundError:
-    # package is not installed
-    pass

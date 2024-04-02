@@ -39,7 +39,7 @@ def convert_colors(colors, color_space):
     #  TODO: IMPLEMENT !
     if color_space.lower() not in IMPLEMENTED_COLOR_SPACE:
         raise NotImplementedError(f"Color space '{color_space}' not yet implemented.")
-    if color_space == "hsv":
+    if color_space == "hsv":  # noqa SIM108
         colors = matplotlib.colors.hsv_to_rgb(colors)
     # elif
     #   IMPLEMENT

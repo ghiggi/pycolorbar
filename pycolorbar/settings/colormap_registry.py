@@ -319,10 +319,7 @@ class ColormapRegistry:
 
     def available(self, category=None, include_reversed=False):
         """List the name of available colormaps for a specific category."""
-        if category is None:
-            names = self.names
-        else:
-            names = self._get_subset_names(category=category)
+        names = self.names if category is None else self._get_subset_names(category=category)
 
         if include_reversed:
             names = [name + "_r" for name in names] + names
@@ -378,7 +375,7 @@ def register_colormaps(directory: str, name: str = None, verbose: bool = True, f
     colormaps = ColormapRegistry.get_instance()
 
     # List the colormap YAML files to register
-    if name is not None:
+    if name is not None:  # noqa SIM108
         filepaths = [os.path.join(directory, f"{name}.yaml")]
     else:
         # List all YAML files in the directory
@@ -569,11 +566,7 @@ def _get_mpl_cmap_by_category(category):
         "CYCLIC": ["twilight", "twilight_shifted", "hsv"],
     }
     type_dict["CATEGORICAL"] = type_dict["QUALITATIVE"]
-    if category.upper() in type_dict:
-        names = type_dict[category.upper()]
-    else:
-        names = []
-    return names
+    return type_dict.get(category.upper(), [])
 
 
 def _get_matplotlib_cmaps(category=None, include_reversed=False):

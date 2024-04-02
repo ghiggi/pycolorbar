@@ -90,7 +90,7 @@ class TestGetCmapFromCbarDict:
         basic_cbar_dict["cmap"]["n"] = n_values
         cmap = get_cmap(basic_cbar_dict)
         if n_values is not None:
-            assert cmap.N == n_values, "The 'n' parameter does not match the expected number of colors."
+            assert n_values == cmap.N, "The 'n' parameter does not match the expected number of colors."
         else:
             assert cmap.N == 256, "The default number of colors should be 256 when 'n' is not specified."
 
