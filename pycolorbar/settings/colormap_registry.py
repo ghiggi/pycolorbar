@@ -89,7 +89,7 @@ class ColormapRegistry:
     @property
     def names(self):
         """List the names of all registered colormaps."""
-        return sorted(list(self.registry))
+        return sorted(self.registry)
 
     def __contains__(self, item):
         """Test registration of colormap in the registry."""

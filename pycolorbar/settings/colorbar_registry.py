@@ -71,7 +71,7 @@ class ColorbarRegistry:
     @property
     def names(self):
         """List the names of all registered colorbars settings."""
-        return sorted(list(self.registry))
+        return sorted(self.registry)
 
     def __contains__(self, item):
         """Test registration of a colorbar in the registry."""

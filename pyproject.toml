@@ -144,9 +144,9 @@ select = [
     # flake8-commas
     "COM",
     # flake8-slots
-    # "SLOT",
+    "SLOT",
     # flake8-comprehensions
-    # "C4",
+    "C4",
     # Ruff custom rules
     # "RUF"
 

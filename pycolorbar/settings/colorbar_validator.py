@@ -200,7 +200,7 @@ class CategoryNormSettings(BaseModel):
         if v is not None:
             assert isinstance(v, list), "'labels' must be a list."
             assert len(v) >= 2, "'labels' must have at least two strings"
-            assert all([isinstance(label, str) for label in v]), "'labels' must be a list of strings."
+            assert all(isinstance(label, str) for label in v), "'labels' must be a list of strings."
         return v
 
     @field_validator("first_value")
