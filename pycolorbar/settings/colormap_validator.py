@@ -37,7 +37,7 @@ from pycolorbar.utils.mpl import get_mpl_named_colors
 
 def get_valid_color_space():
     """Get list of valid color spaces."""
-    valid_names = [
+    return [
         "hex",
         "name",
         "rgb",
@@ -50,7 +50,6 @@ def get_valid_color_space():
         "ciexyz",
         "cmyk",
     ]
-    return valid_names
 
 
 def check_color_space(color_space):
@@ -62,6 +61,7 @@ def check_color_space(color_space):
 
 
 def is_monotonically_increasing(values):
+    """Check if a list of values is monotonically increasing."""
     return all(x <= y for x, y in zip(values, values[1:]))
 
 
@@ -75,13 +75,13 @@ class ColormapValidator(BaseModel):
     Attributes
     ----------
     colors_decoded: bool
-        If True, assumes that the colors have been already decoded (internal representation).
-        If False, assumes that the colors have not been decoded (external representation).
-        The default is True.
+        If ``True``, assumes that the colors have been already decoded (internal representation).
+        If ``False``, assumes that the colors have not been decoded (external representation).
+        The default is ``True``.
     colormap_type : str
-        The type of the colormap (e.g., "ListedColormap", "LinearSegmentedColormap").
+        The type of the colormap (e.g., ``ListedColormap``, ``LinearSegmentedColormap``).
     color_space : str
-        The color space of the colormap (e.g., "rgb", "hsv").
+        The color space of the colormap (e.g., ``rgb``, ``hsv``).
     color_palette : np.ndarray
         The array of colors defined for the colormap.
 
@@ -124,6 +124,7 @@ class ColormapValidator(BaseModel):
 
     @field_validator("colormap_type")
     def validate_colormap_type(cls, v):
+        """Validate the ``colormap_type`` field."""
         valid_colormap_types = [
             "ListedColormap",
             "LinearSegmentedColormap",
@@ -134,16 +135,19 @@ class ColormapValidator(BaseModel):
 
     @field_validator("color_space")
     def validate_color_space(cls, v):
+        """Validate the ``color_space`` field."""
         check_color_space(color_space=v)
         return v
 
     @field_validator("colors_decoded")
     def validate_colors_decoded(cls, v):
+        """Validate the ``colors_decoded`` flag."""
         assert isinstance(v, bool), "colors_decoded must be a boolean."
         return v
 
     @field_validator("color_palette")
     def validate_color_palette(cls, v, values):
+        """Validate the ``color_palette`` array."""
         if v is not None:
             v = np.asanyarray(v)
             color_space = values.data.get("color_space", "")
@@ -158,6 +162,7 @@ class ColormapValidator(BaseModel):
 
     @field_validator("segmentdata")
     def validate_segmentdata(cls, v, values):
+        """Validate the ``segmentdata`` dictionary."""
         if v is not None:
             assert (
                 values.data.get("colormap_type") == "LinearSegmentedColormap"
@@ -190,10 +195,13 @@ class ColormapValidator(BaseModel):
 
 
 def _set_default_n(cmap_dict):
-    if cmap_dict["n"] is None:
-        # Set default value for LinearSegmentedColormap
-        if cmap_dict["colormap_type"] == "LinearSegmentedColormap":
-            cmap_dict["n"] = 256
+    # Set default value for LinearSegmentedColormap.from_list
+    if (
+        cmap_dict["n"] is None
+        and cmap_dict["segmentdata"] is None
+        and cmap_dict["colormap_type"] == "LinearSegmentedColormap"
+    ):
+        cmap_dict["n"] = 256
     return cmap_dict
 
 
@@ -290,14 +298,13 @@ def validate_hex_colors(colors: np.ndarray) -> bool:
     ValueError
         If the colors array is not 1-D or if any color is not a valid hex string.
     """
-
     _check_ndim(colors, 1)
     _check_type(colors, np.str_)
     hex_color_pattern = re.compile(r"^#(?:[0-9a-fA-F]{3}){1,2}$")
     if not all(hex_color_pattern.match(color) for color in colors):
         raise ValueError(
             "Invalid color format for 'hex'. "
-            "Colors should be strings starting with '#' and followed by 3 or 6 hex digits."
+            "Colors should be strings starting with '#' and followed by 3 or 6 hex digits.",
         )
 
 
@@ -353,11 +360,10 @@ def validate_colors_values(colors, color_space, decoded_colors=True):
         validate_name_colors(colors)
     elif color_space == "hex":
         validate_hex_colors(colors)
+    elif decoded_colors:
+        check_valid_internal_data_range(colors, color_space=color_space.upper())
     else:
-        if decoded_colors:
-            check_valid_internal_data_range(colors, color_space=color_space.upper())
-        else:
-            check_valid_external_data_range(colors, color_space=color_space.upper())
+        check_valid_external_data_range(colors, color_space=color_space.upper())
 
 
 ####-------------------------------------------------------------------------------------------------------------------.

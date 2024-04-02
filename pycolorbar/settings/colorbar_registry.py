@@ -27,6 +27,7 @@
 """Define the register of univiariate colorbars."""
 
 import os
+from typing import Optional
 
 from pycolorbar.settings.colorbar_io import read_cbar_dicts, write_cbar_dicts
 from pycolorbar.settings.colorbar_validator import validate_cbar_dict
@@ -52,6 +53,7 @@ class ColorbarRegistry:
     _instance = None
 
     def __new__(cls):
+        """Create a new instance of the ColorbarRegistry."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             #  cls._instance = super(ColorbarRegistry, cls).__new__(cls)
@@ -60,6 +62,7 @@ class ColorbarRegistry:
 
     @classmethod
     def get_instance(cls):
+        """Return the singleton instance of the ColorbarRegistry."""
         if cls._instance is None:
             cls()  # this will call __new__
         return cls._instance
@@ -71,19 +74,20 @@ class ColorbarRegistry:
     @property
     def names(self):
         """List the names of all registered colorbars settings."""
-        return sorted(list(self.registry))
+        return sorted(self.registry)
 
     def __contains__(self, item):
         """Test registration of a colorbar in the registry."""
         return item in self.names
 
     def _check_if_cbar_in_use(self, name, force, verbose):
+        """Check if a colorbar is already registered and if it can be overwritten."""
         if name in self.registry:
             if force and verbose:
                 print(f"Warning: Overwriting existing colorbar '{name}'")
             if not force:
                 raise ValueError(
-                    f"A colorbar setting named '{name}' already exists. To allow overwriting, set 'force=True'."
+                    f"A colorbar setting named '{name}' already exists. To allow overwriting, set 'force=True'.",
                 )
 
     def register(self, filepath: str, verbose: bool = True, force: bool = True, validate=False):
@@ -104,6 +108,7 @@ class ColorbarRegistry:
         validate: bool, optional
             Whether to validate the colorbar configuration file before registering.
             The default is `False`.
+
         Notes
         -----
         If a a colorbar configuration with the same name already exists, it will be overwritten.
@@ -118,7 +123,7 @@ class ColorbarRegistry:
         # Register colorbars settings
         for name, cbar_dict in cbar_dicts.items():
             if validate:
-                cbar_dict = validate_cbar_dict(cbar_dict=cbar_dict, name=name)
+                cbar_dict = validate_cbar_dict(cbar_dict=cbar_dict, name=name)  # noqa
             self._check_if_cbar_in_use(name=name, force=force, verbose=verbose)
             self.registry[name] = cbar_dict
 
@@ -229,6 +234,7 @@ class ColorbarRegistry:
         return get_cmap(cbar_dict)
 
     def to_yaml(self, filepath, names=None, force=False, sort_keys=False):
+        """Write the registered colorbars settings to a YAML file."""
         write_cbar_dicts(
             cbar_dicts=self.registry,
             filepath=filepath,
@@ -237,7 +243,7 @@ class ColorbarRegistry:
             sort_keys=sort_keys,
         )
 
-    def validate(self, name: str = None):
+    def validate(self, name: Optional[str] = None):
         """
         Validate the registered colorbars. If a specific name is provided, only that colorbar is validated.
 
@@ -256,10 +262,7 @@ class ColorbarRegistry:
         Invalid colorbar configurations are reported.
         """
         # TODO: allow for list of names ?
-        if isinstance(name, str):
-            names = [name]
-        else:
-            names = self.names
+        names = [name] if isinstance(name, str) else self.names
 
         # Validate colorbars
         wrong_names = []
@@ -273,7 +276,6 @@ class ColorbarRegistry:
                 print("")
         if wrong_names:
             raise ValueError(f"The {wrong_names} colorbars have invalid configurations.")
-        return
 
     def get_standalone_settings(self):
         """Return the colorbar settings names which are not a reference to another colorbar."""
@@ -295,10 +297,7 @@ class ColorbarRegistry:
 
     def available(self, category=None, exclude_referenced=False):
         """List the name of available colorbars for a specific category."""
-        if exclude_referenced:
-            names = self.get_standalone_settings()
-        else:
-            names = self.names
+        names = self.get_standalone_settings() if exclude_referenced else self.names
 
         if category is None:
             return names
@@ -313,17 +312,23 @@ class ColorbarRegistry:
                 cat_names.append(name)
         return cat_names
 
-    def show_colorbar(self, name, user_plot_kwargs={}, user_cbar_kwargs={}, fig_size=(6, 1)):
+    def show_colorbar(self, name, user_plot_kwargs=None, user_cbar_kwargs=None, fig_size=(6, 1)):
         """Display a colorbar (updated with optional user arguments)."""
         from pycolorbar.settings.colorbar_visualization import plot_colorbar
 
+        if user_cbar_kwargs is None:
+            user_cbar_kwargs = {}
+        if user_plot_kwargs is None:
+            user_plot_kwargs = {}
         plot_kwargs, cbar_kwargs = self.get_plot_kwargs(
-            name=name, user_plot_kwargs=user_plot_kwargs, user_cbar_kwargs=user_cbar_kwargs
+            name=name,
+            user_plot_kwargs=user_plot_kwargs,
+            user_cbar_kwargs=user_cbar_kwargs,
         )
         plot_colorbar(plot_kwargs=plot_kwargs, cbar_kwargs=cbar_kwargs, ax=None, subplot_size=fig_size)
 
     def show_colorbars(self, category=None, exclude_referenced=True, subplot_size=None):
-        """Display available colorbars (optionally of a specific category)"""
+        """Display available colorbars (optionally of a specific category)."""
         from pycolorbar.settings.colorbar_visualization import plot_colorbars
 
         # TODO: allow for names subset ?
@@ -336,10 +341,10 @@ class ColorbarRegistry:
         # If only 1 colormap registered, plot it with the other method
         if len(names) == 1:
             self.show_colorbar(name=names[0])
-            return None
+            return
 
         # Display colorbars
-        list_args = [[name] + list(self.get_plot_kwargs(name=name)) for name in names]
+        list_args = [[name, *list(self.get_plot_kwargs(name=name))] for name in names]
         plot_colorbars(list_args, subplot_size=subplot_size)
 
     def get_plot_kwargs(self, name=None, user_plot_kwargs=None, user_cbar_kwargs=None):
@@ -521,5 +526,4 @@ def available_colorbars(category=None, exclude_referenced=False):
         List of registered colorbars.
     """
     colorbars = ColorbarRegistry.get_instance()
-    names = colorbars.available(category=category, exclude_referenced=exclude_referenced)
-    return names
+    return colorbars.available(category=category, exclude_referenced=exclude_referenced)

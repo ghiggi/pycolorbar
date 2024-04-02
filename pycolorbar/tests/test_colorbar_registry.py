@@ -38,7 +38,7 @@ from pycolorbar.settings.colorbar_registry import ColorbarRegistry
 from pycolorbar.utils.yaml import write_yaml
 
 
-@pytest.fixture
+@pytest.fixture()
 def colorbar_registry():
     """Fixture to initialize and reset the colorbar registry."""
     registry = ColorbarRegistry.get_instance()
@@ -49,13 +49,13 @@ def colorbar_registry():
     registry.reset()
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_matplotlib_show(mocker):  # noqa
     mock = mocker.patch("matplotlib.pyplot.show")
-    yield mock
+    return mock  # noqa
 
 
-@pytest.fixture
+@pytest.fixture()
 def colorbar_test_filepath(tmp_path):
     """Fixture to create a temporary colorbar YAML file."""
     filepath = tmp_path / "temp_colorbar.yaml"
@@ -66,7 +66,7 @@ def colorbar_test_filepath(tmp_path):
     return filepath
 
 
-@pytest.fixture
+@pytest.fixture()
 def invalid_colorbar_test_filepath(tmp_path):
     """Fixture to create a temporary colorbar YAML file."""
     filepath = tmp_path / "invalid_colorbar.yaml"
@@ -81,7 +81,7 @@ class TestColorbarRegistry:
         colorbar_registry.register(colorbar_test_filepath)
         assert len(colorbar_registry.names) > 0, "Colorbar should be registered."
 
-        colorbar_name = list(colorbar_registry.registry.keys())[0]
+        colorbar_name = next(iter(colorbar_registry.registry.keys()))
         colorbar_registry.unregister(colorbar_name)
         assert colorbar_name not in colorbar_registry.names, "Colorbar should be unregistered."
 
@@ -148,7 +148,7 @@ class TestColorbarRegistry:
     def test_get_cbar_dict(self, colorbar_registry, colorbar_test_filepath):
         """Test get_cbar_dict retrieves the colorbar configuration."""
         colorbar_registry.register(colorbar_test_filepath)
-        colorbar_name = list(colorbar_registry.registry.keys())[0]
+        colorbar_name = next(iter(colorbar_registry.registry.keys()))
         cbar_dict = colorbar_registry.get_cbar_dict(colorbar_name)
         assert isinstance(cbar_dict, dict), "Should return a colorbar configuration dictionary."
 
@@ -186,7 +186,9 @@ class TestColorbarRegistry:
 
         # Test with no custom kwargs
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(
-            name="TEST_CBAR_1", user_plot_kwargs={}, user_cbar_kwargs={}
+            name="TEST_CBAR_1",
+            user_plot_kwargs={},
+            user_cbar_kwargs={},
         )
         assert isinstance(plot_kwargs["cmap"], Colormap)
         assert isinstance(plot_kwargs["norm"], Normalize)
@@ -194,7 +196,9 @@ class TestColorbarRegistry:
 
         # Test with custom kwargs
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(
-            name="TEST_CBAR_1", user_plot_kwargs={"vmin": 10, "vmax": 20}, user_cbar_kwargs={}
+            name="TEST_CBAR_1",
+            user_plot_kwargs={"vmin": 10, "vmax": 20},
+            user_cbar_kwargs={},
         )
         assert isinstance(plot_kwargs["cmap"], Colormap)
         assert isinstance(plot_kwargs["norm"], Normalize)
@@ -210,7 +214,9 @@ class TestColorbarRegistry:
 
         # Test inexisting colorbar configuration with no custom kwargs
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(
-            name=None, user_plot_kwargs={"vmin": 10, "vmax": 20}, user_cbar_kwargs={}
+            name=None,
+            user_plot_kwargs={"vmin": 10, "vmax": 20},
+            user_cbar_kwargs={},
         )
         assert plot_kwargs["cmap"] is None
         assert isinstance(plot_kwargs["norm"], Normalize)
@@ -310,7 +316,6 @@ class TestColorbarRegistry:
 
 def test_utility_methods(colorbar_test_filepath):
     """Tests register_colorbar, get_cbar_dict and get_plot_kwargs utility."""
-
     cbar_name = "TEST_CBAR_1"
     assert cbar_name not in pycolorbar.colorbars
 

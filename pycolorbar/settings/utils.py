@@ -24,6 +24,7 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
+"""Utility functions for settings module."""
 
 
 def get_auxiliary_categories(dictionary):
@@ -33,6 +34,4 @@ def get_auxiliary_categories(dictionary):
         if isinstance(categories, str):
             categories = [categories]
         return categories
-    else:
-        categories = []
-    return categories
+    return []

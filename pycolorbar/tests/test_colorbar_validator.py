@@ -57,7 +57,7 @@ TEST_CMAP_DICT = {
 }
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_colormap_registry(tmp_path):
     """Fixture that register a colormap for testing purpose."""
     # Initialize pycolorbar.colormap registry
@@ -76,10 +76,9 @@ def setup_colormap_registry(tmp_path):
     os.remove(cmap_filepath)
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_colorbar_registry(tmp_path):
     """Fixture that register a colormap for testing purpose."""
-
     TEST_COLORBAR_DICT = {TEST_CBAR_NAME: TEST_CBAR_DICT}
 
     # Initialize pycolorbar.colorbar registry
@@ -279,7 +278,7 @@ class TestNormSettings:
         check_norm_settings(norm_settings)
 
     @pytest.mark.parametrize(
-        "norm_settings, expected_error_msg",
+        ("norm_settings", "expected_error_msg"),
         [
             # Invalid Normalize settings due to incorrect vmin and vmax
             ({"name": "Norm", "vmin": 1, "vmax": 0}, "vmin must be less than vmax"),
@@ -313,7 +312,7 @@ class TestNormSettings:
         assert expected_error_msg in str(exc_info.value)
 
     @pytest.mark.parametrize(
-        "norm_name, extra_param",
+        ("norm_name", "extra_param"),
         [
             ("Norm", {"unexpected": 123}),
             ("BoundaryNorm", {"boundaries": [0, 1], "extra": "not valid"}),
@@ -328,7 +327,7 @@ class TestNormSettings:
             check_norm_settings(norm_settings)
 
     @pytest.mark.parametrize(
-        "norm_name, missing_param",
+        ("norm_name", "missing_param"),
         [
             ("BoundaryNorm", {}),
             ("TwoSlopeNorm", {"vmin": 0}),

@@ -53,7 +53,7 @@ from pycolorbar.settings.matplotlib_kwargs import (
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def basic_cbar_dict():
     """Provides a basic colorbar dictionary for testing."""
     return {
@@ -68,7 +68,8 @@ def basic_cbar_dict():
 
 class TestGetCmapFromCbarDict:
     @pytest.mark.parametrize(
-        "cmap_name, expected_type", [("viridis", ListedColormap), ("Spectral", LinearSegmentedColormap)]
+        ("cmap_name", "expected_type"),
+        [("viridis", ListedColormap), ("Spectral", LinearSegmentedColormap)],
     )
     def test_get_cmap_with_valid_names(self, basic_cbar_dict, cmap_name, expected_type):
         """Test get_cmap function with valid colormap names."""
@@ -90,12 +91,12 @@ class TestGetCmapFromCbarDict:
         basic_cbar_dict["cmap"]["n"] = n_values
         cmap = get_cmap(basic_cbar_dict)
         if n_values is not None:
-            assert cmap.N == n_values, "The 'n' parameter does not match the expected number of colors."
+            assert n_values == cmap.N, "The 'n' parameter does not match the expected number of colors."
         else:
             assert cmap.N == 256, "The default number of colors should be 256 when 'n' is not specified."
 
     @pytest.mark.parametrize(
-        "cmap_names, n_values",
+        ("cmap_names", "n_values"),
         [
             (["viridis", "plasma"], None),
             (["viridis", "plasma"], [128, 128]),
@@ -119,21 +120,25 @@ class TestGetCmapFromCbarDict:
                 "bad_alpha": 0.5,
                 "over_alpha": 0.5,
                 "under_alpha": 0.5,
-            }
+            },
         )
         cmap = get_cmap(basic_cbar_dict)
         np.testing.assert_equal(
-            cmap.get_bad(), np.array([0, 0, 0, 0.5])
+            cmap.get_bad(),
+            np.array([0, 0, 0, 0.5]),
         ), "The bad color or alpha is not correctly set."
         np.testing.assert_equal(
-            cmap.get_over(), np.array([1, 0, 0, 0.5])
+            cmap.get_over(),
+            np.array([1, 0, 0, 0.5]),
         ), "The over color or alpha is not correctly set."
         np.testing.assert_equal(
-            cmap.get_under(), np.array([0, 1, 0, 0.5])
+            cmap.get_under(),
+            np.array([0, 1, 0, 0.5]),
         ), "The under color or alpha is not correctly set."
 
     @pytest.mark.parametrize(
-        "cmap_dict_update", [{"bad_color": "none"}, {"over_color": "none"}, {"under_color": "none"}]
+        "cmap_dict_update",
+        [{"bad_color": "none"}, {"over_color": "none"}, {"under_color": "none"}],
     )
     def test_finalize_cmap_with_none_colors(self, basic_cbar_dict, cmap_dict_update):
         """Test _finalize_cmap handling of 'none' for colors."""
@@ -149,7 +154,7 @@ class TestGetCmapFromCbarDict:
 
 
 @pytest.mark.parametrize(
-    "norm_name, expected_type, norm_settings",
+    ("norm_name", "expected_type", "norm_settings"),
     [
         ("Norm", Normalize, {"vmin": 0, "vmax": 1}),
         ("NoNorm", NoNorm, {}),
@@ -251,7 +256,7 @@ class TestPlotCbarKwargs:
         for key, value in custom_cbar_kwargs.items():
             assert cbar_kwargs[key] == value, f"The cbar_kwargs key '{key}' has not been updated to {value}"
 
-    @pytest.mark.parametrize("ncolors,extend", [(2, "neither"), (3, "vmin"), (3, "vmax"), (4, "both")])
+    @pytest.mark.parametrize(("ncolors", "extend"), [(2, "neither"), (3, "vmin"), (3, "vmax"), (4, "both")])
     def test_custom_discrete_colorbar(self, ncolors, extend):
         """Test behaviour for discrete colorbar and addition of ticklabels in cbar_kwargs."""
         # Define cbar_dict
@@ -293,11 +298,11 @@ class TestPlotCbarKwargs:
 
 
 class TestUpdatePlotCbarKwargs:
-    @pytest.fixture
+    @pytest.fixture()
     def default_plot_kwargs(self):
         return {"cmap": plt.get_cmap("viridis"), "norm": Normalize(vmin=0, vmax=1)}
 
-    @pytest.fixture
+    @pytest.fixture()
     def default_cbar_kwargs(self):
         return {"extend": "neither", "label": "Default Label"}
 
@@ -306,7 +311,8 @@ class TestUpdatePlotCbarKwargs:
         default_plot_kwargs = "dummy_input"
         default_cbar_kwargs = "dummy_input"
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
-            default_plot_kwargs=default_plot_kwargs, default_cbar_kwargs=default_cbar_kwargs
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
         )
         assert plot_kwargs == default_plot_kwargs, "The returned plot_kwargs are not the default ones"
         assert cbar_kwargs == default_cbar_kwargs, "The returned cbar_kwargs are not the default ones"

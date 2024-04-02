@@ -34,9 +34,7 @@ from pycolorbar.settings.colormap_validator import validate_cmap_dict
 
 
 class TestColormapColorPalette:
-    """
-    Tests for validating color map configurations related to colors.
-    """
+    """Tests for validating color map configurations related to colors."""
 
     def test_valid_hex_colors(self):
         """Validate a colormap dictionary with valid hex colors."""
@@ -59,7 +57,7 @@ class TestColormapColorPalette:
         assert isinstance(validated_dict, dict)
 
     @pytest.mark.parametrize(
-        "color_space,colors",
+        ("color_space", "colors"),
         [
             ("hex", np.array(["#GGGGGG", "invalid1"])),  # Invalid hex code
             ("name", np.array(["not_a_color", "not_a_color1"])),  # Invalid color name
@@ -96,7 +94,7 @@ class TestColormapColorPalette:
         with pytest.raises(ValidationError) as excinfo:
             validate_cmap_dict(cmap_dict)
         assert "The 'color_palette' array must not be empty" in str(
-            excinfo.value
+            excinfo.value,
         ), "Empty colors array should raise ValueError."
 
     def test_colors_at_least_2(self):
@@ -105,7 +103,7 @@ class TestColormapColorPalette:
         with pytest.raises(ValidationError) as excinfo:
             validate_cmap_dict(cmap_dict)
         assert "The 'color_palette' array must have at least 2 colors." in str(
-            excinfo.value
+            excinfo.value,
         ), "Array with only 1 color should raise ValueError."
 
     def test_rgba_colors_with_valid_alpha(self):
@@ -117,7 +115,8 @@ class TestColormapColorPalette:
         }
         validated_dict = validate_cmap_dict(cmap_dict, decoded_colors=False)
         assert np.array_equal(
-            validated_dict["color_palette"], cmap_dict["color_palette"]
+            validated_dict["color_palette"],
+            cmap_dict["color_palette"],
         ), "Valid RGBA colors should pass validation."
 
     def test_rgba_colors_with_invalid_alpha(self):
@@ -130,7 +129,7 @@ class TestColormapColorPalette:
         with pytest.raises(ValidationError) as excinfo:
             validate_cmap_dict(cmap_dict, decoded_colors=False)
         assert "Channel 'A' values are not within the external data range. Expected range (0, 100)" in str(
-            excinfo.value
+            excinfo.value,
         ), "Invalid alpha values should raise ValueError."
 
 
@@ -138,9 +137,7 @@ class TestColormapColorSpace:
     """Tests for validating color map configurations related to color_space."""
 
     def test_invalid_color_space(self):
-        """
-        Test color map validation with an invalid color space.
-        """
+        """Test color map validation with an invalid color space."""
         cmap_dict = {
             "colormap_type": "ListedColormap",
             "color_space": "invalid_color_space",
@@ -155,9 +152,7 @@ class TestColormapSegmentData:
     """Tests for validating color map configurations related to segmentdata."""
 
     def test_valid_segmentdata(self):
-        """
-        Validate a colormap dictionary with valid segmentdata for a LinearSegmentedColormap.
-        """
+        """Validate a colormap dictionary with valid segmentdata for a LinearSegmentedColormap."""
         segment_data = {
             "red": [(0.0, 0.0, 0.0), (0.5, 1.0, 1.0), (1.0, 1.0, 1.0)],
             "green": [(0.0, 0.0, 0.0), (0.25, 0.0, 0.0), (0.75, 1.0, 1.0), (1.0, 1.0, 1.0)],

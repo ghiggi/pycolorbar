@@ -59,20 +59,15 @@ def _create_combined_cmap(names, n=None, new_n=None):
     cmap_colors = np.vstack([cmap(np.linspace(0, 1, lut)) for cmap, lut in zip(list_cmaps, new_n)])
     # Define the new colormap
     new_name = "_".join(names)
-    cmap = LinearSegmentedColormap.from_list(name=new_name, colors=cmap_colors)
-    return cmap
+    return LinearSegmentedColormap.from_list(name=new_name, colors=cmap_colors)
 
 
-def _get_cmap(cmap_settings, norm_settings):
+def _get_cmap(cmap_settings):
     """Retrieve the colormap for a given validated colorbar setting."""
     name = cmap_settings.get("name")
     n = cmap_settings.get("n")
     # Define colormap
-    if isinstance(name, str):
-        cmap = pycolorbar.get_cmap(name=name, lut=n)
-    else:
-        cmap = _create_combined_cmap(names=name, n=n)
-    return cmap
+    return pycolorbar.get_cmap(name=name, lut=n) if isinstance(name, str) else _create_combined_cmap(names=name, n=n)
 
 
 def _finalize_cmap(cmap, cmap_settings):
@@ -102,12 +97,10 @@ def get_cmap(cbar_dict):
         return None
     # Retrieve settings
     cmap_settings = cbar_dict["cmap"]
-    norm_settings = cbar_dict.get("norm", {})
     # Retrieve cmap
-    cmap = _get_cmap(cmap_settings=cmap_settings, norm_settings=norm_settings)
+    cmap = _get_cmap(cmap_settings=cmap_settings)
     ### Set bad, under and over colors and transparency
-    cmap = _finalize_cmap(cmap, cmap_settings)
-    return cmap
+    return _finalize_cmap(cmap, cmap_settings)
 
 
 ####-------------------------------------------------------------------------------------------.
@@ -116,8 +109,7 @@ def create_category_norm(labels, first_value=0):
     """Define a BoundaryNorm that deal with categorical data."""
     n_labels = len(labels)
     norm_bins = np.arange(first_value - 0.01, n_labels + first_value) + 0.5
-    norm = mpl.colors.BoundaryNorm(boundaries=norm_bins, ncolors=n_labels)
-    return norm
+    return mpl.colors.BoundaryNorm(boundaries=norm_bins, ncolors=n_labels)
 
 
 ####-------------------------------------------------------------------------------------------.
@@ -148,8 +140,7 @@ def get_norm(norm_settings):
     norm_name = norm_settings.pop("name", "Norm")
     norm_func = get_norm_function(norm_name)
     # Define norm
-    norm = norm_func(**norm_settings)
-    return norm
+    return norm_func(**norm_settings)
 
 
 ####-------------------------------------------------------------------------------------------.
@@ -166,6 +157,7 @@ def get_norm(norm_settings):
 
 
 def get_plot_cbar_kwargs(cbar_dict):
+    """Retrieve the plot and colorbar kwargs from a validated colorbar dictionary."""
     cbar_dict = cbar_dict.copy()
 
     # ------------------------------------------------------------------------.
@@ -203,7 +195,8 @@ def get_plot_cbar_kwargs(cbar_dict):
 
 
 def get_default_cbar_kwargs():
-    cbar_kwargs = {
+    """Define the default colorbar kwargs."""
+    return {
         "ticks": None,
         # "ticklabels": None,  --> # Temporary ... because matplotlib.colorbar do not accept ticklabels
         "ticklocation": "auto",
@@ -215,29 +208,25 @@ def get_default_cbar_kwargs():
         "drawedges": False,
         "shrink": 1,
     }
-    return cbar_kwargs
 
 
 def _decimal_places(value, cap=4):
     """Determine the number of decimal places needed for formatting."""
-
     if value.is_integer():
         return 0  # No decimal places needed for integer values
     magnitude = np.abs(value)
     # Add only 1 decimal for values above 1
     if magnitude >= 1:
         return 1
-    else:
-        # Dynamically calculate decimal places based on magnitude (and cap at i.e. 4 decimals)
-        return min(int(np.ceil(-np.log10(magnitude))) + 1, cap)
+    # Dynamically calculate decimal places based on magnitude (and cap at i.e. 4 decimals)
+    return min(int(np.ceil(-np.log10(magnitude))) + 1, cap)
 
 
 def _count_string_decimals(value):
     """Count the number of decimal places in a value."""
     if "." in value:
         return len(value) - value.index(".") - 1
-    else:
-        return 0
+    return 0
 
 
 def _ensure_increasing_or_equal_values(arr):
@@ -273,8 +262,7 @@ def _dynamic_formatting_floats(values, cap=4):
     actual_decimals = [_count_string_decimals(label) for label in labels]
     final_decimals = _ensure_increasing_or_equal_values(actual_decimals[::-1])[::-1]
     labels = [_format_label(value, decimals, strip_zero=False) for value, decimals in zip(values, final_decimals)]
-    labels = ["0" if float(label) == 0 else label for label in labels]
-    return labels
+    return ["0" if float(label) == 0 else label for label in labels]
 
 
 def _finalize_ticks_arguments(cbar_kwargs, cbar_dict, norm):
@@ -284,7 +272,7 @@ def _finalize_ticks_arguments(cbar_kwargs, cbar_dict, norm):
     norm_name = norm_settings.get("name", "Norm")
 
     # Define ticks and ticklabels for BoundaryNorm instances
-    if not (norm_name == "BoundaryNorm" or norm_name == "CategoryNorm"):
+    if norm_name not in ("BoundaryNorm", "CategoryNorm"):
         return cbar_kwargs
 
     # Retrieve discrete norm information
@@ -303,7 +291,7 @@ def _finalize_ticks_arguments(cbar_kwargs, cbar_dict, norm):
     elif norm_name == "CategoryNorm":  # Categorical Colorbar
         ticks = norm.boundaries[:-1] + 0.5
         # Define tick formatter and ticks
-        fmt = mpl.ticker.FuncFormatter(lambda x, pos: labels[norm(x)])
+        fmt = mpl.ticker.FuncFormatter(lambda x, pos=None: labels[norm(x)])  # noqa
         ticklabels = [fmt(tick) for tick in ticks]
 
     # Format back to list
@@ -317,7 +305,7 @@ def _finalize_ticks_arguments(cbar_kwargs, cbar_dict, norm):
 
 
 def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_kwargs=None, user_cbar_kwargs=None):
-
+    """Update the default plot and colorbar kwargs with user-provided arguments."""
     # If no user kwargs, return default kwargs
     user_plot_kwargs = {} if user_plot_kwargs is None else user_plot_kwargs
     user_cbar_kwargs = {} if user_cbar_kwargs is None else user_cbar_kwargs
@@ -364,7 +352,8 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
     # - If user provided a colormap, resample the colormap
     if default_cbar_kwargs.get("ticklabels", None) is not None:
         _resample_user_cmap_for_labeled_colorbar(
-            user_plot_kwargs=user_plot_kwargs, default_cbar_kwargs=default_cbar_kwargs
+            user_plot_kwargs=user_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
         )
 
     # Deal with xarray user_plot_kwargs 'levels' option
@@ -392,8 +381,7 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
 def _count_length(v):
     if v is None:
         return 0
-    else:
-        return len(v)
+    return len(v)
 
 
 def _check_valid_ticks_ticklabels(user_cbar_kwargs, default_cbar_kwargs):
@@ -411,18 +399,23 @@ def _check_valid_ticks_ticklabels(user_cbar_kwargs, default_cbar_kwargs):
         if user_ticks is not None and user_ticklabels is not None:
             if user_ticks_length != user_ticklabels_length:
                 raise ValueError(
-                    "'ticks' and 'ticklabels' must have same length: {user_ticks_length} vs {user_ticklabels_length}."
+                    "'ticks' and 'ticklabels' must have same length: {user_ticks_length} vs {user_ticklabels_length}.",
                 )
-        elif user_ticks is None and default_ticks is not None:  # but user_ticklabels provided
+        # Case: user_ticklabels provided
+        elif user_ticks is None and default_ticks is not None:
             if user_ticklabels_length != default_ticks_length:
                 raise ValueError(
-                    "If you don't specify 'ticks', expecting a 'ticklabels' list of length {default_ticks_length}."
+                    "If you don't specify 'ticks', expecting a 'ticklabels' list of length {default_ticks_length}.",
                 )
-        elif user_ticklabels is None and default_ticklabels is not None:  # but user_ticks provided
-            if user_ticks_length != default_ticklabels_length:
-                raise ValueError(
-                    "If you don't specify 'ticklabels', expecting a 'ticks' list of length {default_ticklabels_length}."
-                )
+        # Case: user_ticks provided
+        elif (
+            user_ticklabels is None
+            and default_ticklabels is not None
+            and user_ticks_length != default_ticklabels_length
+        ):
+            raise ValueError(
+                "If you don't specify 'ticklabels', expecting a 'ticks' list of length {default_ticklabels_length}.",
+            )
 
 
 def _remove_defaults_ticks_and_ticklabels(default_cbar_kwargs):
@@ -496,7 +489,7 @@ def _update_default_norm_using_vmin_and_vmax(user_plot_kwargs, default_plot_kwar
             norm_class = type(default_plot_kwargs["norm"])
             print(
                 f"The default pycolorbar norm is a {norm_class} and does not accept 'vmin' and 'vmax'.\n "
-                f"Switching the norm to Normalize(vmin={vmin}, vmax={vmax}) !"
+                f"Switching the norm to Normalize(vmin={vmin}, vmax={vmax}) !",
             )
             user_plot_kwargs["norm"] = Normalize(vmin=vmin, vmax=vmax)
             default_plot_kwargs["norm"] = Normalize(vmin=vmin, vmax=vmax)
@@ -519,9 +512,8 @@ def _check_no_vmin_vmax_if_norm_specified(user_plot_kwargs):
     vmin = user_plot_kwargs.get("vmin", None)
     vmax = user_plot_kwargs.get("vmax", None)
     norm = user_plot_kwargs.get("norm", None)
-    if norm is not None:
-        if vmin is not None or vmax is not None:
-            raise ValueError("If the 'norm' is specified, 'vmin' and 'vmax' must not be specified.")
+    if norm is not None and (vmin is not None or vmax is not None):
+        raise ValueError("If the 'norm' is specified, 'vmin' and 'vmax' must not be specified.")
 
 
 def _parse_user_cmap(user_plot_kwargs):

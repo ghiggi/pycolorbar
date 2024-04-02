@@ -40,20 +40,18 @@ from pycolorbar.settings.colorbar_io import (
 
 
 class TestColorbarIO:
-    @pytest.fixture
+    @pytest.fixture()
     def test_cbar_dict(self):
         """Return test cbar_dict."""
-        cbar_dict = {"cmap": {"name": "viridis"}, "norm": {"name": "Norm"}, "cbar": {"extend": "both"}}
-        return cbar_dict
+        return {"cmap": {"name": "viridis"}, "norm": {"name": "Norm"}, "cbar": {"extend": "both"}}
 
-    @pytest.fixture
+    @pytest.fixture()
     def test_cbar_dicts(self):
         """Return test cbar_dicts."""
-        cbar_dicts = {
+        return {
             "cbar1": {"cmap": {"name": "viridis"}, "norm": {"name": "Norm"}, "cbar": {"extend": "both"}},
             "cbar2": {"cmap": {"name": "plasma"}, "norm": {"name": "LogNorm"}, "cbar": {"extend": "neither"}},
         }
-        return cbar_dicts
 
     def test_is_single_colorbar_settings(self, test_cbar_dict):
         # Assert cbar_dict

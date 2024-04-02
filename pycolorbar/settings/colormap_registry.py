@@ -28,6 +28,7 @@
 
 import os
 import tempfile
+from typing import Optional
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -68,6 +69,7 @@ class ColormapRegistry:
     _instance = None
 
     def __new__(cls):
+        """Create a new instance of the `ColormapRegistry`."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             #  cls._instance = super(ColormapRegistry, cls).__new__(cls)
@@ -78,6 +80,7 @@ class ColormapRegistry:
 
     @classmethod
     def get_instance(cls):
+        """Return the singleton instance of the `ColormapRegistry`."""
         if cls._instance is None:
             cls()  # this will call __new__
         return cls._instance
@@ -89,7 +92,7 @@ class ColormapRegistry:
     @property
     def names(self):
         """List the names of all registered colormaps."""
-        return sorted(list(self.registry))
+        return sorted(self.registry)
 
     def __contains__(self, item):
         """Test registration of colormap in the registry."""
@@ -135,6 +138,7 @@ class ColormapRegistry:
     def add_cmap_dict(self, cmap_dict: dict, name: str, verbose: bool = True, force=True):
         """
         Add a colormap to the registry by providing a colormap dictionary and the colormap name.
+
         A temporary file YAML configuration file is created in `ColormapRegistry.tmp_dir`.
 
         Parameters
@@ -262,7 +266,7 @@ class ColormapRegistry:
             cmap = cmap.reversed(name)
         return cmap
 
-    def validate(self, name: str = None):
+    def validate(self, name: Optional[str] = None):
         """
         Validate the registered colormaps. If a specific name is provided, only that colormap is validated.
 
@@ -299,7 +303,6 @@ class ColormapRegistry:
                 print("")
         if wrong_names:
             raise ValueError(f"The {wrong_names} colormaps have invalid configurations.")
-        return
 
     def to_yaml(self, name, filepath, force=False):
         """Write the colormap configuration to a YAML file."""
@@ -318,10 +321,7 @@ class ColormapRegistry:
 
     def available(self, category=None, include_reversed=False):
         """List the name of available colormaps for a specific category."""
-        if category is None:
-            names = self.names
-        else:
-            names = self._get_subset_names(category=category)
+        names = self.names if category is None else self._get_subset_names(category=category)
 
         if include_reversed:
             names = [name + "_r" for name in names] + names
@@ -335,7 +335,7 @@ class ColormapRegistry:
         plot_colormap(cmap)
 
     def show_colormaps(self, category=None, include_reversed=False, subplot_size=None):
-        """Display available colormaps (optionally of a specific category)"""
+        """Display available colormaps (optionally of a specific category)."""
         from pycolorbar.settings.colormap_visualization import plot_colormaps
 
         # Retrieve available colormaps (of a given category)
@@ -346,7 +346,7 @@ class ColormapRegistry:
         # If only 1 colormap registered, plot it with the other method
         if len(names) == 1:
             self.show_colormap(name=names[0])
-            return None
+            return
 
         # Else, retrieve colormaps to display
         cmaps = [self.get_cmap(name) for name in sorted(names)]
@@ -355,7 +355,7 @@ class ColormapRegistry:
         plot_colormaps(cmaps, subplot_size=subplot_size)
 
 
-def register_colormaps(directory: str, name: str = None, verbose: bool = True, force: bool = True):
+def register_colormaps(directory: str, name: Optional[str] = None, verbose: bool = True, force: bool = True):
     """
     Register all colormap YAML files present in the specified directory (if name=None).
 
@@ -377,7 +377,7 @@ def register_colormaps(directory: str, name: str = None, verbose: bool = True, f
     colormaps = ColormapRegistry.get_instance()
 
     # List the colormap YAML files to register
-    if name is not None:
+    if name is not None:  # noqa SIM108
         filepaths = [os.path.join(directory, f"{name}.yaml")]
     else:
         # List all YAML files in the directory
@@ -436,7 +436,7 @@ def get_cmap_dict(name):
     return colormaps.get_cmap_dict(name)
 
 
-def get_cmap(name: str = None, lut: int = None):
+def get_cmap(name: Optional[str] = None, lut: Optional[int] = None):
     """
     Get a colormap instance.
 
@@ -482,12 +482,11 @@ def get_cmap(name: str = None, lut: int = None):
     if name in mpl_registered_names:
         return plt.get_cmap(name=name, lut=lut)
     # Unavailable colormap
-    else:
-        raise ValueError(
-            f"{name} is not registered in pycolorbar and matplotlib !\n "
-            f"Valid matplotlib colormap are {mpl_registered_names}.\n "
-            f"Valid pycolorbar colormap are {pycolorbar_registered_names}."
-        )
+    raise ValueError(
+        f"{name} is not registered in pycolorbar and matplotlib !\n "
+        f"Valid matplotlib colormap are {mpl_registered_names}.\n "
+        f"Valid pycolorbar colormap are {pycolorbar_registered_names}.",
+    )
 
 
 def _get_mpl_cmap_by_category(category):
@@ -569,11 +568,7 @@ def _get_mpl_cmap_by_category(category):
         "CYCLIC": ["twilight", "twilight_shifted", "hsv"],
     }
     type_dict["CATEGORICAL"] = type_dict["QUALITATIVE"]
-    if category.upper() in type_dict:
-        names = type_dict[category.upper()]
-    else:
-        names = []
-    return names
+    return type_dict.get(category.upper(), [])
 
 
 def _get_matplotlib_cmaps(category=None, include_reversed=False):
@@ -604,6 +599,7 @@ def available_colormaps(category=None, include_reversed=False):
     include_reversed : bool, optional
         Whether to include also the name of the reversed colormap suffixed by `_r`.
         The default is `False`.
+
     Returns
     -------
     names : str
@@ -612,8 +608,7 @@ def available_colormaps(category=None, include_reversed=False):
     colormaps = ColormapRegistry.get_instance()
     names = colormaps.available(category=category, include_reversed=include_reversed)
     names += _get_matplotlib_cmaps(category=category, include_reversed=include_reversed)
-    names = sorted(np.unique(names))
-    return names
+    return sorted(np.unique(names))
 
 
 def check_colormap_archive():

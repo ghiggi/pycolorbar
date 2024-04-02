@@ -33,6 +33,7 @@ import numpy as np
 
 
 def plot_colormap(cmap, dpi=200):
+    """Plot a single colormap."""
     fig, ax = plt.subplots(figsize=(4, 0.4), dpi=dpi)
     mpl.colorbar.ColorbarBase(ax, cmap=cmap, orientation="horizontal")
     ax.set_title(cmap.name, fontsize=10, weight="bold")
@@ -40,6 +41,7 @@ def plot_colormap(cmap, dpi=200):
 
 
 def plot_colormaps(cmaps, cols=None, subplot_size=None, dpi=200):
+    """Plot a list of colormaps."""
     # Define subplot_size
     if subplot_size is None:
         subplot_size = (2, 0.5)
@@ -83,6 +85,7 @@ def plot_colormaps(cmaps, cols=None, subplot_size=None, dpi=200):
 
 
 def show_colormap(cmap):
+    """Show a registered colormap."""
     from pycolorbar import get_cmap
 
     cmap = get_cmap(cmap)
@@ -90,6 +93,7 @@ def show_colormap(cmap):
 
 
 def show_colormaps(category=None, include_reversed=False, cols=None, subplot_size=None):
+    """Show all registered colormaps."""
     import pycolorbar
 
     # Retrieve list of colormaps names

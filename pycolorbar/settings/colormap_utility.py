@@ -36,10 +36,11 @@ IMPLEMENTED_COLOR_SPACE = ["name", "rgb", "rgba", "hex", "hsv"]
 
 
 def convert_colors(colors, color_space):
+    """Convert colors to the RGB color space."""
     #  TODO: IMPLEMENT !
     if color_space.lower() not in IMPLEMENTED_COLOR_SPACE:
         raise NotImplementedError(f"Color space '{color_space}' not yet implemented.")
-    if color_space == "hsv":
+    if color_space == "hsv":  # noqa SIM108
         colors = matplotlib.colors.hsv_to_rgb(colors)
     # elif
     #   IMPLEMENT
@@ -49,6 +50,7 @@ def convert_colors(colors, color_space):
 
 
 def create_cmap(cmap_dict, name):
+    """Create a colormap from the colormap dictionary."""
     cmap_type = cmap_dict["colormap_type"]
     color_space = cmap_dict["color_space"]
 
@@ -67,17 +69,16 @@ def create_cmap(cmap_dict, name):
     # Create Colormap
     if cmap_type == "ListedColormap":
         return ListedColormap(colors, name=name, N=n)
-    else:
-        # LinearSegmentedColormap
-        if segmentdata is None:
-            if n is None:
-                n = 256  # matplotlib default
+    # LinearSegmentedColormap from list
+    if segmentdata is None:
+        if n is None:
+            n = 256  # matplotlib default
 
-            # Retrieve n colors in 'interpolation_space' (when type=LinearSegmentedColormap)
-            # TODO
+        # Retrieve n colors in 'interpolation_space' (when type=LinearSegmentedColormap)
+        # TODO
 
-            # Retrieve colormap
-            return LinearSegmentedColormap.from_list(name=name, colors=colors, N=n, gamma=gamma)
-        else:
-            segmentdata = cmap_dict["segmentdata"]
-            return LinearSegmentedColormap(name=name, segmentdata=segmentdata, gamma=gamma)
+        # Retrieve colormap
+        return LinearSegmentedColormap.from_list(name=name, colors=colors, N=n, gamma=gamma)
+    # LinearSegmentedColormap with segmentdata
+    segmentdata = cmap_dict["segmentdata"]
+    return LinearSegmentedColormap(name=name, segmentdata=segmentdata, gamma=gamma)

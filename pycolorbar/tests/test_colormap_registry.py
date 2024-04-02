@@ -28,7 +28,7 @@
 
 import os
 
-import matplotlib.pyplot as plt  # noqa
+import matplotlib.pyplot as plt
 import pytest
 from matplotlib.colors import Colormap, ListedColormap
 from pytest_mock import mocker  # noqa
@@ -38,7 +38,7 @@ from pycolorbar.settings.colormap_registry import ColormapRegistry
 from pycolorbar.utils.yaml import write_yaml
 
 
-@pytest.fixture
+@pytest.fixture()
 def colormap_registry():
     registry = ColormapRegistry.get_instance()
     registry.reset()
@@ -48,10 +48,10 @@ def colormap_registry():
     registry.reset()
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_matplotlib_show(mocker):  # noqa
     mock = mocker.patch("matplotlib.pyplot.show")
-    yield mock
+    return mock  # noqa RET504
 
 
 TEST_CMAP_DICT = {
@@ -107,7 +107,6 @@ class TestColormapRegistry:
 
     def test_register_overwriting(self, colormap_registry, tmp_path, capsys):
         """Test registering an already existing colormap."""
-
         # Create a temporary colormap YAML file
         cmap_name = "test_cmap"
         cmap_filepath = os.path.join(tmp_path, f"{cmap_name}.yaml")
@@ -188,7 +187,7 @@ class TestColormapRegistry:
         assert cmap_name not in colormap_registry
 
     def test_available(self, colormap_registry):
-        """Test available colormaps"""
+        """Test available colormaps."""
         # Register cmap
         cmap_name = "test_cmap_dict"
         colormap_registry.add_cmap_dict(cmap_dict=TEST_CMAP_DICT, name=cmap_name)
@@ -334,7 +333,6 @@ class TestColormapRegistry:
 
 def test_utility_methods(colormap_registry, tmp_path):
     """Tests register_colormap, get_cmap and get_cmap_dict utility."""
-
     # Create a temporary colormap YAML file
     cmap_name = "test_cmap"
     cmap_filepath = os.path.join(tmp_path, f"{cmap_name}.yaml")

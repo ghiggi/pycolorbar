@@ -49,6 +49,7 @@ def _draw_colorbar(plot_kwargs, cbar_kwargs, fig, ax=None, cax=None):
 
 
 def plot_colorbar(plot_kwargs, cbar_kwargs, ax=None, subplot_size=(6, 1)):
+    """Plot a single colorbar."""
     # Initialize figure if necessary
     if ax is None:
         fig, ax = plt.subplots(figsize=subplot_size, layout="constrained")
@@ -58,6 +59,7 @@ def plot_colorbar(plot_kwargs, cbar_kwargs, ax=None, subplot_size=(6, 1)):
 
 
 def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
+    """Plot multiple colorbars in a single figure."""
     # Define subplot_size
     if subplot_size is None:
         subplot_size = (5, 1.2)  # 3 --> 2
@@ -84,7 +86,7 @@ def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
     axes = axes.ravel()
 
     # Loop through colorbars and axes
-    for idx, ((name, plot_kwargs, cbar_kwargs), ax) in enumerate(zip(list_args, axes)):
+    for (name, plot_kwargs, cbar_kwargs), ax in zip(list_args, axes):
         _ = _draw_colorbar(plot_kwargs=plot_kwargs, cbar_kwargs=cbar_kwargs, fig=fig, ax=None, cax=ax)
         ax.set_title(name, fontsize=10, weight="bold")
     # Turn off any remaining axes
@@ -95,9 +97,14 @@ def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
     plt.show()
 
 
-def show_colorbar(name=None, user_plot_kwargs={}, user_cbar_kwargs={}, fig_size=(6, 1)):
+def show_colorbar(name=None, user_plot_kwargs=None, user_cbar_kwargs=None, fig_size=(6, 1)):
+    """Show a single pycolorbar colorbar."""
     from pycolorbar import colorbars
 
+    if user_cbar_kwargs is None:
+        user_cbar_kwargs = {}
+    if user_plot_kwargs is None:
+        user_plot_kwargs = {}
     colorbars.show_colorbar(
         name=name,
         user_plot_kwargs=user_plot_kwargs,
@@ -107,6 +114,7 @@ def show_colorbar(name=None, user_plot_kwargs={}, user_cbar_kwargs={}, fig_size=
 
 
 def show_colorbars(category=None, exclude_referenced=True, subplot_size=None):
+    """Show pycolorbar colorbars."""
     from pycolorbar import colorbars
 
     colorbars.show_colorbars(category=category, exclude_referenced=exclude_referenced, subplot_size=subplot_size)

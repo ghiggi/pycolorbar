@@ -50,30 +50,24 @@ from pycolorbar.colors.colors_io import (
 
 def create_test_colors_array(color_space):
     """Utility function to create test colors arrays for various color spaces."""
-    if color_space == "RGB":
-        return np.array([[0, 128, 255], [255, 0, 128]])
-    elif color_space == "RGBA":
-        return np.array([[0, 128, 255, 50], [255, 0, 128, 100]])
-    elif color_space == "HSV":
-        return np.array([[0, 100, 100], [240, 50, 50]])
-    elif color_space == "LCH":
-        return np.array([[50, 100, 0], [75, 50, 180]])
-    elif color_space == "HCL":
-        return np.array([[0, 50, 100], [180, 25, 75]])
-    elif color_space == "CIELUV":
-        return np.array([[100, -80, 70], [10, 20, -40]])
-    elif color_space == "CIELAB":
-        return np.array([[50, -25, 25], [75, 50, -50]])
-    elif color_space == "CIEXYZ":
-        return np.array([[20, 40, 60], [80, 70, 50]])
-    elif color_space == "CMYK":
-        return np.array([[0, 100, 100, 0], [100, 0, 0, 50]])
-    else:
+    color_spaces = {
+        "RGB": np.array([[0, 128, 255], [255, 0, 128]]),
+        "RGBA": np.array([[0, 128, 255, 50], [255, 0, 128, 100]]),
+        "HSV": np.array([[0, 100, 100], [240, 50, 50]]),
+        "LCH": np.array([[50, 100, 0], [75, 50, 180]]),
+        "HCL": np.array([[0, 50, 100], [180, 25, 75]]),
+        "CIELUV": np.array([[100, -80, 70], [10, 20, -40]]),
+        "CIELAB": np.array([[50, -25, 25], [75, 50, -50]]),
+        "CIEXYZ": np.array([[20, 40, 60], [80, 70, 50]]),
+        "CMYK": np.array([[0, 100, 100, 0], [100, 0, 0, 50]]),
+    }
+    if color_space not in color_spaces:
         raise ValueError(f"Color space '{color_space}' not recognized.")
+    return color_spaces[color_space]
 
 
 @pytest.mark.parametrize(
-    "encoder_decoder_class, color_space",
+    ("encoder_decoder_class", "color_space"),
     [
         (RGBEncoderDecoder, "RGB"),
         (RGBAEncoderDecoder, "RGBA"),
@@ -93,12 +87,14 @@ def test_encode_decode(encoder_decoder_class, color_space):
     encoded_colors = encoder_decoder.encode(test_colors)
     decoded_colors = encoder_decoder.decode(encoded_colors)
     assert np.allclose(
-        test_colors, decoded_colors, atol=1e-2
+        test_colors,
+        decoded_colors,
+        atol=1e-2,
     ), f"Decoded colors should match the original colors for {color_space} within a tolerance."
 
 
 @pytest.mark.parametrize(
-    "encoder_decoder_class, color_space",
+    ("encoder_decoder_class", "color_space"),
     [
         (RGBEncoderDecoder, "RGB"),
         (RGBAEncoderDecoder, "RGBA"),
@@ -122,7 +118,7 @@ def test_color_range_check(encoder_decoder_class, color_space):
         test_colors = np.array([[256, -1, 256], [256, -1, -1]])
     elif color_space == "HSV":
         test_colors = np.array([[361, -1, 101], [-1, 101, -1]])
-    elif color_space == "LCH" or color_space == "HCL":
+    elif color_space in ("LCH", "HCL"):
         test_colors = np.array([[101, 201, 361], [-1, -1, -1]])
     elif color_space == "CIELUV":
         test_colors = np.array([[101, 101, 101], [-101, 101, -101]])
@@ -147,7 +143,7 @@ def test_color_range_check(encoder_decoder_class, color_space):
 
 
 @pytest.mark.parametrize(
-    "hue_degree, expected_radian",
+    ("hue_degree", "expected_radian"),
     [
         (0, 0),
         (180, np.pi),
@@ -210,7 +206,7 @@ def test_encoding_decoding_accuracy():
 
 
 @pytest.mark.parametrize(
-    "input_radians, expected_degrees",
+    ("input_radians", "expected_degrees"),
     [
         (0, 0),
         (np.pi, 180),
@@ -222,12 +218,13 @@ def test_hsv_hue_encoding(input_radians, expected_degrees):
     hsv_encoder_decoder = HSVEncoderDecoder()
     encoded_hue = hsv_encoder_decoder._hue_encode(input_radians, 0, 2 * np.pi, 0, 360)
     assert np.isclose(
-        encoded_hue, expected_degrees
+        encoded_hue,
+        expected_degrees,
     ), "Hue encoding from radians to degrees is incorrect for HSV color space."
 
 
 @pytest.mark.parametrize(
-    "input_radians, expected_degrees",
+    ("input_radians", "expected_degrees"),
     [
         (0, 0),
         (np.pi, 180),
@@ -239,7 +236,8 @@ def test_lch_hue_encoding(input_radians, expected_degrees):
     lch_encoder_decoder = LCHEncoderDecoder()
     encoded_hue = lch_encoder_decoder._hue_encode(input_radians, 0, 2 * np.pi, 0, 360)
     assert np.isclose(
-        encoded_hue, expected_degrees
+        encoded_hue,
+        expected_degrees,
     ), "Hue encoding from radians to degrees is incorrect for LCH color space."
 
 
@@ -287,7 +285,7 @@ def test_check_valid_external_data_range():
 
 
 @pytest.mark.parametrize(
-    "color_space, colors",
+    ("color_space", "colors"),
     [
         ("name", np.array(["red", "green", "blue"])),
         ("hex", np.array(["#FF0000", "#00FF00", "#0000FF"])),
@@ -298,18 +296,20 @@ def test_not_decode_encode_name_hex_colors(color_space, colors):
     # Test decoding
     decoded_colors = decode_colors(colors, color_space)
     assert np.array_equal(
-        decoded_colors, colors
+        decoded_colors,
+        colors,
     ), f"Decoding should return the original colors for color_space='{color_space}'"
 
     # Test encoding
     encoded_colors = encode_colors(colors, color_space)
     assert np.array_equal(
-        encoded_colors, colors
+        encoded_colors,
+        colors,
     ), f"Encoding should return the original colors for color_space='{color_space}'"
 
 
 @pytest.mark.parametrize(
-    "color_space, decoded_colors, encoded_colors",
+    ("color_space", "decoded_colors", "encoded_colors"),
     [
         ("RGB", np.array([[0.5, 0.5, 0.5], [0, 0, 0]]), np.array([[127.5, 127.5, 127.5], [0.0, 0.0, 0.0]])),
     ],
@@ -318,9 +318,11 @@ def test_decode_encode_name_other_colors(color_space, decoded_colors, encoded_co
     """Test that encode and decode other colors."""
     # Test decoding
     assert np.array_equal(
-        decode_colors(encoded_colors, color_space), decoded_colors
+        decode_colors(encoded_colors, color_space),
+        decoded_colors,
     ), f"Decoding should return the original colors for color_space='{color_space}'"
     # Test encoding
     assert np.array_equal(
-        encode_colors(decoded_colors, color_space), encoded_colors
+        encode_colors(decoded_colors, color_space),
+        encoded_colors,
     ), f"Encoding should return the original colors for color_space='{color_space}'"

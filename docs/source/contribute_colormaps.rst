@@ -64,30 +64,30 @@ To start defining your colormap configuration YAML files, please refers
 to the :doc:`Introduction to Univariate Colormaps <tutorials/Introduction_univariate_colormaps>`
 documentation.
 
-Consider adding relevant colormap categories within the `category` field of the `auxiliary` subdictionary.
+Consider adding relevant colormap categories within the ``category`` field of the ``auxiliary`` subdictionary.
 These categories help differentiate between colormaps based on:
 
-- the type of colormap: `cyclic`, `diverging`, `sequential`, `qualitative`, `perceptual`.
-- the variables for which the colormap is commonly used (i.e. elevation, bathymetry, precipitation, temperature, etc.).
-- the author or source agency of the colormap (i.e. `brewer`, `crameri`, `meteoswiss`, `nasa`, etc.).
+- the type of colormap: ``cyclic``, ``diverging``, ``sequential``, ``qualitative``, ``perceptual``.
+- the variables for which the colormap is commonly used (i.e. ``elevation``, ``bathymetry``, ``precipitation``, ``temperature``, etc.).
+- the author or source agency of the colormap (i.e. ``brewer``, ``crameri``, ``meteoswiss``, ``nasa``, etc.).
 
-Additionally, in the `auxiliary` subdictionary, you can specify custom fields such
-as `comments`, `references`, `url`, `author`, `license`.
+Additionally, in the ``auxiliary`` subdictionary, you can specify custom fields such
+as ``comments``, ``references``, ``url``, ``author``, ``license``.
 
-Once your colormap configurations are finalized, save the configuration YAML files in the `pycolorbar/etc/colormaps` directory.
+Once your colormap configurations are finalized, save the configuration YAML files in the ``pycolorbar/etc/colormaps`` directory.
 
-Before proceeding, please review the existing directories within `pycolorbar/etc/colormaps`.
+Before proceeding, please review the existing directories within ``pycolorbar/etc/colormaps``.
 If it seems appropriate, create a new directory and place your colormap configuration YAML files inside it.
 
 .. note:: Guidelines for the naming of the colormap configuration YAML files:
 
-   * The colormap name must not end with `_r`.
+   * The colormap name must not end with ``_r``.
 
-   * Usage of dash ( - ) and underscore ( _ ) is allowed.
+   * Usage of dash (``-``) and underscore (``_``) is allowed.
 
-   * If you're adding colormap configurations of a specific author (i.e. `brewer`, `crameri`), consider naming the new directory after the original author.
+   * If you're adding colormap configurations of a specific author (i.e. ``brewer``, ``crameri``), consider naming the new directory after the original author.
 
-   * If you're adding colormap configurations of a specific variable (i.e. `precipitation`, `temperature`), consider naming the new directory after the variable.
+   * If you're adding colormap configurations of a specific variable (i.e. ``precipitation``, ``temperature``), consider naming the new directory after the variable.
 
 
 .. _step3:

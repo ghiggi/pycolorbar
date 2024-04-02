@@ -24,13 +24,15 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
+"""Color encoding and decoding functions."""
 import numpy as np
 
 
 class ColorEncoderDecoder:
+    """Base Color Encoding-Decoding Class."""
+
     def __init__(self, external_data_range, internal_data_range, name):
-        """
-        Initialize a color encoder-decoder to convert color values between external and internal representations.
+        """Initialize a color encoder-decoder to convert color values between external and internal representations.
 
         Parameters
         ----------
@@ -73,10 +75,12 @@ class ColorEncoderDecoder:
         return np.array(
             [
                 self.decoding_functions[channel](
-                    val, *self.external_data_range[channel], *self.internal_data_range[channel]
+                    val,
+                    *self.external_data_range[channel],
+                    *self.internal_data_range[channel],
                 )
                 for channel, val in zip(self.external_data_range.keys(), colors.T)
-            ]
+            ],
         ).T
 
     def encode(self, colors):
@@ -93,15 +97,16 @@ class ColorEncoderDecoder:
         np.ndarray
             Encoded color values in external representation.
         """
-        encoded_values = np.array(
+        return np.array(
             [
                 self.encoding_functions[channel](
-                    val, *self.internal_data_range[channel], *self.external_data_range[channel]
+                    val,
+                    *self.internal_data_range[channel],
+                    *self.external_data_range[channel],
                 )
                 for channel, val in zip(self.internal_data_range.keys(), colors.T)
-            ]
+            ],
         ).T
-        return encoded_values
 
     def _default_decode(self, value, from_min, from_max, to_min, to_max):
         """Default decoding function (linear scaling)."""
@@ -145,8 +150,8 @@ class ColorEncoderDecoder:
         return colors
 
     def check_valid_internal_data_range(self, colors):
-        """
-        Check if the color values are within the internal data range for each channel.
+        """Check if the color values are within the internal data range for each channel.
+
         Raises an informative ValueError if a channel does not comply with the data range.
 
         Parameters
@@ -166,12 +171,13 @@ class ColorEncoderDecoder:
             if not ((min_val <= channel_colors) & (channel_colors <= max_val)).all():
                 raise ValueError(
                     f"Channel '{channel}' values are not within the internal data range. "
-                    f"Expected range ({min_val}, {max_val}), but got values outside this range."
+                    f"Expected range ({min_val}, {max_val}), but got values outside this range.",
                 )
 
     def check_valid_external_data_range(self, colors, strict=False):
         """
         Check if the color values are within the external data range for each channel.
+
         Raises an informative ValueError if a channel does not comply with the data range.
         If 'strict' is True, it ensures that not all values are within the internal data range.
 
@@ -196,7 +202,7 @@ class ColorEncoderDecoder:
             if not ((min_val <= channel_colors) & (channel_colors <= max_val)).all():
                 raise ValueError(
                     f"Channel '{channel}' values are not within the external data range. "
-                    f"Expected range ({min_val}, {max_val}), but got values outside this range."
+                    f"Expected range ({min_val}, {max_val}), but got values outside this range.",
                 )
 
             if strict:
@@ -204,7 +210,7 @@ class ColorEncoderDecoder:
                 if ((internal_min_val <= channel_colors) & (channel_colors <= internal_max_val)).all():
                     raise ValueError(
                         f"All '{channel}' values are within the internal data range "
-                        "while expecting external representation."
+                        "while expecting external representation.",
                     )
 
     def is_within_internal_data_range(self, colors):
@@ -234,6 +240,7 @@ class ColorEncoderDecoder:
     def is_within_external_data_range(self, colors, strict: bool = False):
         """
         Check if the color values of each channels are within the external data range.
+
         Optionally, perform a strict check to ensure that not all values are also within the internal data range.
 
         Parameters
@@ -262,8 +269,7 @@ class ColorEncoderDecoder:
         is_within = np.all(np.vstack(conditions))
         if not strict:
             return is_within
-        else:
-            return is_within and not self.is_within_internal_data_range(colors)
+        return is_within and not self.is_within_internal_data_range(colors)
 
 
 class RGBEncoderDecoder(ColorEncoderDecoder):
@@ -319,11 +325,11 @@ class HSVEncoderDecoder(ColorEncoderDecoder):
         self.decoding_functions["H"] = self._hue_decode
         self.encoding_functions["H"] = self._hue_encode
 
-    def _hue_decode(self, hue, from_min, from_max, to_min, to_max):
+    def _hue_decode(self, hue, from_min, from_max, to_min, to_max):  # noqa: ARG002
         """Custom decode function for Hue channel (from degrees to radians)."""
         return hue * (2 * np.pi) / 360  # Convert degrees to radians
 
-    def _hue_encode(self, hue, from_min, from_max, to_min, to_max):
+    def _hue_encode(self, hue, from_min, from_max, to_min, to_max):  # noqa: ARG002
         """Custom encode function for Hue channel (from radians to degrees)."""
         return hue * 360 / (2 * np.pi)  # Convert radians to degrees
 
@@ -378,11 +384,11 @@ class LCHEncoderDecoder(ColorEncoderDecoder):
         self.decoding_functions["H"] = self._hue_decode
         self.encoding_functions["H"] = self._hue_encode
 
-    def _hue_decode(self, hue, from_min, from_max, to_min, to_max):
+    def _hue_decode(self, hue, from_min, from_max, to_min, to_max):  # noqa: ARG002
         """Custom decode function for Hue channel (from degrees to radians)."""
         return hue * (2 * np.pi) / 360  # Convert degrees to radians
 
-    def _hue_encode(self, hue, from_min, from_max, to_min, to_max):
+    def _hue_encode(self, hue, from_min, from_max, to_min, to_max):  # noqa: ARG002
         """Custom encode function for Hue channel (from radians to degrees)."""
         return hue * 360 / (2 * np.pi)  # Convert radians to degrees
 
@@ -460,7 +466,7 @@ class CMYKEncoderDecoder(ColorEncoderDecoder):
 
 
 def _get_color_space_dict():
-    class_dict = {
+    return {
         "RGB": RGBEncoderDecoder,
         "RGBA": RGBAEncoderDecoder,
         "HSV": HSVEncoderDecoder,
@@ -471,7 +477,6 @@ def _get_color_space_dict():
         "CIEXYZ": CIEXYZEncoderDecoder,
         "CMYK": CMYKEncoderDecoder,
     }
-    return class_dict
 
 
 def get_color_space_class(color_space):
@@ -570,6 +575,7 @@ def is_within_internal_data_range(colors, color_space):
 def is_within_external_data_range(colors, color_space, strict=False):
     """
     Check if the color values are within the external data range for the specified color space.
+
     Optionally, perform a strict check to ensure that not all values are also within the internal data range.
 
     Parameters
@@ -595,6 +601,7 @@ def is_within_external_data_range(colors, color_space, strict=False):
 def check_valid_internal_data_range(colors, color_space):
     """
     Check if the color values are within the internal data range for the specified color space.
+
     Raises an informative ValueError if a channel does not comply with the data range.
 
     Parameters
@@ -616,6 +623,7 @@ def check_valid_internal_data_range(colors, color_space):
 def check_valid_external_data_range(colors, color_space, strict=False):
     """
     Check if the color values are within the external data range for each channel.
+
     Raises an informative ValueError if a channel does not comply with the data range.
     If 'strict' is True, it ensures that not all values are within the internal data range.
 
