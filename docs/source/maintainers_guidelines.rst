@@ -128,7 +128,7 @@ Ghiggi Gionata owns the `ReadTheDoc <https://readthedocs.org/>`__ account.
 Package release
 =================
 
-A `GitHub Action <https://github.com/ghiggi/gpm_api/actions>`_ is configured to automate the packaging and uploading process
+A `GitHub Action <https://github.com/ghiggi/pycolorbar/actions>`_ is configured to automate the packaging and uploading process
 to `PyPI <https://pypi.org/project/pycolorbar/>`_.
 This action, detailed `here <https://github.com/ghiggi/pycolorbar/blob/main/.github/workflows/release_to_pypi.yml>`_,
 triggers the packaging workflow depicted in the following image:
