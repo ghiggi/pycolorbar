@@ -347,7 +347,7 @@ class ColormapRegistry:
         # If only 1 colormap registered, plot it with the other method
         if len(names) == 1:
             self.show_colormap(name=names[0])
-            return None
+            return
 
         # Else, retrieve colormaps to display
         cmaps = [self.get_cmap(name) for name in sorted(names)]
@@ -483,12 +483,11 @@ def get_cmap(name: str = None, lut: int = None):
     if name in mpl_registered_names:
         return plt.get_cmap(name=name, lut=lut)
     # Unavailable colormap
-    else:
-        raise ValueError(
-            f"{name} is not registered in pycolorbar and matplotlib !\n "
-            f"Valid matplotlib colormap are {mpl_registered_names}.\n "
-            f"Valid pycolorbar colormap are {pycolorbar_registered_names}."
-        )
+    raise ValueError(
+        f"{name} is not registered in pycolorbar and matplotlib !\n "
+        f"Valid matplotlib colormap are {mpl_registered_names}.\n "
+        f"Valid pycolorbar colormap are {pycolorbar_registered_names}."
+    )
 
 
 def _get_mpl_cmap_by_category(category):
@@ -614,8 +613,7 @@ def available_colormaps(category=None, include_reversed=False):
     colormaps = ColormapRegistry.get_instance()
     names = colormaps.available(category=category, include_reversed=include_reversed)
     names += _get_matplotlib_cmaps(category=category, include_reversed=include_reversed)
-    names = sorted(np.unique(names))
-    return names
+    return sorted(np.unique(names))
 
 
 def check_colormap_archive():

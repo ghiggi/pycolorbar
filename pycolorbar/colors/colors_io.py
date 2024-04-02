@@ -92,7 +92,7 @@ class ColorEncoderDecoder:
         np.ndarray
             Encoded color values in external representation.
         """
-        encoded_values = np.array(
+        return np.array(
             [
                 self.encoding_functions[channel](
                     val, *self.internal_data_range[channel], *self.external_data_range[channel]
@@ -100,7 +100,6 @@ class ColorEncoderDecoder:
                 for channel, val in zip(self.internal_data_range.keys(), colors.T)
             ]
         ).T
-        return encoded_values
 
     def _default_decode(self, value, from_min, from_max, to_min, to_max):
         """Default decoding function (linear scaling)."""
@@ -263,8 +262,7 @@ class ColorEncoderDecoder:
         is_within = np.all(np.vstack(conditions))
         if not strict:
             return is_within
-        else:
-            return is_within and not self.is_within_internal_data_range(colors)
+        return is_within and not self.is_within_internal_data_range(colors)
 
 
 class RGBEncoderDecoder(ColorEncoderDecoder):
@@ -461,7 +459,7 @@ class CMYKEncoderDecoder(ColorEncoderDecoder):
 
 
 def _get_color_space_dict():
-    class_dict = {
+    return {
         "RGB": RGBEncoderDecoder,
         "RGBA": RGBAEncoderDecoder,
         "HSV": HSVEncoderDecoder,
@@ -472,7 +470,6 @@ def _get_color_space_dict():
         "CIEXYZ": CIEXYZEncoderDecoder,
         "CMYK": CMYKEncoderDecoder,
     }
-    return class_dict
 
 
 def get_color_space_class(color_space):

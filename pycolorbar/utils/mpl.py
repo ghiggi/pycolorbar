@@ -49,8 +49,7 @@ def get_mpl_named_colors():
     #     list(mcolors.CSS4_COLORS)    +
     #     list(mcolors.XKCD_COLORS)
     # )
-    named_colors = np.array(named_colors, dtype=str)
-    return named_colors
+    return np.array(named_colors, dtype=str)
 
 
 def get_mpl_colormaps():

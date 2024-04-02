@@ -44,8 +44,7 @@ def read_yaml(filepath: str) -> dict:
         Dictionary with the attributes read from the YAML file.
     """
     with open(filepath) as f:
-        dictionary = yaml.safe_load(f)
-    return dictionary
+        return yaml.safe_load(f)
 
 
 def write_yaml(dictionary, filepath, sort_keys=False):

@@ -52,24 +52,23 @@ def create_test_colors_array(color_space):
     """Utility function to create test colors arrays for various color spaces."""
     if color_space == "RGB":
         return np.array([[0, 128, 255], [255, 0, 128]])
-    elif color_space == "RGBA":
+    if color_space == "RGBA":
         return np.array([[0, 128, 255, 50], [255, 0, 128, 100]])
-    elif color_space == "HSV":
+    if color_space == "HSV":
         return np.array([[0, 100, 100], [240, 50, 50]])
-    elif color_space == "LCH":
+    if color_space == "LCH":
         return np.array([[50, 100, 0], [75, 50, 180]])
-    elif color_space == "HCL":
+    if color_space == "HCL":
         return np.array([[0, 50, 100], [180, 25, 75]])
-    elif color_space == "CIELUV":
+    if color_space == "CIELUV":
         return np.array([[100, -80, 70], [10, 20, -40]])
-    elif color_space == "CIELAB":
+    if color_space == "CIELAB":
         return np.array([[50, -25, 25], [75, 50, -50]])
-    elif color_space == "CIEXYZ":
+    if color_space == "CIEXYZ":
         return np.array([[20, 40, 60], [80, 70, 50]])
-    elif color_space == "CMYK":
+    if color_space == "CMYK":
         return np.array([[0, 100, 100, 0], [100, 0, 0, 50]])
-    else:
-        raise ValueError(f"Color space '{color_space}' not recognized.")
+    raise ValueError(f"Color space '{color_space}' not recognized.")
 
 
 @pytest.mark.parametrize(

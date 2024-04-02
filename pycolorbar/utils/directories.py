@@ -56,12 +56,10 @@ def list_paths(dir_path, glob_pattern, recursive=False):
     """Return a list of filepaths and directory paths."""
     if not recursive:
         return glob.glob(os.path.join(dir_path, glob_pattern))
-    else:
-        return _recursive_glob(dir_path, glob_pattern)
+    return _recursive_glob(dir_path, glob_pattern)
 
 
 def list_files(dir_path, glob_pattern, recursive=False):
     """Return a list of filepaths (exclude directory paths)."""
     paths = list_paths(dir_path, glob_pattern, recursive=recursive)
-    filepaths = [f for f in paths if os.path.isfile(f)]
-    return filepaths
+    return [f for f in paths if os.path.isfile(f)]

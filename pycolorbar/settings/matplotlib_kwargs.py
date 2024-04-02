@@ -59,8 +59,7 @@ def _create_combined_cmap(names, n=None, new_n=None):
     cmap_colors = np.vstack([cmap(np.linspace(0, 1, lut)) for cmap, lut in zip(list_cmaps, new_n)])
     # Define the new colormap
     new_name = "_".join(names)
-    cmap = LinearSegmentedColormap.from_list(name=new_name, colors=cmap_colors)
-    return cmap
+    return LinearSegmentedColormap.from_list(name=new_name, colors=cmap_colors)
 
 
 def _get_cmap(cmap_settings, norm_settings):
@@ -106,8 +105,7 @@ def get_cmap(cbar_dict):
     # Retrieve cmap
     cmap = _get_cmap(cmap_settings=cmap_settings, norm_settings=norm_settings)
     ### Set bad, under and over colors and transparency
-    cmap = _finalize_cmap(cmap, cmap_settings)
-    return cmap
+    return _finalize_cmap(cmap, cmap_settings)
 
 
 ####-------------------------------------------------------------------------------------------.
@@ -116,8 +114,7 @@ def create_category_norm(labels, first_value=0):
     """Define a BoundaryNorm that deal with categorical data."""
     n_labels = len(labels)
     norm_bins = np.arange(first_value - 0.01, n_labels + first_value) + 0.5
-    norm = mpl.colors.BoundaryNorm(boundaries=norm_bins, ncolors=n_labels)
-    return norm
+    return mpl.colors.BoundaryNorm(boundaries=norm_bins, ncolors=n_labels)
 
 
 ####-------------------------------------------------------------------------------------------.
@@ -148,8 +145,7 @@ def get_norm(norm_settings):
     norm_name = norm_settings.pop("name", "Norm")
     norm_func = get_norm_function(norm_name)
     # Define norm
-    norm = norm_func(**norm_settings)
-    return norm
+    return norm_func(**norm_settings)
 
 
 ####-------------------------------------------------------------------------------------------.
@@ -203,7 +199,7 @@ def get_plot_cbar_kwargs(cbar_dict):
 
 
 def get_default_cbar_kwargs():
-    cbar_kwargs = {
+    return {
         "ticks": None,
         # "ticklabels": None,  --> # Temporary ... because matplotlib.colorbar do not accept ticklabels
         "ticklocation": "auto",
@@ -215,7 +211,6 @@ def get_default_cbar_kwargs():
         "drawedges": False,
         "shrink": 1,
     }
-    return cbar_kwargs
 
 
 def _decimal_places(value, cap=4):
@@ -226,17 +221,15 @@ def _decimal_places(value, cap=4):
     # Add only 1 decimal for values above 1
     if magnitude >= 1:
         return 1
-    else:
-        # Dynamically calculate decimal places based on magnitude (and cap at i.e. 4 decimals)
-        return min(int(np.ceil(-np.log10(magnitude))) + 1, cap)
+    # Dynamically calculate decimal places based on magnitude (and cap at i.e. 4 decimals)
+    return min(int(np.ceil(-np.log10(magnitude))) + 1, cap)
 
 
 def _count_string_decimals(value):
     """Count the number of decimal places in a value."""
     if "." in value:
         return len(value) - value.index(".") - 1
-    else:
-        return 0
+    return 0
 
 
 def _ensure_increasing_or_equal_values(arr):
@@ -272,8 +265,7 @@ def _dynamic_formatting_floats(values, cap=4):
     actual_decimals = [_count_string_decimals(label) for label in labels]
     final_decimals = _ensure_increasing_or_equal_values(actual_decimals[::-1])[::-1]
     labels = [_format_label(value, decimals, strip_zero=False) for value, decimals in zip(values, final_decimals)]
-    labels = ["0" if float(label) == 0 else label for label in labels]
-    return labels
+    return ["0" if float(label) == 0 else label for label in labels]
 
 
 def _finalize_ticks_arguments(cbar_kwargs, cbar_dict, norm):
@@ -391,8 +383,7 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
 def _count_length(v):
     if v is None:
         return 0
-    else:
-        return len(v)
+    return len(v)
 
 
 def _check_valid_ticks_ticklabels(user_cbar_kwargs, default_cbar_kwargs):

@@ -43,8 +43,7 @@ def _check_presence_required_keys(cmap_dict):
 
 def _ensure_colors_array(colors):
     """Ensure the colors object is a numpy array."""
-    colors = np.asanyarray(colors)
-    return colors
+    return np.asanyarray(colors)
 
 
 def _ensure_colors_list(colors):

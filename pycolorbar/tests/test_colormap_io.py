@@ -37,12 +37,11 @@ from pycolorbar.settings.colormap_io import read_cmap_dict, write_cmap_dict
 
 @pytest.fixture
 def test_cmap_dict():
-    cmap_dict = {
+    return {
         "colormap_type": "ListedColormap",
         "color_palette": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],  # RGB colors
         "color_space": "rgb",
     }
-    return cmap_dict
 
 
 def test_default_write_read_cmap_dict(tmp_path, test_cmap_dict):

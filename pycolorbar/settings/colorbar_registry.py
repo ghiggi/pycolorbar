@@ -337,7 +337,7 @@ class ColorbarRegistry:
         # If only 1 colormap registered, plot it with the other method
         if len(names) == 1:
             self.show_colorbar(name=names[0])
-            return None
+            return
 
         # Display colorbars
         list_args = [[name] + list(self.get_plot_kwargs(name=name)) for name in names]
@@ -522,5 +522,4 @@ def available_colorbars(category=None, exclude_referenced=False):
         List of registered colorbars.
     """
     colorbars = ColorbarRegistry.get_instance()
-    names = colorbars.available(category=category, exclude_referenced=exclude_referenced)
-    return names
+    return colorbars.available(category=category, exclude_referenced=exclude_referenced)

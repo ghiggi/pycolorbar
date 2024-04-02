@@ -67,17 +67,16 @@ def create_cmap(cmap_dict, name):
     # Create Colormap
     if cmap_type == "ListedColormap":
         return ListedColormap(colors, name=name, N=n)
-    else:
-        # LinearSegmentedColormap
-        if segmentdata is None:
-            if n is None:
-                n = 256  # matplotlib default
+    # LinearSegmentedColormap from list
+    if segmentdata is None:
+        if n is None:
+            n = 256  # matplotlib default
 
-            # Retrieve n colors in 'interpolation_space' (when type=LinearSegmentedColormap)
-            # TODO
+        # Retrieve n colors in 'interpolation_space' (when type=LinearSegmentedColormap)
+        # TODO
 
-            # Retrieve colormap
-            return LinearSegmentedColormap.from_list(name=name, colors=colors, N=n, gamma=gamma)
-        else:
-            segmentdata = cmap_dict["segmentdata"]
-            return LinearSegmentedColormap(name=name, segmentdata=segmentdata, gamma=gamma)
+        # Retrieve colormap
+        return LinearSegmentedColormap.from_list(name=name, colors=colors, N=n, gamma=gamma)
+    # LinearSegmentedColormap with segmentdata
+    segmentdata = cmap_dict["segmentdata"]
+    return LinearSegmentedColormap(name=name, segmentdata=segmentdata, gamma=gamma)

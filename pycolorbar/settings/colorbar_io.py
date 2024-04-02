@@ -38,8 +38,7 @@ def is_single_colorbar_settings(dictionary):
     """Determine if a dictionary is a single colorbar settings."""
     if np.any(np.isin(["cmap", "norm", "cbar", "auxiliary"], list(dictionary))):
         return True
-    else:
-        return False
+    return False
 
 
 def read_cbar_dict(filepath, name=None, validate=False):

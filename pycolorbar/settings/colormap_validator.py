@@ -37,7 +37,7 @@ from pycolorbar.utils.mpl import get_mpl_named_colors
 
 def get_valid_color_space():
     """Get list of valid color spaces."""
-    valid_names = [
+    return [
         "hex",
         "name",
         "rgb",
@@ -50,7 +50,6 @@ def get_valid_color_space():
         "ciexyz",
         "cmyk",
     ]
-    return valid_names
 
 
 def check_color_space(color_space):

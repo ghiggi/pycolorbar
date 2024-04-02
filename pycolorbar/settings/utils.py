@@ -33,6 +33,4 @@ def get_auxiliary_categories(dictionary):
         if isinstance(categories, str):
             categories = [categories]
         return categories
-    else:
-        categories = []
-    return categories
+    return []
