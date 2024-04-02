@@ -300,7 +300,6 @@ class ColormapRegistry:
                 print("")
         if wrong_names:
             raise ValueError(f"The {wrong_names} colormaps have invalid configurations.")
-        return
 
     def to_yaml(self, name, filepath, force=False):
         """Write the colormap configuration to a YAML file."""

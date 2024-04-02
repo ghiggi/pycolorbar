@@ -270,7 +270,7 @@ def _finalize_ticks_arguments(cbar_kwargs, cbar_dict, norm):
     norm_name = norm_settings.get("name", "Norm")
 
     # Define ticks and ticklabels for BoundaryNorm instances
-    if not (norm_name == "BoundaryNorm" or norm_name == "CategoryNorm"):
+    if norm_name not in ("BoundaryNorm", "CategoryNorm"):
         return cbar_kwargs
 
     # Retrieve discrete norm information

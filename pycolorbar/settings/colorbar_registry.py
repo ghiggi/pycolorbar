@@ -271,7 +271,6 @@ class ColorbarRegistry:
                 print("")
         if wrong_names:
             raise ValueError(f"The {wrong_names} colorbars have invalid configurations.")
-        return
 
     def get_standalone_settings(self):
         """Return the colorbar settings names which are not a reference to another colorbar."""

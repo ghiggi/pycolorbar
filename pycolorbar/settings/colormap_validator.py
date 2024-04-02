@@ -354,11 +354,10 @@ def validate_colors_values(colors, color_space, decoded_colors=True):
         validate_name_colors(colors)
     elif color_space == "hex":
         validate_hex_colors(colors)
+    elif decoded_colors:
+        check_valid_internal_data_range(colors, color_space=color_space.upper())
     else:
-        if decoded_colors:
-            check_valid_internal_data_range(colors, color_space=color_space.upper())
-        else:
-            check_valid_external_data_range(colors, color_space=color_space.upper())
+        check_valid_external_data_range(colors, color_space=color_space.upper())
 
 
 ####-------------------------------------------------------------------------------------------------------------------.

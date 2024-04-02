@@ -50,25 +50,20 @@ from pycolorbar.colors.colors_io import (
 
 def create_test_colors_array(color_space):
     """Utility function to create test colors arrays for various color spaces."""
-    if color_space == "RGB":
-        return np.array([[0, 128, 255], [255, 0, 128]])
-    if color_space == "RGBA":
-        return np.array([[0, 128, 255, 50], [255, 0, 128, 100]])
-    if color_space == "HSV":
-        return np.array([[0, 100, 100], [240, 50, 50]])
-    if color_space == "LCH":
-        return np.array([[50, 100, 0], [75, 50, 180]])
-    if color_space == "HCL":
-        return np.array([[0, 50, 100], [180, 25, 75]])
-    if color_space == "CIELUV":
-        return np.array([[100, -80, 70], [10, 20, -40]])
-    if color_space == "CIELAB":
-        return np.array([[50, -25, 25], [75, 50, -50]])
-    if color_space == "CIEXYZ":
-        return np.array([[20, 40, 60], [80, 70, 50]])
-    if color_space == "CMYK":
-        return np.array([[0, 100, 100, 0], [100, 0, 0, 50]])
-    raise ValueError(f"Color space '{color_space}' not recognized.")
+    color_spaces = {
+        "RGB": np.array([[0, 128, 255], [255, 0, 128]]),
+        "RGBA": np.array([[0, 128, 255, 50], [255, 0, 128, 100]]),
+        "HSV": np.array([[0, 100, 100], [240, 50, 50]]),
+        "LCH": np.array([[50, 100, 0], [75, 50, 180]]),
+        "HCL": np.array([[0, 50, 100], [180, 25, 75]]),
+        "CIELUV": np.array([[100, -80, 70], [10, 20, -40]]),
+        "CIELAB": np.array([[50, -25, 25], [75, 50, -50]]),
+        "CIEXYZ": np.array([[20, 40, 60], [80, 70, 50]]),
+        "CMYK": np.array([[0, 100, 100, 0], [100, 0, 0, 50]]),
+    }
+    if color_space not in color_spaces:
+        raise ValueError(f"Color space '{color_space}' not recognized.")
+    return color_spaces[color_space]
 
 
 @pytest.mark.parametrize(
@@ -121,7 +116,7 @@ def test_color_range_check(encoder_decoder_class, color_space):
         test_colors = np.array([[256, -1, 256], [256, -1, -1]])
     elif color_space == "HSV":
         test_colors = np.array([[361, -1, 101], [-1, 101, -1]])
-    elif color_space == "LCH" or color_space == "HCL":
+    elif color_space in ("LCH", "HCL"):
         test_colors = np.array([[101, 201, 361], [-1, -1, -1]])
     elif color_space == "CIELUV":
         test_colors = np.array([[101, 101, 101], [-101, 101, -101]])
