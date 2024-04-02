@@ -128,11 +128,18 @@ Ghiggi Gionata owns the `ReadTheDoc <https://readthedocs.org/>`__ account.
 Package release
 =================
 
-One  `GitHub Action <https://github.com/ghiggi/pycolorbar/actions>`_ is defined to trigger the packaging and the upload on `pypi.org <https://pypi.org/project/pycolorbar/>`_.
+A `GitHub Action <https://github.com/ghiggi/gpm_api/actions>`_ is configured to automate the packaging and uploading process
+to `PyPI <https://pypi.org/project/pycolorbar/>`_.
+This action, detailed `here <https://github.com/ghiggi/pycolorbar/blob/main/.github/workflows/release_to_pypi.yml>`_,
+triggers the packaging workflow depicted in the following image:
 
 .. image:: /static/package_release.png
 
-The `PyPI <https://pypi.org/>`__ project is shared between the core contributors.
+Upon the release of the package on PyPI, a conda-forge bot attempts to automatically update the
+ `conda-forge recipe <https://github.com/conda-forge/pycolorbar-feedstock/>`__.
+Once the conda-forge recipe is updated, a new conda-forge package is released.
+
+The PyPI project and the conda-forge recipes are collaboratively maintained by core contributors of the project.
 
 
 Release process
