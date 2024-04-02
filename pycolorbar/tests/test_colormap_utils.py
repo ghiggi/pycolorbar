@@ -32,7 +32,7 @@ from pycolorbar.settings.colormap_utility import create_cmap
 
 
 @pytest.mark.parametrize(
-    "cmap_dict,expected_type",
+    ("cmap_dict", "expected_type"),
     [
         (
             {

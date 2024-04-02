@@ -68,7 +68,7 @@ def basic_cbar_dict():
 
 class TestGetCmapFromCbarDict:
     @pytest.mark.parametrize(
-        "cmap_name, expected_type", [("viridis", ListedColormap), ("Spectral", LinearSegmentedColormap)]
+        ("cmap_name", "expected_type"), [("viridis", ListedColormap), ("Spectral", LinearSegmentedColormap)]
     )
     def test_get_cmap_with_valid_names(self, basic_cbar_dict, cmap_name, expected_type):
         """Test get_cmap function with valid colormap names."""
@@ -95,7 +95,7 @@ class TestGetCmapFromCbarDict:
             assert cmap.N == 256, "The default number of colors should be 256 when 'n' is not specified."
 
     @pytest.mark.parametrize(
-        "cmap_names, n_values",
+        ("cmap_names", "n_values"),
         [
             (["viridis", "plasma"], None),
             (["viridis", "plasma"], [128, 128]),
@@ -149,7 +149,7 @@ class TestGetCmapFromCbarDict:
 
 
 @pytest.mark.parametrize(
-    "norm_name, expected_type, norm_settings",
+    ("norm_name", "expected_type", "norm_settings"),
     [
         ("Norm", Normalize, {"vmin": 0, "vmax": 1}),
         ("NoNorm", NoNorm, {}),
@@ -251,7 +251,7 @@ class TestPlotCbarKwargs:
         for key, value in custom_cbar_kwargs.items():
             assert cbar_kwargs[key] == value, f"The cbar_kwargs key '{key}' has not been updated to {value}"
 
-    @pytest.mark.parametrize("ncolors,extend", [(2, "neither"), (3, "vmin"), (3, "vmax"), (4, "both")])
+    @pytest.mark.parametrize(("ncolors", "extend"), [(2, "neither"), (3, "vmin"), (3, "vmax"), (4, "both")])
     def test_custom_discrete_colorbar(self, ncolors, extend):
         """Test behaviour for discrete colorbar and addition of ticklabels in cbar_kwargs."""
         # Define cbar_dict

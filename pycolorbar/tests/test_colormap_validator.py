@@ -57,7 +57,7 @@ class TestColormapColorPalette:
         assert isinstance(validated_dict, dict)
 
     @pytest.mark.parametrize(
-        "color_space,colors",
+        ("color_space", "colors"),
         [
             ("hex", np.array(["#GGGGGG", "invalid1"])),  # Invalid hex code
             ("name", np.array(["not_a_color", "not_a_color1"])),  # Invalid color name

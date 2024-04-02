@@ -278,7 +278,7 @@ class TestNormSettings:
         check_norm_settings(norm_settings)
 
     @pytest.mark.parametrize(
-        "norm_settings, expected_error_msg",
+        ("norm_settings", "expected_error_msg"),
         [
             # Invalid Normalize settings due to incorrect vmin and vmax
             ({"name": "Norm", "vmin": 1, "vmax": 0}, "vmin must be less than vmax"),
@@ -312,7 +312,7 @@ class TestNormSettings:
         assert expected_error_msg in str(exc_info.value)
 
     @pytest.mark.parametrize(
-        "norm_name, extra_param",
+        ("norm_name", "extra_param"),
         [
             ("Norm", {"unexpected": 123}),
             ("BoundaryNorm", {"boundaries": [0, 1], "extra": "not valid"}),
@@ -327,7 +327,7 @@ class TestNormSettings:
             check_norm_settings(norm_settings)
 
     @pytest.mark.parametrize(
-        "norm_name, missing_param",
+        ("norm_name", "missing_param"),
         [
             ("BoundaryNorm", {}),
             ("TwoSlopeNorm", {"vmin": 0}),

@@ -72,7 +72,7 @@ def create_test_colors_array(color_space):
 
 
 @pytest.mark.parametrize(
-    "encoder_decoder_class, color_space",
+    ("encoder_decoder_class", "color_space"),
     [
         (RGBEncoderDecoder, "RGB"),
         (RGBAEncoderDecoder, "RGBA"),
@@ -97,7 +97,7 @@ def test_encode_decode(encoder_decoder_class, color_space):
 
 
 @pytest.mark.parametrize(
-    "encoder_decoder_class, color_space",
+    ("encoder_decoder_class", "color_space"),
     [
         (RGBEncoderDecoder, "RGB"),
         (RGBAEncoderDecoder, "RGBA"),
@@ -146,7 +146,7 @@ def test_color_range_check(encoder_decoder_class, color_space):
 
 
 @pytest.mark.parametrize(
-    "hue_degree, expected_radian",
+    ("hue_degree", "expected_radian"),
     [
         (0, 0),
         (180, np.pi),
@@ -209,7 +209,7 @@ def test_encoding_decoding_accuracy():
 
 
 @pytest.mark.parametrize(
-    "input_radians, expected_degrees",
+    ("input_radians", "expected_degrees"),
     [
         (0, 0),
         (np.pi, 180),
@@ -226,7 +226,7 @@ def test_hsv_hue_encoding(input_radians, expected_degrees):
 
 
 @pytest.mark.parametrize(
-    "input_radians, expected_degrees",
+    ("input_radians", "expected_degrees"),
     [
         (0, 0),
         (np.pi, 180),
@@ -286,7 +286,7 @@ def test_check_valid_external_data_range():
 
 
 @pytest.mark.parametrize(
-    "color_space, colors",
+    ("color_space", "colors"),
     [
         ("name", np.array(["red", "green", "blue"])),
         ("hex", np.array(["#FF0000", "#00FF00", "#0000FF"])),
@@ -308,7 +308,7 @@ def test_not_decode_encode_name_hex_colors(color_space, colors):
 
 
 @pytest.mark.parametrize(
-    "color_space, decoded_colors, encoded_colors",
+    ("color_space", "decoded_colors", "encoded_colors"),
     [
         ("RGB", np.array([[0.5, 0.5, 0.5], [0, 0, 0]]), np.array([[127.5, 127.5, 127.5], [0.0, 0.0, 0.0]])),
     ],
