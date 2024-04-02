@@ -57,7 +57,7 @@ instructions on [conda forge][conda_forge_link].
 ## 💭 Feedback and Contributing Guidelines
 
 If you aim to contribute your data or discuss the future development of pycolorbar,
-we highly suggest to join the [**pycolorbar Slack Workspace**](https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g)
+we highly suggest to join the [**Slack Workspace**](https://join.slack.com/t/pycolorbar/shared_invite/zt-2bxdsywo3-368GbufPyb8vNJ1GC9aT3g)
 
 Feel free to also open a [GitHub Issue](https://github.com/ghiggi/pycolorbar/issues) or a [GitHub Discussion](https://github.com/ghiggi/pycolorbar/discussions) specific to your questions or ideas.
 
