@@ -27,6 +27,7 @@
 """Define the register of univiariate colorbars."""
 
 import os
+from typing import Optional
 
 from pycolorbar.settings.colorbar_io import read_cbar_dicts, write_cbar_dicts
 from pycolorbar.settings.colorbar_validator import validate_cbar_dict
@@ -238,7 +239,7 @@ class ColorbarRegistry:
             sort_keys=sort_keys,
         )
 
-    def validate(self, name: str = None):
+    def validate(self, name: Optional[str] = None):
         """
         Validate the registered colorbars. If a specific name is provided, only that colorbar is validated.
 
@@ -335,7 +336,7 @@ class ColorbarRegistry:
             return
 
         # Display colorbars
-        list_args = [[name] + list(self.get_plot_kwargs(name=name)) for name in names]
+        list_args = [[name, *list(self.get_plot_kwargs(name=name))] for name in names]
         plot_colorbars(list_args, subplot_size=subplot_size)
 
     def get_plot_kwargs(self, name=None, user_plot_kwargs=None, user_cbar_kwargs=None):

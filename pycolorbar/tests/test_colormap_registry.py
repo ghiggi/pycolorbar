@@ -28,7 +28,7 @@
 
 import os
 
-import matplotlib.pyplot as plt  # noqa
+import matplotlib.pyplot as plt
 import pytest
 from matplotlib.colors import Colormap, ListedColormap
 from pytest_mock import mocker  # noqa

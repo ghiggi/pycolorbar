@@ -60,7 +60,7 @@ colorbars = ColorbarRegistry.get_instance()
 # TODO: donfig config !
 # pycolorbar.register_default_colormaps()
 # pycolorbar.register_default_colorbars()
-_root_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa
+_root_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 etc_directory = os.path.join(_root_path, "pycolorbar", "etc")
 
 
