@@ -84,7 +84,7 @@ def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
     axes = axes.ravel()
 
     # Loop through colorbars and axes
-    for idx, ((name, plot_kwargs, cbar_kwargs), ax) in enumerate(zip(list_args, axes)):
+    for (name, plot_kwargs, cbar_kwargs), ax in zip(list_args, axes):
         _ = _draw_colorbar(plot_kwargs=plot_kwargs, cbar_kwargs=cbar_kwargs, fig=fig, ax=None, cax=ax)
         ax.set_title(name, fontsize=10, weight="bold")
     # Turn off any remaining axes
