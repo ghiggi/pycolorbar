@@ -308,10 +308,14 @@ class ColorbarRegistry:
                 cat_names.append(name)
         return cat_names
 
-    def show_colorbar(self, name, user_plot_kwargs={}, user_cbar_kwargs={}, fig_size=(6, 1)):
+    def show_colorbar(self, name, user_plot_kwargs=None, user_cbar_kwargs=None, fig_size=(6, 1)):
         """Display a colorbar (updated with optional user arguments)."""
         from pycolorbar.settings.colorbar_visualization import plot_colorbar
 
+        if user_cbar_kwargs is None:
+            user_cbar_kwargs = {}
+        if user_plot_kwargs is None:
+            user_plot_kwargs = {}
         plot_kwargs, cbar_kwargs = self.get_plot_kwargs(
             name=name,
             user_plot_kwargs=user_plot_kwargs,

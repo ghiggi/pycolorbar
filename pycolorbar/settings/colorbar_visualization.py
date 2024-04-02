@@ -95,9 +95,13 @@ def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
     plt.show()
 
 
-def show_colorbar(name=None, user_plot_kwargs={}, user_cbar_kwargs={}, fig_size=(6, 1)):
+def show_colorbar(name=None, user_plot_kwargs=None, user_cbar_kwargs=None, fig_size=(6, 1)):
     from pycolorbar import colorbars
 
+    if user_cbar_kwargs is None:
+        user_cbar_kwargs = {}
+    if user_plot_kwargs is None:
+        user_plot_kwargs = {}
     colorbars.show_colorbar(
         name=name,
         user_plot_kwargs=user_plot_kwargs,
