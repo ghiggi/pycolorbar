@@ -6,15 +6,14 @@ Maintainers Guidelines
 The section is dedicated to the pycolorbar core developers (maintainers).
 
 
-List of the core contributors
+Core Contributors
 =================================
 
 * Current Release Manager : Ghiggi Gionata
 * Testing Team : Ghiggi Gionata
 
 
-
-Versions guidelines
+Versions Guidelines
 ========================
 
 pycolorbar uses `Semantic <https://semver.org/>`_ Versioning. Each release is associated with a git tag of the form X.Y.Z.
@@ -69,7 +68,7 @@ styled with `Book Theme <https://sphinx-book-theme.readthedocs.io/en/stable/inde
 All documentation source files are neatly organized in the ``docs/`` directory within the project's repository.
 
 
-Documentation generation
+Documentation Generation
 --------------------------
 
 To build the documentation locally, follow the next three steps.
@@ -112,7 +111,7 @@ By following these steps, you should have a local version of the pycolorbar docu
 in the ``docs/build/html/`` directory, ready for review or deployment!
 
 
-Documentation deployment
+Documentation Deployment
 ----------------------------
 
 A webhook is defined in the GitHub repository to trigger automatically the publication process to `ReadTheDocs <https://about.readthedocs.com/?ref=readthedocs.com>`__
@@ -125,7 +124,7 @@ This webhook is linked to the pycolorbar core developer.
 Ghiggi Gionata owns the `ReadTheDoc <https://readthedocs.org/>`__ account.
 
 
-Package release
+Package Release
 =================
 
 A `GitHub Action <https://github.com/ghiggi/pycolorbar/actions>`_ is configured to automate the packaging and uploading process
@@ -173,7 +172,7 @@ On GitHub, edit the release description to add the list of changes from the ``CH
 
 
 
-Reviewing process
+Reviewing Process
 =====================
 
 
@@ -189,14 +188,14 @@ The review process is the following:
 
 
 
-Continuous Integration (CI)
+Continuous Integration
 ===============================
 
-Continuous integration (CI) is a crucial practice in modern software development, ensuring that code changes are regularly integrated into the main codebase.
+Continuous Integration (CI) is a crucial practice in modern software development, ensuring that code changes are regularly integrated into the main codebase.
 With CI, each commit or pull request triggers an automated process that verifies the integrity of the codebase, runs tests,
 and performs various checks to catch issues early in the development lifecycle.
 
-The table below summarizes the software tools utilized in our CI pipeline, descibes their respective aims and project pages.
+The table below summarizes the software tools utilized in our CI pipeline, describes their respective aims and project pages.
 
 +----------------------------------------------------------------------------------------------------+------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
 |  Tools                                                                                             | Aim                                                              | Project page                                                                                 |
