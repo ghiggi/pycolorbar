@@ -101,7 +101,7 @@ contribute to the project!
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Each contribution should be made in a separate new branch of your forked repository.
-Working on the main branch is reserved for `Core Contributors` only.
+Working on the main branch is reserved for *Core Contributors* only.
 Core Contributors are developers that actively work and maintain the repository.
 They are the only ones who accept Pull Requests and push commits directly to the pycolorbar repository.
 
@@ -137,7 +137,7 @@ We follow the `PEP 8 <https://pep8.org/>`__ style guide for python code.
 Another relevant style guide can be found in the `The Hitchhiker's Guide to Python <https://docs.python-guide.org/writing/style/>`__.
 
 To ensure a minimal style consistency, we use `black <https://black.readthedocs.io/en/stable/>`__ to auto-format the source code.
-The `black` configuration used in the pycolorbar project is
+The *black* configuration used in the pycolorbar project is
 defined in the `pyproject.toml <https://github.com/ghiggi/pycolorbar/blob/main/pyproject.toml>`__.
 
 

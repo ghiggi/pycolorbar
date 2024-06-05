@@ -8,31 +8,31 @@ discrete_colorbar:
   norm:
     name: BoundaryNorm
     boundaries:
-    - 0.08
-    - 0.16
-    - 0.25
-    - 0.4
-    - 0.63
-    - 1
-    - 1.6
-    - 2.5
-    - 4
-    - 6.3
-    - 10
-    - 16
-    - 25
-    - 40
-    - 63
-    - 100
-    - 160
+      - 0.08
+      - 0.16
+      - 0.25
+      - 0.4
+      - 0.63
+      - 1
+      - 1.6
+      - 2.5
+      - 4
+      - 6.3
+      - 10
+      - 16
+      - 25
+      - 40
+      - 63
+      - 100
+      - 160
   cbar:
     extend: max
     extendrect: false
     label: Discrete Colorbar
   auxiliary:
     category:
-    - example
-    - discrete
+      - example
+      - discrete
 category_colorbar:
   cmap:
     name: Set1
@@ -41,9 +41,9 @@ category_colorbar:
   norm:
     name: CategoryNorm
     labels:
-    - Class 1
-    - Class 2
-    - Class 3
+      - Class 1
+      - Class 2
+      - Class 3
 continuous_colorbar:
   cmap:
     name: Spectral_r
@@ -59,8 +59,8 @@ continuous_colorbar:
     label: Continuous Colorbar
   auxiliary:
     category:
-    - example
-    - continuous
+      - example
+      - continuous
 referenced_colorbar:
   reference: continuous_colorbar
 continuous_log_colorbar:
@@ -80,7 +80,7 @@ continuous_log_colorbar:
     label: Contiuous Colorbar with Log Scale
   auxiliary:
     category:
-    - example
+      - example
 combined_colorbar:
   cmap:
     name:
@@ -100,7 +100,7 @@ combined_colorbar:
     label: Brightness Temperature [K]
   auxiliary:
     category:
-    - example
+      - example
 probability:
   cmap:
     name: OrRd
@@ -111,17 +111,17 @@ probability:
   norm:
     name: BoundaryNorm
     boundaries:
-    - 0.001
-    - 0.1
-    - 0.2
-    - 0.3
-    - 0.4
-    - 0.5
-    - 0.6
-    - 0.7
-    - 0.8
-    - 0.9
-    - 1.0
+      - 0.001
+      - 0.1
+      - 0.2
+      - 0.3
+      - 0.4
+      - 0.5
+      - 0.6
+      - 0.7
+      - 0.8
+      - 0.9
+      - 1.0
   auxiliary:
     category: probability
     citation: pycolorbar

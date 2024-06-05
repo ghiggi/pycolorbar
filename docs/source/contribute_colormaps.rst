@@ -4,7 +4,7 @@ Contribute Colormaps
 
 Do you want to contribute your own colormap to the pycolorbar archive ? Great! You are in the right place !
 
-Here below we provide a detailed description of the steps to follow to contribute your colormap configuration to pycolorbar:
+In this section we provide a detailed description of the steps to follow to contribute your colormap configuration to pycolorbar:
 
 .. contents::
    :depth: 1
@@ -104,7 +104,7 @@ To test the validity of the colormap configurations, you can execute the followi
 
    python -c "import pycolorbar; pycolorbar.check_colormap_archive()"
 
-or alternatively you can run the `check_colormap_archive` function in python:
+or alternatively you can run the ``check_colormap_archive`` function in python:
 
 .. code:: python
 

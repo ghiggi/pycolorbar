@@ -39,6 +39,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 pycolorbar/_version.py
+docs/source/tutorials/
+docs/build/
 lcov.info
 
 # PyInstaller

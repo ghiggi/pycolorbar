@@ -175,6 +175,7 @@ ignore = [
     # Docstyle Rules
     "D404", # Docstring can't start with "This"
     "D401", # First sentence must be in imperative mood
+    "D100",
 
     # Complexity rules
     "PLR0913",
@@ -198,13 +199,24 @@ convention = "numpy"
 # Rules to ignore in test files
 "test_*.py" = [
     "ARG",  # avoid problems with fixtures
-    "D100", "D101","D102", "D103", "D104", "D105",  # Missing docstrings
+    "D101","D102", "D103", "D104", "D105",  # Missing docstrings
 ]
-"setup.py" = ["D100"]
 "*__init__.py" = ["D104"]
 
+[tool.doc8]
+ignore-path = [
+    "docs/build",
+    "docs/api/generated",
+    "docs/_templates",
+    "docs/tutorials",
+    "docs/examples",
+]
+file-encoding = "utf8"
+max-line-length = 120
+ignore = ["D001"]
+
 [tool.codespell]
-    ignore-words-list = 'nD'
+ignore-words-list = 'nD'
 
 [tool.coverage]
     [tool.coverage.run]

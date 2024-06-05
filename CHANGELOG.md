@@ -2,21 +2,13 @@
 
 ## Version v0.0.11 (2024/03/28)
 
-* Fix ticklabels dynamic layout for BoundaryNorm and CategoryNorm
+- Fix ticklabels dynamic layout for BoundaryNorm and CategoryNorm
 
 ## Version 0.0.10 (2024/03/26)
-
 
 ### Pull Requests Merged
 
 * [PR 15](https://github.com/ghiggi/pycolorbar/pull/15) - Bump actions/checkout from 3 to 4, by [@dependabot[bot]](https://github.com/apps/dependabot)
-
-
-## Version 0.0.9 (2024/03/13)
-
-
-### Pull Requests Merged
-
 * [PR 14](https://github.com/ghiggi/pycolorbar/pull/14) - Add automatic changelog generation, by [@sphamba](https://github.com/sphamba)
 * [PR 13](https://github.com/ghiggi/pycolorbar/pull/13) - [pre-commit.ci] pre-commit autoupdate, by [@pre-commit-ci[bot]](https://github.com/apps/pre-commit-ci)
 * [PR 12](https://github.com/ghiggi/pycolorbar/pull/12) - Fix GitHub release, by [@sphamba](https://github.com/sphamba)
