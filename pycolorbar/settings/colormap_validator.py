@@ -82,7 +82,7 @@ class ColormapValidator(BaseModel):
         The type of the colormap (e.g., ``ListedColormap``, ``LinearSegmentedColormap``).
     color_space : str
         The color space of the colormap (e.g., ``rgb``, ``hsv``).
-    color_palette : np.ndarray
+    color_palette : numpy.ndarray
         The array of colors defined for the colormap.
 
     Methods
@@ -249,7 +249,7 @@ def _check_ndim(colors: np.ndarray, expected_ndim: int):
 
     Parameters
     ----------
-    colors : np.ndarray
+    colors : numpy.ndarray
         The array of colors to validate.
     expected_ndim : int
         The expected number of dimensions for the colors array.
@@ -269,7 +269,7 @@ def _check_type(colors: np.ndarray, expected_type: type):
 
     Parameters
     ----------
-    colors : np.ndarray
+    colors : numpy.ndarray
         The array of colors to validate.
     expected_type : type
         The expected data type(s) of the color values.
@@ -290,7 +290,7 @@ def validate_hex_colors(colors: np.ndarray) -> bool:
 
     Parameters
     ----------
-    colors : np.ndarray
+    colors : numpy.ndarray
         The array of colors to validate.
 
     Raises
@@ -316,7 +316,7 @@ def validate_name_colors(colors: np.ndarray) -> bool:
 
     Parameters
     ----------
-    colors : np.ndarray
+    colors : numpy.ndarray
         The array of colors to validate.
 
     Raises
@@ -339,7 +339,7 @@ def validate_colors_values(colors, color_space, decoded_colors=True):
 
     Parameters
     ----------
-    colors : np.ndarray
+    colors : numpy.ndarray
         The array of colors to validate.
     color_space : str
         The color space of the colors array (e.g., "hex", "rgb", "rgba", etc.).

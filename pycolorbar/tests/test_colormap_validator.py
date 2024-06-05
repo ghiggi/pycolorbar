@@ -73,13 +73,13 @@ class TestColormapColorPalette:
             validate_cmap_dict(cmap_dict)
 
     def test_colors_list(self):
-        """Validate a colormap dictionary with colors not provided as np.ndarray."""
+        """Validate a colormap dictionary with colors not provided as numpy.ndarray."""
         cmap_dict = {"colormap_type": "ListedColormap", "color_space": "hex", "color_palette": ["#000000", "#FFFFFF"]}
         cmap_dict = validate_cmap_dict(cmap_dict)
         assert isinstance(cmap_dict["color_palette"], np.ndarray)
 
     def test_colors_is_empty(self):
-        """Validate a colormap dictionary with colors not provided as np.ndarray."""
+        """Validate a colormap dictionary with colors not provided as numpy.ndarray."""
         cmap_dict = {
             "colormap_type": "ListedColormap",
             "color_space": "hex",

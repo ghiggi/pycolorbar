@@ -475,7 +475,7 @@ def get_plot_kwargs(name=None, user_plot_kwargs=None, user_cbar_kwargs=None):
 
     Returns
     -------
-    plot_kwargs, cbar_kwargs
+    tuple
         A tuple with the `plot_kwargs` and `cbar_kwargs` to pass to the plotting functions.
 
     Examples

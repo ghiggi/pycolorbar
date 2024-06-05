@@ -36,7 +36,7 @@ def get_mpl_named_colors():
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         An array of valid named colors.
 
     Notes

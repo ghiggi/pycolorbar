@@ -64,12 +64,12 @@ class ColorEncoderDecoder:
 
         Parameters
         ----------
-        colors : np.ndarray
+        colors : numpy.ndarray
             2D array where each column represents a channel in the color space.
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Decoded color values in internal representation.
         """
         return np.array(
@@ -89,12 +89,12 @@ class ColorEncoderDecoder:
 
         Parameters
         ----------
-        colors : np.ndarray
+        colors : numpy.ndarray
             2D array where each column represents a channel in the color space.
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Encoded color values in external representation.
         """
         return np.array(
@@ -122,12 +122,12 @@ class ColorEncoderDecoder:
 
         Parameters
         ----------
-        colors : np.ndarray
+        colors : numpy.ndarray
             2D array where each column represents a channel in the color space.
 
         Returns
         -------
-        colors : np.ndarray
+        colors : numpy.ndarray
             2D array where each column represents a channel in the color space.
 
         """
@@ -156,7 +156,7 @@ class ColorEncoderDecoder:
 
         Parameters
         ----------
-        colors : np.ndarray
+        colors : numpy.ndarray
             2D array where each column represents a channel in the color space.
 
         Raises
@@ -183,7 +183,7 @@ class ColorEncoderDecoder:
 
         Parameters
         ----------
-        colors : np.ndarray
+        colors : numpy.ndarray
             2D array where each column represents a channel in the color space.
         strict : bool, optional
             If True, performs a strict check to ensure that the values are within the external data range
@@ -219,7 +219,7 @@ class ColorEncoderDecoder:
 
         Parameters
         ----------
-        colors : np.array
+        colors : numpy.ndarray
             2D-Array with the columns representing the color space dimensions.
 
         Returns
@@ -245,7 +245,7 @@ class ColorEncoderDecoder:
 
         Parameters
         ----------
-        colors : np.array
+        colors : numpy.ndarray
             2D array where each column represents a channel in the color space.
         strict : bool, optional
             If True, performs a check to ensure that not all values are also within the internal data range.
@@ -510,14 +510,14 @@ def decode_colors(colors, color_space):
 
     Parameters
     ----------
-    colors : np.ndarray
+    colors : numpy.ndarray
         2D array where each column represents a channel in the color space.
     color_space : str
         The name of the color space.
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Decoded color values in internal representation.
     """
     colors = np.asanyarray(colors)
@@ -534,14 +534,14 @@ def encode_colors(colors, color_space):
 
     Parameters
     ----------
-    colors : np.ndarray
+    colors : numpy.ndarray
         2D array where each column represents a channel in the color space.
     color_space : str
         The name of the color space.
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Encoded color values in external representation.
     """
     colors = np.asanyarray(colors)
@@ -558,7 +558,7 @@ def is_within_internal_data_range(colors, color_space):
 
     Parameters
     ----------
-    colors : np.ndarray
+    colors : numpy.ndarray
         2D array where each column represents a channel in the color space.
     color_space : str
         The name of the color space.
@@ -580,7 +580,7 @@ def is_within_external_data_range(colors, color_space, strict=False):
 
     Parameters
     ----------
-    colors : np.ndarray
+    colors : numpy.ndarray
         2D array where each column represents a channel in the color space.
     color_space : str
         The name of the color space.
@@ -606,7 +606,7 @@ def check_valid_internal_data_range(colors, color_space):
 
     Parameters
     ----------
-    colors : np.ndarray
+    colors : numpy.ndarray
         2D array where each column represents a channel in the color space.
     color_space : str
         The name of the color space.
@@ -629,7 +629,7 @@ def check_valid_external_data_range(colors, color_space, strict=False):
 
     Parameters
     ----------
-    colors : np.ndarray
+    colors : numpy.ndarray
         2D array where each column represents a channel in the color space.
     color_space : str
         The name of the color space.

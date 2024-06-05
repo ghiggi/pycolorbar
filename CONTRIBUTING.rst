@@ -6,7 +6,7 @@ Hi! Thanks for taking the time to contribute to pycolorbar.
 You can contribute in many ways:
 
 - Join the `GitHub Discussions <https://github.com/ghiggi/pycolorbar/discussions>`__
-- Report software `issues <#issue-reporting-guidelines>`__
+- Report software `issues <#issue-reporting>`__
 - Add new colormaps
 - Add new colorbars
 - ...

@@ -250,7 +250,7 @@ class ColormapRegistry:
 
         Returns
         -------
-        matplotlib.Colormap
+        matplotlib.colors.Colormap
             The matplotlib colormap.
 
         Raises
