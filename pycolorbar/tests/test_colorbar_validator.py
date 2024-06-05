@@ -177,7 +177,7 @@ class TestColormapSettings:
         [
             "#ff0000",  # valid hex
             (1, 0, 0),  # valid RGB tuple
-            [1, 0, 0],  # valid RGB tuple
+            [1, 0, 0],  # valid RGB list
             (1, 0, 0, 1),  # valid RGBA tuple (if bad/over/under alpha provided ... RGB alpha will be overwritten !)
             "red",  # valid named color
             "none",
@@ -187,8 +187,8 @@ class TestColormapSettings:
         """Test valid colors for 'bad_color', 'over_color', 'under_color'."""
         cmap_settings = {"name": "viridis", "bad_color": color, "over_color": color, "under_color": color}
         validated = ColormapSettings(**cmap_settings)
-        if isinstance(color, tuple):
-            color = list(color)
+        if isinstance(color, list):
+            color = tuple(color)
         assert validated.bad_color == color
         assert validated.over_color == color
         assert validated.under_color == color

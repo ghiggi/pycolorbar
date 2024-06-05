@@ -110,6 +110,7 @@ class ColormapSettings(BaseModel):
                     isinstance(color_component, (int, float)) and 0 <= color_component <= 1 for color_component in v
                 ):
                     raise ValueError("Invalid RGB/RGBA format. Expected tuple with values between 0 and 1.")
+                v = tuple(v)
             else:
                 raise ValueError("Invalid color format. Expected a named color, hex string, or RGB/RGBA tuple.")
         return v
