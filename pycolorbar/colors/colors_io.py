@@ -143,8 +143,8 @@ class ColorEncoderDecoder:
             raise ValueError(f"The colors array in the {self.name} color space must have {self.ndim} columns.")
 
         # Check data type
-        expected_type = (np.int_, np.float_)
-        if not issubclass(colors.dtype.type, expected_type):
+        expected_type = (np.integer, np.floating)
+        if not np.issubdtype(colors.dtype, expected_type):
             str_type = str(expected_type)
             raise ValueError(f"The colors array values must be of type {str_type}.")
         return colors
