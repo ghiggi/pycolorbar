@@ -40,12 +40,12 @@ from pycolorbar.settings.colorbar_io import (
 
 
 class TestColorbarIO:
-    @pytest.fixture()
+    @pytest.fixture
     def test_cbar_dict(self):
         """Return test cbar_dict."""
         return {"cmap": {"name": "viridis"}, "norm": {"name": "Norm"}, "cbar": {"extend": "both"}}
 
-    @pytest.fixture()
+    @pytest.fixture
     def test_cbar_dicts(self):
         """Return test cbar_dicts."""
         return {
