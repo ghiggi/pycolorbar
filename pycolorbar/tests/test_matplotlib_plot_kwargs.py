@@ -294,7 +294,7 @@ class TestPlotCbarKwargs:
         # Check for ticklabels
         assert "ticklabels" in cbar_kwargs
         assert cbar_kwargs["ticklabels"] == ["one", "two"]
-        assert cbar_kwargs["ticks"] == [0.99, 1.99]
+        assert cbar_kwargs["ticks"] == [0.5, 1.5]
 
 
 class TestUpdatePlotCbarKwargs:

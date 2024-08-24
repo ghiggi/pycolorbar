@@ -108,7 +108,8 @@ def get_cmap(cbar_dict):
 def create_category_norm(labels, first_value=0):
     """Define a BoundaryNorm that deal with categorical data."""
     n_labels = len(labels)
-    norm_bins = np.arange(first_value - 0.01, n_labels + first_value) + 0.5
+    norm_bins = np.arange(first_value, n_labels + first_value + 1)
+    # norm_bins = np.arange(first_value - 0.01, n_labels + first_value) + 0.5
     return mpl.colors.BoundaryNorm(boundaries=norm_bins, ncolors=n_labels)
 
 
