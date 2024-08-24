@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - pyyaml
-  - numpy
+  - numpy<=1.26.4
   - matplotlib
   - pydantic>=2.0.0
   # Docs
