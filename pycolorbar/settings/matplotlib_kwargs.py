@@ -113,6 +113,14 @@ def create_category_norm(labels, first_value=0):
     return mpl.colors.BoundaryNorm(boundaries=norm_bins, ncolors=n_labels)
 
 
+def CategoryNorm():
+    pass
+
+
+def CategorizeNorm():
+    pass
+
+
 ####-------------------------------------------------------------------------------------------.
 #### Norm utility
 
