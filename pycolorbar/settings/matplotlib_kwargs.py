@@ -527,7 +527,7 @@ def _check_levels_validity(levels, vmin, vmax):
             raise ValueError("If you specify 'levels' as a list, you don't have to specify 'vmin' and 'vmax'.")
         boundaries = list(levels)
         # Check levels are monotonic increasing
-    check_boundaries(boundaries, arg_name="levels")
+    boundaries = check_boundaries(boundaries, arg_name="levels")
     return boundaries
 
 

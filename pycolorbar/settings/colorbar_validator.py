@@ -30,8 +30,9 @@ import re
 from typing import Optional, Union
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from pycolorbar.norm import check_boundaries, check_categories
 from pycolorbar.utils.mpl import get_mpl_colormaps, get_mpl_named_colors
 
 ####---------------------------------------------------------------------------------------------------------.
@@ -156,11 +157,6 @@ def _check_extend(extend):
     assert extend in valid_extends, f"Invalid extend option '{extend}'. Valid options are {valid_extends}."
 
 
-def _is_monotonically_increasing(x):
-    x = np.asanyarray(x)
-    return np.all(x[1:] > x[:-1])
-
-
 def _get_boundary_norm_expected_ncolors(norm_settings):
     boundaries = norm_settings.get("boundaries", [])
     extend = norm_settings.get("extend", "neither")
@@ -231,10 +227,66 @@ class CategoryNormSettings(BaseModel):
         return values
 
 
+class ClassNormSettings(BaseModel):
+    """Pydantic model for ``ClassNorm`` settings."""
+
+    categories: dict = Field(..., description="A dictionary encoding values and category labels.")
+
+    @field_validator("categories")
+    def validate_categories(cls, v):
+        """Validate ``categories`` dictionary for ``ClassNorm``."""
+        categories = check_categories(categories=v)
+        return categories
+
+    @model_validator(mode="before")
+    def check_valid_args(cls, values):
+        """Check for no excess parameters in ``ClassNorm``."""
+        valid_args = {"categories"}
+        _check_norm_invalid_args(norm_name="ClassNorm", args=values.keys(), valid_args=valid_args)
+        return values
+
+
+class CategorizeNormSettings(BaseModel):
+    """Pydantic model for ``CategorizeNorm`` settings."""
+
+    boundaries: list[float] = Field(..., description="A list of boundary values.")
+    labels: list[str] = Field(..., description="A list of labels corresponding to the categories.")
+
+    @field_validator("boundaries")
+    def validate_boundaries(cls, v):
+        """Validate ``labels`` for ``CategorizeNorm``."""
+        boundaries = check_boundaries(boundaries=v)
+        return boundaries
+
+    @field_validator("labels")
+    def validate_labels(cls, v):
+        """Validate ``first_value`` for ``CategorizeNorm``."""
+        assert all(isinstance(label, (str)) for label in v), "'labels' must be a list of string."
+        return v
+
+    @model_validator(mode="after")
+    def validate_boundaries_label_size(self):
+        """Validate ``boundaries`` and ``labels`` size for ``CategorizeNorm``."""
+        boundaries = self.boundaries
+        labels = self.labels
+        n_categories = len(labels)
+        expected_n = len(boundaries) - 1
+        if n_categories != expected_n:
+            raise ValueError(f"'labels' size must be {expected_n} given the size of 'boundaries'.")
+        return self
+
+    @model_validator(mode="before")
+    def check_valid_args(cls, values):
+        """Check for no excess parameters in ``CategorizeNorm``."""
+        valid_args = {"labels", "boundaries"}
+        _check_norm_invalid_args(norm_name="CategorizeNorm", args=values.keys(), valid_args=valid_args)
+        return values
+
+
 class BoundaryNormSettings(BaseModel):
     """Pydantic model for ``BoundaryNorm`` settings."""
 
-    boundaries: list[float]
+    boundaries: list[float] = Field(..., description="A list of boundary values.")
     clip: Optional[bool] = False
     extend: Optional[str] = "neither"
     ncolors: Optional[int] = None  # "ncolors" if not specified is determined based on len(boundaries) and extend
@@ -242,10 +294,8 @@ class BoundaryNormSettings(BaseModel):
     @field_validator("boundaries")
     def validate_boundaries(cls, v):
         """Validate ``boundaries`` list for ``BoundaryNorm``."""
-        assert isinstance(v, list), "'boundaries' list is required for 'BoundaryNorm'."
-        assert all(isinstance(b, (int, float)) for b in v), "'boundaries' must be a list of numbers."
-        assert _is_monotonically_increasing(v), "'boundaries' must be monotonically increasing."
-        return v
+        boundaries = check_boundaries(boundaries=v)
+        return boundaries
 
     @field_validator("clip")
     def validate_clip(cls, v):
@@ -363,7 +413,7 @@ class CenteredNormSettings(BaseModel):
 class TwoSlopeNormSettings(BaseModel):
     """Pydantic model for ``TwoSlopeNorm`` settings."""
 
-    vcenter: float
+    vcenter: float = Field(..., description="Value over which to center the colormap.")
     vmin: Optional[float] = None
     vmax: Optional[float] = None
 
@@ -421,7 +471,7 @@ class LogNormSettings(BaseModel):
 class SymLogNormSettings(BaseModel):
     """Pydanctic model for ``SymLogNorm`` settings."""
 
-    linthresh: float
+    linthresh: float = Field(..., description="SymLogNorm linthres value.")
     linscale: Optional[float] = 1.0
     base: Optional[float] = 10
     vmin: Optional[float] = None
@@ -465,7 +515,7 @@ class SymLogNormSettings(BaseModel):
 class PowerNormSettings(BaseModel):
     """Pydantic model for ``PowerNorm`` settings."""
 
-    gamma: float
+    gamma: float = Field(..., description="PowerNorm gamma value.")
     vmin: Optional[float] = None
     vmax: Optional[float] = None
     clip: Optional[bool] = False
@@ -545,6 +595,8 @@ def _check_valid_norm_name(name):
         "PowerNorm",
         "AsinhNorm",
         "CategoryNorm",
+        "ClassNorm",
+        "CategorizeNorm",
     ]
     if name not in valid_names:
         raise ValueError(f"Invalid norm '{name}'. Valid options are {valid_names}.")
@@ -568,6 +620,8 @@ def check_norm_settings(norm_settings):
         "PowerNorm": PowerNormSettings,
         "AsinhNorm": AsinhNormSettings,
         "CategoryNorm": CategoryNormSettings,
+        "ClassNorm": ClassNormSettings,
+        "CategorizeNorm": CategorizeNormSettings,
     }
     # Retrieve NormSettings Validator
     validator = norm_settings_mapping[name]
@@ -673,12 +727,14 @@ def resolve_colorbar_reference(cbar_dict, name, checked_references=None):
 def _check_discrete_norm_cmap_settings(cmap_settings, norm_settings):
     """Validate or set the 'n' default value for discrete colormaps."""
     norm = norm_settings.get("name", "Norm")
-    if norm not in ["CategoryNorm", "BoundaryNorm"]:
+    if norm not in ["CategoryNorm", "BoundaryNorm", "ClassNorm", "CategorizeNorm"]:
         return cmap_settings, norm_settings
 
     # Retrieve expected number of colors
-    if norm == "CategoryNorm":
+    if norm in ["CategoryNorm", "CategorizeNorm"]:
         expected_ncolors = len(norm_settings["labels"])
+    elif norm == "ClassNorm":
+        expected_ncolors = len(norm_settings["categories"])
     else:  # "BoundaryNorm"
         expected_ncolors = _get_boundary_norm_expected_ncolors(norm_settings=norm_settings)
 

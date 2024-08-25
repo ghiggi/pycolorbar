@@ -28,15 +28,37 @@
 import numpy as np
 from matplotlib.colors import BoundaryNorm
 
-from pycolorbar.settings.colormap_validator import is_monotonically_increasing
+
+def is_monotonically_increasing(x):
+    """Check if a list of values is monotonically increasing."""
+    x = np.asanyarray(x)
+    return np.all(x[1:] > x[:-1])
 
 
 def check_boundaries(boundaries, arg_name="boundaries"):
     """Check boundaries/levels validity."""
+    if not isinstance(boundaries, (list, np.ndarray)):
+        raise TypeError(f"'{arg_name}' should be a list or a numpy array.")
+    if not all(isinstance(b, (int, float)) for b in boundaries):
+        raise ValueError("'{arg_name}' must be a list of numbers.")
+    if len(boundaries) < 3:
+        raise ValueError(f"Expecting '{arg_name}' of at least size 3.")
     if not is_monotonically_increasing(boundaries):
-        raise ValueError(f"{arg_name} must be monotonically increasing !")
-    if len(np.unique(boundaries)) != len(boundaries):
-        raise ValueError(f"{arg_name} should not contain duplicated values !")
+        raise ValueError(f"'{arg_name}' must be monotonically increasing !")
+    return boundaries
+
+
+def check_categories(categories):
+    """Check categories dictionary validity."""
+    if not all(isinstance(key, int) for key in categories):
+        raise ValueError("All 'categories' dictionary keys must be integers.")
+    if not all(isinstance(key, str) for key in categories.values()):
+        raise ValueError("All 'categories' dictionary values be strings.")
+    if len(categories) < 2:
+        raise ValueError("Expecting a 'categories' dictionary with at least 2 keys.")
+    # Reorder dictionary by integer order
+    categories = dict(sorted(categories.items()))
+    return categories
 
 
 class ClassNorm(BoundaryNorm):  # BoundaryNorm instance required my matplotlib !
@@ -61,11 +83,8 @@ class ClassNorm(BoundaryNorm):  # BoundaryNorm instance required my matplotlib !
         Appropriate colorbar ticks and ticklabels can be retrieved from
         the `ticks` and `ticklabels` attributes.
         """
-        # Check keys are integer values
-        if not all(isinstance(key, int) for key in categories):
-            raise ValueError("All keys in the 'categories' dictionary must be integers.")
-        # Reorder dictionary by integer order
-        categories = dict(sorted(categories.items()))
+        # Check keys are integers, and values are strings
+        categories = check_categories(categories)
         n_categories = len(categories)
         boundaries = list(categories.keys())
         boundaries = np.append(boundaries, boundaries[-1] + 1)
@@ -96,7 +115,7 @@ class CategorizeNorm(BoundaryNorm):  # BoundaryNorm instance required my matplot
         Appropriate colorbar ticks and ticklabels can be retrieved from
         the `ticks` and `ticklabels` attributes.
         """
-        check_boundaries(boundaries, arg_name="boundaries")
+        boundaries = check_boundaries(boundaries, arg_name="boundaries")
         n_categories = len(labels)
         expected_n = len(boundaries) - 1
         if n_categories != expected_n:
