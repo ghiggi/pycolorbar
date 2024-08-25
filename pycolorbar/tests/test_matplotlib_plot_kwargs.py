@@ -495,6 +495,24 @@ class TestUpdatePlotCbarKwargs:
                 user_plot_kwargs=user_plot_kwargs,
             )
 
+        # Assert raise an error if duplicated levels
+        user_plot_kwargs = {"levels": [0, 0, 1.0]}
+        with pytest.raises(ValueError):
+            update_plot_cbar_kwargs(
+                default_plot_kwargs=default_plot_kwargs,
+                default_cbar_kwargs=default_cbar_kwargs,
+                user_plot_kwargs=user_plot_kwargs,
+            )
+
+        # Assert raise an error if levels < 2
+        user_plot_kwargs = {"levels": 1, "vmin": 0, "vmax": 1}
+        with pytest.raises(ValueError):
+            update_plot_cbar_kwargs(
+                default_plot_kwargs=default_plot_kwargs,
+                default_cbar_kwargs=default_cbar_kwargs,
+                user_plot_kwargs=user_plot_kwargs,
+            )
+
         # Assert raise an error if levels is an integer and vmin and max are not specified
         user_plot_kwargs = {"levels": 2}
         with pytest.raises(ValueError):
@@ -522,6 +540,24 @@ class TestUpdatePlotCbarKwargs:
         )
         assert plot_kwargs["norm"].vmin == 0
         assert plot_kwargs["norm"].vmax == 2
+
+    def test_user_vmin_vmax_validity(self, default_plot_kwargs, default_cbar_kwargs):
+        # Raise error if vmin > vmax
+        user_plot_kwargs = {"vmin": 2, "vmax": 0}
+        with pytest.raises(ValueError):
+            update_plot_cbar_kwargs(
+                default_plot_kwargs=default_plot_kwargs,
+                default_cbar_kwargs=default_cbar_kwargs,
+                user_plot_kwargs=user_plot_kwargs,
+            )
+        # Raise error if vmin = vmax
+        user_plot_kwargs = {"vmin": 0, "vmax": 0}
+        with pytest.raises(ValueError):
+            update_plot_cbar_kwargs(
+                default_plot_kwargs=default_plot_kwargs,
+                default_cbar_kwargs=default_cbar_kwargs,
+                user_plot_kwargs=user_plot_kwargs,
+            )
 
     def test_user_vmin_vmax_norm_not_allowed(self, default_plot_kwargs, default_cbar_kwargs):
         """Ensure ValueError is raised if vmin/vmax specified alongside norm."""

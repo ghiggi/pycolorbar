@@ -28,6 +28,16 @@
 import numpy as np
 from matplotlib.colors import BoundaryNorm
 
+from pycolorbar.settings.colormap_validator import is_monotonically_increasing
+
+
+def check_boundaries(boundaries, arg_name="boundaries"):
+    """Check boundaries/levels validity."""
+    if not is_monotonically_increasing(boundaries):
+        raise ValueError(f"{arg_name} must be monotonically increasing !")
+    if len(np.unique(boundaries)) != len(boundaries):
+        raise ValueError(f"{arg_name} should not contain duplicated values !")
+
 
 class ClassNorm(BoundaryNorm):  # BoundaryNorm instance required my matplotlib !
     """Generate a colormap index based on a category dictionary.
@@ -51,9 +61,11 @@ class ClassNorm(BoundaryNorm):  # BoundaryNorm instance required my matplotlib !
         Appropriate colorbar ticks and ticklabels can be retrieved from
         the `ticks` and `ticklabels` attributes.
         """
-        # TODO: Check keys are integer values
-        # TODO: Reorder dictionary by integer order
-
+        # Check keys are integer values
+        if not all(isinstance(key, int) for key in categories):
+            raise ValueError("All keys in the 'categories' dictionary must be integers.")
+        # Reorder dictionary by integer order
+        categories = dict(sorted(categories.items()))
         n_categories = len(categories)
         boundaries = list(categories.keys())
         boundaries = np.append(boundaries, boundaries[-1] + 1)
@@ -84,9 +96,11 @@ class CategorizeNorm(BoundaryNorm):  # BoundaryNorm instance required my matplot
         Appropriate colorbar ticks and ticklabels can be retrieved from
         the `ticks` and `ticklabels` attributes.
         """
-        n_categories = len(boundaries) - 1
-        # TODO: check labels == len(boundaries)  - 1
-
+        check_boundaries(boundaries, arg_name="boundaries")
+        n_categories = len(labels)
+        expected_n = len(boundaries) - 1
+        if n_categories != expected_n:
+            raise ValueError(f"'labels' size must be {expected_n} given the size of 'boundaries'.")
         boundaries = np.array(boundaries)
         super().__init__(boundaries=boundaries, ncolors=n_categories, clip=False)
         self.ticks = boundaries[:-1] + np.diff(boundaries) / 2

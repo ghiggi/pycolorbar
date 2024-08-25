@@ -25,4 +25,4 @@
 
 # -----------------------------------------------------------------------------.
 """Initialize norm module."""
-from pycolorbar.norm.categorical import ClassNorm, CategorizeNorm  # noqa
+from pycolorbar.norm.categorical import ClassNorm, CategorizeNorm, check_boundaries  # noqa

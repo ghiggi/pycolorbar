@@ -44,8 +44,7 @@ from matplotlib.colors import (
 )
 
 import pycolorbar
-from pycolorbar.norm import CategorizeNorm, ClassNorm
-from pycolorbar.settings.colormap_validator import is_monotonically_increasing
+from pycolorbar.norm import CategorizeNorm, ClassNorm, check_boundaries
 
 
 def _create_combined_cmap(names, n=None, new_n=None):
@@ -334,6 +333,9 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
     _check_no_vmin_vmax_if_norm_specified(user_plot_kwargs=user_plot_kwargs)
     _check_no_levels_if_norm_specified(user_plot_kwargs=user_plot_kwargs)
 
+    # Check valid vmin, vmax if specified
+    _check_valid_vmin_vmax(user_plot_kwargs=user_plot_kwargs)
+
     # Determine flags for user arguments
     user_specified_levels = user_plot_kwargs.get("levels", None) is not None
     user_specified_norm = user_plot_kwargs.get("norm", None) is not None
@@ -415,6 +417,13 @@ def _count_length(v):
     if v is None:
         return 0
     return len(v)
+
+
+def _check_valid_vmin_vmax(user_plot_kwargs):
+    vmin = user_plot_kwargs.get("vmin", None)
+    vmax = user_plot_kwargs.get("vmax", None)
+    if vmin is not None and vmax is not None and vmax <= vmin:
+        raise ValueError("'vmin' should be smaller than 'vmax'!")
 
 
 def _check_valid_ticks_ticklabels(user_cbar_kwargs, default_cbar_kwargs):
@@ -510,14 +519,15 @@ def _check_levels_validity(levels, vmin, vmax):
     if isinstance(levels, (int, float)):
         if vmin is None or vmax is None:
             raise ValueError("If 'levels' is an integer, you must specify 'vmin' and 'vmax'.")
+        if levels <= 1:
+            raise ValueError("If 'levels' is an integer, it must be a value larger than 1.")
         boundaries = list(np.linspace(vmin, vmax, int(levels + 1)))
     else:
         if vmin is not None or vmax is not None:
             raise ValueError("If you specify 'levels' as a list, you don't have to specify 'vmin' and 'vmax'.")
         boundaries = list(levels)
         # Check levels are monotonic increasing
-        if not is_monotonically_increasing(boundaries):
-            raise ValueError("'levels' must be monotonically increasing !")
+    check_boundaries(boundaries, arg_name="levels")
     return boundaries
 
 
