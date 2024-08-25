@@ -44,6 +44,7 @@ from matplotlib.colors import (
     TwoSlopeNorm,
 )
 
+from pycolorbar.norm import CategorizeNorm, ClassNorm
 from pycolorbar.settings.matplotlib_kwargs import (
     get_cmap,
     get_default_cbar_kwargs,
@@ -64,6 +65,15 @@ def basic_cbar_dict():
         "cbar": {},
         "auxiliary": {},
     }
+
+
+categorical_cbar_dicts = [
+    {"cmap": {"name": "Set1"}, "norm": {"name": "ClassNorm", "categories": {0: "cat1", 2: "cat2"}}},
+    {
+        "cmap": {"name": "Set1"},
+        "norm": {"name": "CategorizeNorm", "boundaries": [0, 0.5, 0.75], "labels": ["cat1", "cat2"]},
+    },
+]
 
 
 class TestGetCmapFromCbarDict:
@@ -162,6 +172,8 @@ class TestGetCmapFromCbarDict:
         ("BoundaryNorm", BoundaryNorm, {"boundaries": [0, 0.5, 1], "ncolors": 3, "extend": "vmin"}),
         ("BoundaryNorm", BoundaryNorm, {"boundaries": [0, 0.5, 1], "ncolors": 4, "extend": "both"}),
         ("CategoryNorm", BoundaryNorm, {"labels": ["a", "b", "c"]}),
+        ("ClassNorm", ClassNorm, {"categories": {1: "a", 2: "b"}}),
+        ("CategorizeNorm", CategorizeNorm, {"boundaries": [0, 0.5, 1], "labels": ["a", "b"]}),
         ("TwoSlopeNorm", TwoSlopeNorm, {"vmin": 0, "vcenter": 0.5, "vmax": 1}),
         ("CenteredNorm", CenteredNorm, {"vcenter": 0.5}),
         ("LogNorm", LogNorm, {"vmin": 0.1, "vmax": 1}),
@@ -280,6 +292,7 @@ class TestPlotCbarKwargs:
 
     def test_custom_categorical_colorbar(self):
         """Test behaviour for a categorical colorbar and addition of ticklabels in cbar_kwargs."""
+        # TODO: REMOVE TEST
         # Define cbar_dict
         cbar_dict = {"cmap": {"name": "Set1"}, "norm": {"name": "CategoryNorm", "labels": ["one", "two"]}}
         # Retrieve plot_kwargs and cbar_kwargs
@@ -295,6 +308,35 @@ class TestPlotCbarKwargs:
         assert "ticklabels" in cbar_kwargs
         assert cbar_kwargs["ticklabels"] == ["one", "two"]
         assert cbar_kwargs["ticks"] == [0.5, 1.5]
+
+    def test_categorize_norm(self):
+        """Test ticks and ticklabels are extracted from CategorizeNorm."""
+        # Define cbar_dict
+        cbar_dict = {
+            "cmap": {"name": "Set1"},
+            "norm": {"name": "CategorizeNorm", "boundaries": [0, 0.5, 0.75], "labels": ["cat1", "cat2"]},
+        }
+        # Retrieve plot_kwargs and cbar_kwargs
+        plot_kwargs, cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
+        # Check norm instance
+        assert isinstance(plot_kwargs["norm"], CategorizeNorm)
+        assert isinstance(plot_kwargs["norm"], BoundaryNorm)
+        # Check ticks and ticklabels are extracted from norm
+        assert cbar_kwargs["ticks"] == [0.25, 0.625]
+        assert cbar_kwargs["ticklabels"] == ["cat1", "cat2"]
+
+    def test_category_norm(self):
+        """Test ticks and ticklabels are extracted from ClassNorm."""
+        # Define cbar_dict
+        cbar_dict = {"cmap": {"name": "Set1"}, "norm": {"name": "ClassNorm", "categories": {0: "cat1", 2: "cat2"}}}
+        # Retrieve plot_kwargs and cbar_kwargs
+        plot_kwargs, cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
+        # Check norm instance
+        assert isinstance(plot_kwargs["norm"], ClassNorm)
+        assert isinstance(plot_kwargs["norm"], BoundaryNorm)
+        # Check ticks and ticklabels are extracted from norm
+        assert cbar_kwargs["ticks"] == [1.0, 2.5]
+        assert cbar_kwargs["ticklabels"] == ["cat1", "cat2"]
 
 
 class TestUpdatePlotCbarKwargs:
@@ -348,23 +390,7 @@ class TestUpdatePlotCbarKwargs:
         # Assert that the others default_cbar_kwargs are kept
         assert "extend" in cbar_kwargs
 
-    def test_user_levels_specified(self, default_plot_kwargs):
-        """Test original ticks and ticklabels are removed from default_cbar_kwargs."""
-        user_plot_kwargs = {"levels": [1000, 2000, 3000]}
-        default_cbar_kwargs = {"ticks": ["whatever"], "ticklabels": ["whatever"], "extend": "both"}
-        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
-            default_plot_kwargs=default_plot_kwargs,
-            default_cbar_kwargs=default_cbar_kwargs,
-            user_plot_kwargs=user_plot_kwargs,
-        )
-        # Assert cbar_kwargs does not contain anymore default_cbar_kwargs ticks and ticklabels
-        assert "ticks" not in cbar_kwargs
-        assert "ticklabels" not in cbar_kwargs
-        assert isinstance(plot_kwargs["norm"], BoundaryNorm)
-        # Assert that the others default_cbar_kwargs are kept
-        assert "extend" in cbar_kwargs
-
-    def test_user_cmap_for_labeled_colorbar(self, default_plot_kwargs, default_cbar_kwargs):
+    def test_user_cmap_resampled_for_categorical_colorbar_with_defaults(self, default_plot_kwargs, default_cbar_kwargs):
         """Test resampling user-provided colormap for categorical and discrete colorbar."""
         user_plot_kwargs = {"cmap": plt.get_cmap("Spectral", 256)}
         default_cbar_kwargs["ticklabels"] = ["low", "medium", "high"]
@@ -375,9 +401,45 @@ class TestUpdatePlotCbarKwargs:
         )
         assert plot_kwargs["cmap"].N == 3
 
-    def test_create_boundary_norm_from_levels_list(self, default_plot_kwargs, default_cbar_kwargs):
+    def test_user_cmap_resampled_for_categorical_colorbar_with_no_defaults(self):
+        """Test that user specified cmap is resampled."""
+        # Define defaults
+        default_plot_kwargs, default_cbar_kwargs = get_plot_cbar_kwargs(cbar_dict={})
+        # Define user updates
+        user_plot_kwargs = {
+            "cmap": "Spectral",
+            "norm": ClassNorm(categories={0: "cat1", 2: "cat2"}),
+        }
+        # Retrieve updated plot_kwargs and cbar_kwargs
+        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+            user_plot_kwargs=user_plot_kwargs,
+        )
+        assert plot_kwargs["cmap"].N == 2
+        assert plot_kwargs["norm"] == user_plot_kwargs["norm"]
+
+        # Raise error if cmap too short
+        user_plot_kwargs = {
+            "cmap": ["red", "yellow"],
+            "norm": ClassNorm(categories={0: "cat1", 1: "cat2", 2: "cat3"}),
+        }
+
+        # Retrieve updated plot_kwargs and cbar_kwargs
+        with pytest.raises(ValueError):
+            update_plot_cbar_kwargs(
+                default_plot_kwargs=default_plot_kwargs,
+                default_cbar_kwargs=default_cbar_kwargs,
+                user_plot_kwargs=user_plot_kwargs,
+            )
+
+    def test_user_levels_list(self, default_plot_kwargs, default_cbar_kwargs):
         """Test creating BoundaryNorm and resampling cmap based on 'levels' list in user_plot_kwargs."""
-        user_plot_kwargs = {"cmap": plt.get_cmap("Spectral"), "levels": [0, 0.5, 1.0]}
+        levels = [0, 0.5, 1.0]
+        user_plot_kwargs = {"cmap": plt.get_cmap("Spectral"), "levels": levels}
+        default_cbar_kwargs["ticks"] = ["whatever"] * 5
+        default_cbar_kwargs["ticklabels"] = ["whatever"] * 5
+        default_cbar_kwargs["extend"] = "both"  # keep other cbar_kwargs
         default_plot_kwargs["cmap"] = None  # this should also pass
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
@@ -385,23 +447,35 @@ class TestUpdatePlotCbarKwargs:
             user_plot_kwargs=user_plot_kwargs,
         )
         assert isinstance(plot_kwargs["norm"], BoundaryNorm)
-        assert plot_kwargs["cmap"].N == 2  # Resampled to match number of boundaries - 1
-        np.testing.assert_equal(plot_kwargs["norm"].boundaries, [0, 0.5, 1.0])
+        assert cbar_kwargs["ticks"] == levels
+        assert cbar_kwargs["ticklabels"] == levels
+        assert len(levels) - 1 == plot_kwargs["cmap"].N  # Resampled to match number of boundaries - 1
+        assert cbar_kwargs["extend"] == "both"
+        np.testing.assert_equal(plot_kwargs["norm"].boundaries, levels)
 
-    def test_create_boundary_norm_from_levels_number(self, default_plot_kwargs, default_cbar_kwargs):
+    # # If levels provided, update ticklabels  !
+
+    def test_user_levels_number(self, default_plot_kwargs, default_cbar_kwargs):
         """Test creating BoundaryNorm and resampling cmap based on a 'levels' number in user_plot_kwargs."""
         user_plot_kwargs = {"levels": 2, "vmin": 0, "vmax": 1}  # 3 levels linearly spaced between 0-1
+        default_cbar_kwargs["ticks"] = ["whatever"] * 5
+        default_cbar_kwargs["ticklabels"] = ["whatever"] * 5
+        default_cbar_kwargs["extend"] = "both"
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
             user_plot_kwargs=user_plot_kwargs,
         )
 
+        expected_levels = [0.0, 0.5, 1.0]
         assert isinstance(plot_kwargs["norm"], BoundaryNorm)
+        assert cbar_kwargs["ticks"] == expected_levels
+        assert cbar_kwargs["ticklabels"] == expected_levels
+        assert cbar_kwargs["extend"] == "both"  # keep other cbar_kwargs
         assert plot_kwargs["cmap"].N == 2  # Resampled to match number of boundaries - 1
-        np.testing.assert_equal(plot_kwargs["norm"].boundaries, [0.0, 0.5, 1.0])
+        np.testing.assert_equal(plot_kwargs["norm"].boundaries, expected_levels)
 
-    def test_invalid_levels_user_kwargs(self, default_plot_kwargs, default_cbar_kwargs):
+    def test_user_levels_invalid(self, default_plot_kwargs, default_cbar_kwargs):
         """Test invalid user_kwargs together with the 'levels' argument."""
         # Assert raise an error if levels is a list and also vmin or max are specified
         user_plot_kwargs = {"levels": [0, 0.5, 1.0], "vmin": 0, "vmax": 1}
@@ -438,7 +512,7 @@ class TestUpdatePlotCbarKwargs:
                 user_plot_kwargs=user_plot_kwargs,
             )
 
-    def test_update_default_norm_using_vmin_vmax(self, default_plot_kwargs, default_cbar_kwargs):
+    def test_user_vmin_vmax_update_default_norm(self, default_plot_kwargs, default_cbar_kwargs):
         """Test updating default norm using vmin and vmax from user_plot_kwargs when norm not specified."""
         user_plot_kwargs = {"vmin": 0, "vmax": 2}
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
@@ -449,19 +523,18 @@ class TestUpdatePlotCbarKwargs:
         assert plot_kwargs["norm"].vmin == 0
         assert plot_kwargs["norm"].vmax == 2
 
-    def test_no_vmin_vmax_if_norm_specified(self, default_plot_kwargs, default_cbar_kwargs):
+    def test_user_vmin_vmax_norm_not_allowed(self, default_plot_kwargs, default_cbar_kwargs):
         """Ensure ValueError is raised if vmin/vmax specified alongside norm."""
         user_plot_kwargs = {"norm": Normalize(vmin=0, vmax=2), "vmin": 0, "vmax": 2}
         with pytest.raises(ValueError) as excinfo:
             update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_kwargs=user_plot_kwargs)
         assert "If the 'norm' is specified, 'vmin' and 'vmax' must not be specified" in str(excinfo.value)
 
-    def test_norm_incompatible_user_vmin_vmax(self):
+    def test_user_vmin_vmax_incompatible_with_default_norm(self):
         """Test if 'vmin' and 'vmax' are incompatible with the default 'norm', a Normalize norm is created."""
         default_plot_kwargs = {"cmap": plt.get_cmap("viridis"), "norm": BoundaryNorm(boundaries=[0, 0.5, 1], ncolors=2)}
         default_cbar_kwargs = {"ticks": [0, 1, 2], "ticklabels": ["A", "B", "C"]}
         user_plot_kwargs = {"vmin": 0, "vmax": 2}
-
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
@@ -496,7 +569,7 @@ class TestUpdatePlotCbarKwargs:
         assert cbar_kwargs["ticks"] == [3, 4, 5, 6]
         assert cbar_kwargs["ticklabels"] == ["D", "E", "F", "G"]
 
-    def test_valid_update_ticks_and_ticklabels(self):
+    def test_ticks_and_ticklabels_valid_update(self):
         """Test valid updates of 'ticks' and 'ticklabels."""
         default_plot_kwargs = {"cmap": plt.get_cmap("viridis"), "norm": BoundaryNorm(boundaries=[0, 0.5, 1], ncolors=2)}
         default_cbar_kwargs = {"ticks": [0, 1, 2], "ticklabels": ["A", "B", "C"]}
@@ -514,7 +587,7 @@ class TestUpdatePlotCbarKwargs:
         assert cbar_kwargs["ticks"] == [3, 4, 5, 6]
         assert cbar_kwargs["ticklabels"] == ["D", "E", "F", "G"]
 
-    def test_invalid_update_ticks_and_ticklabels(self):
+    def test_ticks_and_ticklabels_invalid_update(self):
         """Test error is raised if 'vmin' and 'vmax' are not accepted by the default_plot_kwargs 'norm'."""
         default_plot_kwargs = {"cmap": plt.get_cmap("viridis"), "norm": BoundaryNorm(boundaries=[0, 0.5, 1], ncolors=2)}
         default_cbar_kwargs = {"ticks": [0, 1, 2], "ticklabels": ["A", "B", "C"]}
@@ -558,5 +631,141 @@ class TestUpdatePlotCbarKwargs:
         )
         assert cbar_kwargs["extend"] == "both"
 
+    @pytest.mark.parametrize("cbar_dict", categorical_cbar_dicts)
+    def test_default_categorical_colorbar(self, cbar_dict):
+        """Test ticks and ticklabels are extracted from default categorical norm."""
+        # Define defaults
+        default_plot_kwargs, default_cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
+        # Retrieve updated plot_kwargs and cbar_kwargs
+        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+        )
+        assert default_plot_kwargs["norm"] == plot_kwargs["norm"]
+        assert default_cbar_kwargs["ticks"] == cbar_kwargs["ticks"]
+        assert default_cbar_kwargs["ticklabels"] == cbar_kwargs["ticklabels"]
 
-# get_plot_kwargs(name=None, user_plot_kwargs={}, user_cbar_kwargs={})
+    def test_user_categorical_norm_with_no_defaults(self):
+        """Test that user specified categorical norm is taken into account.
+
+        Check that tick and ticklabels are added to cbar_kwargs.
+        """
+        # Define defaults
+        default_plot_kwargs, default_cbar_kwargs = get_plot_cbar_kwargs(cbar_dict={})
+        # Define user updates
+        user_plot_kwargs = {"norm": ClassNorm(categories={0: "cat1", 2: "cat2"})}
+        # Retrieve updated plot_kwargs and cbar_kwargs
+        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+            user_plot_kwargs=user_plot_kwargs,
+        )
+        assert plot_kwargs["norm"] == user_plot_kwargs["norm"]
+        assert cbar_kwargs["ticks"] == [1.0, 2.5]
+        assert cbar_kwargs["ticklabels"] == ["cat1", "cat2"]
+
+    @pytest.mark.parametrize("cbar_dict", categorical_cbar_dicts)
+    def test_user_categorical_norm_with_defaults(self, cbar_dict):
+        # Define defaults
+        default_plot_kwargs, default_cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
+        # Define user updates
+        user_plot_kwargs = {"norm": ClassNorm(categories={4: "cat3", 5: "cat4"})}
+        # Retrieve updated plot_kwargs and cbar_kwargs
+        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+            user_plot_kwargs=user_plot_kwargs,
+        )
+        assert plot_kwargs["norm"] == user_plot_kwargs["norm"]
+        assert cbar_kwargs["ticks"] == [4.5, 5.5]
+        assert cbar_kwargs["ticks"] == default_cbar_kwargs["ticks"]
+        assert cbar_kwargs["ticklabels"] == ["cat3", "cat4"]
+
+    @pytest.mark.parametrize("cbar_dict", categorical_cbar_dicts)
+    @pytest.mark.parametrize("cmap", ["Spectral", plt.get_cmap("Spectral"), plt.get_cmap("Spectral", 256)])
+    def test_update_categorical_cmap(self, cbar_dict, cmap):
+        # Define defaults
+        default_plot_kwargs, default_cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
+        # Define user updates
+        user_plot_kwargs = {"cmap": cmap}
+        # Retrieve updated plot_kwargs and cbar_kwargs
+        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+            user_plot_kwargs=user_plot_kwargs,
+        )
+        assert plot_kwargs["cmap"].N == 2
+
+    @pytest.mark.parametrize("cbar_dict", categorical_cbar_dicts)
+    def test_update_categorical_ticks_and_ticklabels(self, cbar_dict):
+        # Define defaults
+        default_plot_kwargs, default_cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
+        # CASE1: Update ticklabels only
+        user_cbar_kwargs = {"ticklabels": ["new_name1", "new_name2"]}
+        # Retrieve updated plot_kwargs and cbar_kwargs
+        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+            user_cbar_kwargs=user_cbar_kwargs,
+        )
+        assert cbar_kwargs["ticklabels"] == ["new_name1", "new_name2"]
+        assert cbar_kwargs["ticks"] == default_cbar_kwargs["ticks"]
+
+        # CASE2: Update ticks only
+        user_cbar_kwargs = {"ticks": [0, 1]}
+        # Retrieve updated plot_kwargs and cbar_kwargs
+        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+            user_cbar_kwargs=user_cbar_kwargs,
+        )
+        assert cbar_kwargs["ticklabels"] == default_cbar_kwargs["ticklabels"]
+        assert cbar_kwargs["ticks"] == [0, 1]
+
+        # CASE3: Update ticks and ticklabels
+        user_cbar_kwargs = {"ticks": [-1, -2], "ticklabels": ["new_name1", "new_name2"]}
+        # Retrieve updated plot_kwargs and cbar_kwargs
+        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+            user_cbar_kwargs=user_cbar_kwargs,
+        )
+        assert cbar_kwargs["ticklabels"] == ["new_name1", "new_name2"]
+        assert cbar_kwargs["ticks"] == [-1, -2]
+
+        # CASE4: Bad ticklabels length
+        user_cbar_kwargs = {"ticklabels": ["new_name1", "new_name2", "excess_name"]}
+        with pytest.raises(ValueError):
+            update_plot_cbar_kwargs(
+                default_plot_kwargs=default_plot_kwargs,
+                default_cbar_kwargs=default_cbar_kwargs,
+                user_cbar_kwargs=user_cbar_kwargs,
+            )
+
+        # CASE5: Bad ticks length
+        user_cbar_kwargs = {"ticks": [0, 1, 2]}
+        with pytest.raises(ValueError):
+            update_plot_cbar_kwargs(
+                default_plot_kwargs=default_plot_kwargs,
+                default_cbar_kwargs=default_cbar_kwargs,
+                user_cbar_kwargs=user_cbar_kwargs,
+            )
+
+    @pytest.mark.parametrize("cbar_dict", categorical_cbar_dicts)
+    def test_update_categorical_norm_and_ticklabels(self, cbar_dict):
+        # Define defaults
+        default_plot_kwargs, default_cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
+        # Provide categorical norm and also ticks/ticklabels
+        # - Norm Ticks/Ticklabels are ignored  !
+        user_plot_kwargs = {"norm": ClassNorm(categories={4: "cat3", 5: "cat4"})}
+        user_cbar_kwargs = {"ticklabels": ["new_name1", "new_name2"], "ticks": [-2, -1]}
+        # Retrieve updated plot_kwargs and cbar_kwargs
+        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+            user_plot_kwargs=user_plot_kwargs,
+            user_cbar_kwargs=user_cbar_kwargs,
+        )
+        assert plot_kwargs["norm"] == user_plot_kwargs["norm"]
+        assert cbar_kwargs["ticklabels"] == ["new_name1", "new_name2"]  # overwrite ["cat3", "cat4"]
+        assert cbar_kwargs["ticks"] == [-2, -1]  # # overwrite [1.0, 2.5]
