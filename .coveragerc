@@ -4,6 +4,7 @@ source =
 omit =
 	*ci*
 	pycolorbar/tests/*
+	pycolorbar/_version.py
 
 [report]
 exclude_lines =
