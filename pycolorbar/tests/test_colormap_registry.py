@@ -38,7 +38,7 @@ from pycolorbar.settings.colormap_registry import ColormapRegistry
 from pycolorbar.utils.yaml import write_yaml
 
 
-@pytest.fixture()
+@pytest.fixture
 def colormap_registry():
     registry = ColormapRegistry.get_instance()
     registry.reset()
@@ -48,7 +48,7 @@ def colormap_registry():
     registry.reset()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_matplotlib_show(mocker):  # noqa
     mock = mocker.patch("matplotlib.pyplot.show")
     return mock  # RET504

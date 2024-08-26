@@ -472,7 +472,7 @@ def _resample_user_cmap_if_discrete_colorbar(user_plot_kwargs, default_plot_kwar
     if isinstance(user_plot_kwargs.get("norm", None), (BoundaryNorm, CategoryNorm, CategorizeNorm)):
         ncolors = user_plot_kwargs.get("norm", None).Ncmap
     # - CASE2: By default it's discrete
-    elif default_cbar_kwargs.get("ticklabels", None) is not None:  #
+    elif default_cbar_kwargs.get("ticklabels", None) is not None:
         ncolors = len(default_cbar_kwargs.get("ticklabels", []))
     else:
         return user_plot_kwargs
