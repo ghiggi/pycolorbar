@@ -40,10 +40,10 @@ category_colorbar:
     bad_color: gray
   norm:
     name: CategoryNorm
-    labels:
-      - Class 1
-      - Class 2
-      - Class 3
+    categories:
+      1: Class 1
+      2: Class 2
+      3: Class 3
 continuous_colorbar:
   cmap:
     name: Spectral_r

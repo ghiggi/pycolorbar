@@ -1,5 +1,11 @@
 # Changelog
 
+## Version v0.0.14 (2024/06/28)
+
+- Add CategorizeNorm
+- CategoryNorm now expects a {key: label} dictionary
+- Fix issue with users provided levels
+
 ## Version v0.0.11 (2024/03/28)
 
 - Fix ticklabels dynamic layout for BoundaryNorm and CategoryNorm

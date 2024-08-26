@@ -52,7 +52,7 @@ def colorbar_registry():
 @pytest.fixture()
 def mock_matplotlib_show(mocker):  # noqa
     mock = mocker.patch("matplotlib.pyplot.show")
-    return mock  # noqa
+    return mock
 
 
 @pytest.fixture()
