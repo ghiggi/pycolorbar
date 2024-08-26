@@ -267,11 +267,8 @@ class TestNormSettings:
             # Testing AsinhNorm settings
             {"name": "AsinhNorm"},
             {"name": "AsinhNorm", "linear_width": 1, "vmin": -10, "vmax": 10, "clip": False},
-            # Testing CategoryNorm settings with a valid list of labels
-            {"name": "CategoryNorm", "labels": ["low", "medium", "high"]},
-            {"name": "CategoryNorm", "labels": ["low", "medium", "high"], "first_value": 0},
-            # Testing ClassNorm settings
-            {"name": "ClassNorm", "categories": {0: "low", 1: "medium", 2: "high"}},
+            # Testing CategoryNorm settings
+            {"name": "CategoryNorm", "categories": {0: "low", 1: "medium", 2: "high"}},
             # Testing CategorizeNorm settings
             {"name": "CategorizeNorm", "boundaries": [0, 0.5, 1], "labels": ["low", "medium"]},
         ],
@@ -305,10 +302,6 @@ class TestNormSettings:
                 {"name": "SymLogNorm", "linthresh": -0.1, "linscale": 1, "vmin": 0.01, "vmax": 100},
                 "'linthresh' must be positive for 'SymLogNorm'",
             ),
-            # Invalid CategoryNorm settings due to empty labels list
-            ({"name": "CategoryNorm", "labels": []}, "'labels' must have at least two strings"),
-            ({"name": "CategoryNorm", "labels": ["one"]}, "'labels' must have at least two strings"),
-            ({"name": "CategoryNorm", "labels": [1, 2]}, "Input should be a valid string"),
             # Invalid CategorizeNorm
             # - labels size is not len(boundaries)-1
             (
@@ -322,20 +315,20 @@ class TestNormSettings:
             ),
             # - boundaries value type
             ({"name": "CategorizeNorm", "boundaries": ["invalid", "values", "dtype"], "labels": ["one", "two"]}, ""),
-            # Invalid ClassNorm
+            # Invalid CategoryNorm
             # - Keys are not integers
             (
-                {"name": "ClassNorm", "categories": {0.0: "a", 1.0: "b", 2.0: "c"}},
+                {"name": "CategoryNorm", "categories": {0.0: "a", 1.0: "b", 2.0: "c"}},
                 "All 'categories' dictionary keys must be integers.",
             ),
             # - Values are not strings
             (
-                {"name": "ClassNorm", "categories": {0: -9, 1: -9, 2: -9}},
+                {"name": "CategoryNorm", "categories": {0: -9, 1: -9, 2: -9}},
                 "All 'categories' dictionary values be strings",
             ),
             # - Only 1 category
             (
-                {"name": "ClassNorm", "categories": {0: "a"}},
+                {"name": "CategoryNorm", "categories": {0: "a"}},
                 "Expecting a 'categories' dictionary with at least 2 keys.",
             ),
             # Example of an invalid normalization type
@@ -353,7 +346,8 @@ class TestNormSettings:
         [
             ("Norm", {"unexpected": 123}),
             ("BoundaryNorm", {"boundaries": [0, 1], "extra": "not valid"}),
-            ("CategoryNorm", {"labels": ["a", "b"], "clip": True}),
+            ("CategoryNorm", {"categories": {0: "a", 1: "b"}, "extra": "not valid"}),
+            ("CategorizeNorm", {"boundaries": [0, 1, 2], "labels": ["a", "b"], "extra": "not valid"}),
             ("TwoSlopeNorm", {"vcenter": 0.5, "clip": True}),
             ("CenteredNorm", {"vmin": 0, "vmax": 1}),
         ],
@@ -367,7 +361,7 @@ class TestNormSettings:
         ("norm_name", "missing_param"),
         [
             ("BoundaryNorm", {}),
-            ("ClassNorm", {}),
+            ("CategoryNorm", {}),
             ("CategorizeNorm", {}),
             ("TwoSlopeNorm", {"vmin": 0}),
         ],
@@ -584,26 +578,26 @@ class TestValidateCbarDict:
         with pytest.raises(ValueError):
             validate_cbar_dict(cbar_dict, name="dummy")
 
-    def test_class_norm_consistency_checks(self):
-        """Test consistency checks for ClassNorm."""
+    def test_category_norm_consistency_checks(self):
+        """Test consistency checks for CategoryNorm."""
         # Check valid combinations
         cbar_dict = {
             "cmap": {"name": "viridis", "n": 3},
-            "norm": {"name": "ClassNorm", "categories": {0: "A", 1: "B", 2: "C"}},
+            "norm": {"name": "CategoryNorm", "categories": {0: "A", 1: "B", 2: "C"}},
             "cbar": {"extend": "neither"},
         }
         validate_cbar_dict(cbar_dict, name="dummy")
 
         cbar_dict = {
             "cmap": {"name": "viridis"},  # n not specified
-            "norm": {"name": "ClassNorm", "categories": {0: "A", 1: "B", 2: "C"}},
+            "norm": {"name": "CategoryNorm", "categories": {0: "A", 1: "B", 2: "C"}},
             "cbar": {"extend": "neither"},
         }
         validate_cbar_dict(cbar_dict, name="dummy")
 
         cbar_dict = {
             "cmap": {"name": ["viridis", "Spectral"], "n": [2, 2]},
-            "norm": {"name": "ClassNorm", "categories": {0: "A", 1: "B", 2: "C", 3: "D"}},
+            "norm": {"name": "CategoryNorm", "categories": {0: "A", 1: "B", 2: "C", 3: "D"}},
             "cbar": {"extend": "neither"},
         }
         validate_cbar_dict(cbar_dict, name="dummy")
@@ -611,33 +605,7 @@ class TestValidateCbarDict:
         # Check invalid combinations
         cbar_dict = {
             "cmap": {"name": "viridis", "n": 4},
-            "norm": {"name": "ClassNorm", "categories": {0: "A", 1: "B", 2: "C"}},
-            "cbar": {"extend": "neither"},
-        }
-        with pytest.raises(ValueError):
-            validate_cbar_dict(cbar_dict, name="dummy")
-
-    def test_categorical_norm_consistency_checks(self):
-        """Test consistency checks for CategoricalNorm and BoundaryNorm."""
-        # Check valid combinations
-        cbar_dict = {
-            "cmap": {"name": "viridis", "n": 3},
-            "norm": {"name": "CategoryNorm", "labels": ["A", "B", "C"]},
-            "cbar": {"extend": "neither"},
-        }
-        validate_cbar_dict(cbar_dict, name="dummy")
-
-        cbar_dict = {
-            "cmap": {"name": ["viridis", "Spectral"], "n": [2, 2]},
-            "norm": {"name": "CategoryNorm", "labels": ["A", "B", "C", "D"]},
-            "cbar": {"extend": "neither"},
-        }
-        validate_cbar_dict(cbar_dict, name="dummy")
-
-        # Check invalid combinations
-        cbar_dict = {
-            "cmap": {"name": "viridis", "n": 4},
-            "norm": {"name": "CategoryNorm", "labels": ["A", "B", "C"]},
+            "norm": {"name": "CategoryNorm", "categories": {0: "A", 1: "B", 2: "C"}},
             "cbar": {"extend": "neither"},
         }
         with pytest.raises(ValueError):

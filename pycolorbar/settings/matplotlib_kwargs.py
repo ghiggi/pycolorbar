@@ -26,7 +26,6 @@
 # -----------------------------------------------------------------------------.
 """Define functions to retrieve the plotting arguments."""
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import (
@@ -44,7 +43,7 @@ from matplotlib.colors import (
 )
 
 import pycolorbar
-from pycolorbar.norm import CategorizeNorm, ClassNorm, check_boundaries
+from pycolorbar.norm import CategorizeNorm, CategoryNorm, check_boundaries
 
 
 def _create_combined_cmap(names, n=None, new_n=None):
@@ -105,16 +104,6 @@ def get_cmap(cbar_dict):
 
 
 ####-------------------------------------------------------------------------------------------.
-#### CategoryNorm
-def create_category_norm(labels, first_value=0):
-    """Define a BoundaryNorm that deal with categorical data."""
-    n_labels = len(labels)
-    norm_bins = np.arange(first_value, n_labels + first_value + 1)
-    # norm_bins = np.arange(first_value - 0.01, n_labels + first_value) + 0.5
-    return mpl.colors.BoundaryNorm(boundaries=norm_bins, ncolors=n_labels)
-
-
-####-------------------------------------------------------------------------------------------.
 #### Norm utility
 
 
@@ -130,9 +119,8 @@ def get_norm_function(name):
         "SymLogNorm": SymLogNorm,
         "PowerNorm": PowerNorm,
         "AsinhNorm": AsinhNorm,
-        "CategoryNorm": create_category_norm,
         "CategorizeNorm": CategorizeNorm,
-        "ClassNorm": ClassNorm,
+        "CategoryNorm": CategoryNorm,
     }
     return norm_functions[name]
 
@@ -279,31 +267,21 @@ def _finalize_ticks_arguments(cbar_kwargs, cbar_dict, norm):
 
     # Retrieve discrete norm information
     boundaries = norm_settings.get("boundaries", None)
-    labels = norm_settings.get("labels", None)
     ticks = cbar_kwargs.get("ticks", None)
     ticklabels = cbar_kwargs.get("ticklabels", None)
 
+    # Define ticks for Categorical Colorbars
+    if isinstance(norm, (CategoryNorm, CategorizeNorm)):
+        ticks = norm.ticks.copy()
+        ticklabels = norm.ticklabels.copy()
     # Define ticks for Discrete Colorbar
     # - TODO: DiscretizeNorm --> Use ticks, ticklabels class attributes
-    if norm_name == "BoundaryNorm":
+    elif norm_name == "BoundaryNorm":
         if ticks is None and ticklabels is None:
             ticks = boundaries
         if ticklabels is None:
             # Generate color level strings with correct amount of decimal places
             ticklabels = _dynamic_formatting_floats(ticks)  # [f"{tick:.1f}" for tick in ticks] # for 0.1 probability
-
-    # Define ticks for Categorical Colorbars
-    elif isinstance(norm, (ClassNorm, CategorizeNorm)):
-        ticks = norm.ticks.copy()
-        ticklabels = norm.ticklabels.copy()
-
-    # Define ticks for OLD Categorical Colorbars
-    # TODO: REMOVE
-    elif norm_name == "CategoryNorm":  # Categorical Colorbar
-        ticks = norm.boundaries[:-1] + 0.5
-        # Define tick formatter and ticks
-        fmt = mpl.ticker.FuncFormatter(lambda x, pos=None: labels[norm(x)])  # noqa
-        ticklabels = [fmt(tick) for tick in ticks]
 
     # Format back to list
     cbar_kwargs["ticks"] = list(ticks)
@@ -368,7 +346,7 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
         _remove_defaults_ticks_and_ticklabels(default_cbar_kwargs=default_cbar_kwargs)
 
     # Deal with new user-provided categorical colorbar via categorical norms
-    if isinstance(user_plot_kwargs.get("norm", None), (ClassNorm, CategorizeNorm)):
+    if isinstance(user_plot_kwargs.get("norm", None), (CategoryNorm, CategorizeNorm)):
         if user_cbar_kwargs.get("ticks", None) is None:
             user_cbar_kwargs["ticks"] = list(user_plot_kwargs.get("norm", None).ticks.copy())
         if user_cbar_kwargs.get("ticklabels", None) is None:
@@ -491,7 +469,7 @@ def _resample_user_cmap_if_discrete_colorbar(user_plot_kwargs, default_plot_kwar
     """Resample colormap for categorical colorbars."""
     # Determine the number of colors required
     # - CASE1: The user specified is discrete (take priority)
-    if isinstance(user_plot_kwargs.get("norm", None), (BoundaryNorm, ClassNorm, CategorizeNorm)):
+    if isinstance(user_plot_kwargs.get("norm", None), (BoundaryNorm, CategoryNorm, CategorizeNorm)):
         ncolors = user_plot_kwargs.get("norm", None).Ncmap
     # - CASE2: By default it's discrete
     elif default_cbar_kwargs.get("ticklabels", None) is not None:  #
@@ -565,7 +543,7 @@ def _update_default_norm_using_vmin_and_vmax(user_plot_kwargs, default_plot_kwar
     vmax = user_plot_kwargs.get("vmax", None)
     if vmin is not None or vmax is not None:
         # If the norm does not accepts vmin or vmax, set a Normalize(vmin, vmax) norm
-        # - BoundaryNorm includes class ClassNorm and CategorizeNorm
+        # - BoundaryNorm includes class CategoryNorm and CategorizeNorm
         if isinstance(default_plot_kwargs["norm"], (BoundaryNorm, CenteredNorm)):
             default_norm = default_plot_kwargs["norm"]
             norm_class = type(default_norm)

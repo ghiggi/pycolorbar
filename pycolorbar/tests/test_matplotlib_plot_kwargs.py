@@ -44,7 +44,7 @@ from matplotlib.colors import (
     TwoSlopeNorm,
 )
 
-from pycolorbar.norm import CategorizeNorm, ClassNorm
+from pycolorbar.norm import CategorizeNorm, CategoryNorm
 from pycolorbar.settings.matplotlib_kwargs import (
     get_cmap,
     get_default_cbar_kwargs,
@@ -68,7 +68,7 @@ def basic_cbar_dict():
 
 
 categorical_cbar_dicts = [
-    {"cmap": {"name": "Set1"}, "norm": {"name": "ClassNorm", "categories": {0: "cat1", 2: "cat2"}}},
+    {"cmap": {"name": "Set1"}, "norm": {"name": "CategoryNorm", "categories": {0: "cat1", 2: "cat2"}}},
     {
         "cmap": {"name": "Set1"},
         "norm": {"name": "CategorizeNorm", "boundaries": [0, 0.5, 0.75], "labels": ["cat1", "cat2"]},
@@ -171,8 +171,7 @@ class TestGetCmapFromCbarDict:
         ("BoundaryNorm", BoundaryNorm, {"boundaries": [0, 0.5, 1], "ncolors": 2}),
         ("BoundaryNorm", BoundaryNorm, {"boundaries": [0, 0.5, 1], "ncolors": 3, "extend": "vmin"}),
         ("BoundaryNorm", BoundaryNorm, {"boundaries": [0, 0.5, 1], "ncolors": 4, "extend": "both"}),
-        ("CategoryNorm", BoundaryNorm, {"labels": ["a", "b", "c"]}),
-        ("ClassNorm", ClassNorm, {"categories": {1: "a", 2: "b"}}),
+        ("CategoryNorm", CategoryNorm, {"categories": {1: "a", 2: "b"}}),
         ("CategorizeNorm", CategorizeNorm, {"boundaries": [0, 0.5, 1], "labels": ["a", "b"]}),
         ("TwoSlopeNorm", TwoSlopeNorm, {"vmin": 0, "vcenter": 0.5, "vmax": 1}),
         ("CenteredNorm", CenteredNorm, {"vcenter": 0.5}),
@@ -292,9 +291,8 @@ class TestPlotCbarKwargs:
 
     def test_custom_categorical_colorbar(self):
         """Test behaviour for a categorical colorbar and addition of ticklabels in cbar_kwargs."""
-        # TODO: REMOVE TEST
         # Define cbar_dict
-        cbar_dict = {"cmap": {"name": "Set1"}, "norm": {"name": "CategoryNorm", "labels": ["one", "two"]}}
+        cbar_dict = {"cmap": {"name": "Set1"}, "norm": {"name": "CategoryNorm", "categories": {0: "one", 1: "two"}}}
         # Retrieve plot_kwargs and cbar_kwargs
         plot_kwargs, cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
 
@@ -322,17 +320,17 @@ class TestPlotCbarKwargs:
         assert isinstance(plot_kwargs["norm"], CategorizeNorm)
         assert isinstance(plot_kwargs["norm"], BoundaryNorm)
         # Check ticks and ticklabels are extracted from norm
-        assert cbar_kwargs["ticks"] == [0.25, 0.625]
+        np.testing.assert_allclose(cbar_kwargs["ticks"], [0.25, 0.625])
         assert cbar_kwargs["ticklabels"] == ["cat1", "cat2"]
 
     def test_category_norm(self):
-        """Test ticks and ticklabels are extracted from ClassNorm."""
+        """Test ticks and ticklabels are extracted from CategoryNorm."""
         # Define cbar_dict
-        cbar_dict = {"cmap": {"name": "Set1"}, "norm": {"name": "ClassNorm", "categories": {0: "cat1", 2: "cat2"}}}
+        cbar_dict = {"cmap": {"name": "Set1"}, "norm": {"name": "CategoryNorm", "categories": {0: "cat1", 2: "cat2"}}}
         # Retrieve plot_kwargs and cbar_kwargs
         plot_kwargs, cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
         # Check norm instance
-        assert isinstance(plot_kwargs["norm"], ClassNorm)
+        assert isinstance(plot_kwargs["norm"], CategoryNorm)
         assert isinstance(plot_kwargs["norm"], BoundaryNorm)
         # Check ticks and ticklabels are extracted from norm
         assert cbar_kwargs["ticks"] == [1.0, 2.5]
@@ -408,7 +406,7 @@ class TestUpdatePlotCbarKwargs:
         # Define user updates
         user_plot_kwargs = {
             "cmap": "Spectral",
-            "norm": ClassNorm(categories={0: "cat1", 2: "cat2"}),
+            "norm": CategoryNorm(categories={0: "cat1", 2: "cat2"}),
         }
         # Retrieve updated plot_kwargs and cbar_kwargs
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
@@ -422,7 +420,7 @@ class TestUpdatePlotCbarKwargs:
         # Raise error if cmap too short
         user_plot_kwargs = {
             "cmap": ["red", "yellow"],
-            "norm": ClassNorm(categories={0: "cat1", 1: "cat2", 2: "cat3"}),
+            "norm": CategoryNorm(categories={0: "cat1", 1: "cat2", 2: "cat3"}),
         }
 
         # Retrieve updated plot_kwargs and cbar_kwargs
@@ -689,7 +687,7 @@ class TestUpdatePlotCbarKwargs:
         # Define defaults
         default_plot_kwargs, default_cbar_kwargs = get_plot_cbar_kwargs(cbar_dict={})
         # Define user updates
-        user_plot_kwargs = {"norm": ClassNorm(categories={0: "cat1", 2: "cat2"})}
+        user_plot_kwargs = {"norm": CategoryNorm(categories={0: "cat1", 2: "cat2"})}
         # Retrieve updated plot_kwargs and cbar_kwargs
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
@@ -705,7 +703,7 @@ class TestUpdatePlotCbarKwargs:
         # Define defaults
         default_plot_kwargs, default_cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
         # Define user updates
-        user_plot_kwargs = {"norm": ClassNorm(categories={4: "cat3", 5: "cat4"})}
+        user_plot_kwargs = {"norm": CategoryNorm(categories={4: "cat3", 5: "cat4"})}
         # Retrieve updated plot_kwargs and cbar_kwargs
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
@@ -793,7 +791,7 @@ class TestUpdatePlotCbarKwargs:
         default_plot_kwargs, default_cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
         # Provide categorical norm and also ticks/ticklabels
         # - Norm Ticks/Ticklabels are ignored  !
-        user_plot_kwargs = {"norm": ClassNorm(categories={4: "cat3", 5: "cat4"})}
+        user_plot_kwargs = {"norm": CategoryNorm(categories={4: "cat3", 5: "cat4"})}
         user_cbar_kwargs = {"ticklabels": ["new_name1", "new_name2"], "ticks": [-2, -1]}
         # Retrieve updated plot_kwargs and cbar_kwargs
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(

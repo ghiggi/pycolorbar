@@ -61,16 +61,15 @@ def check_categories(categories):
     return categories
 
 
-class ClassNorm(BoundaryNorm):  # BoundaryNorm instance required my matplotlib !
+class CategoryNorm(BoundaryNorm):  # BoundaryNorm instance required my matplotlib !
     """Generate a colormap index based on a category dictionary.
 
-    Similarly to `BoundaryNorm`, `ClassNorm` maps values to integers
+    Similarly to `BoundaryNorm`, `CategoryNorm` maps values to integers
     instead of to the interval 0-1.
-
     """
 
     def __init__(self, categories):
-        """Create a ClassNorm instance.
+        """Create a CategoryNorm instance.
 
         Parameters
         ----------
@@ -121,6 +120,7 @@ class CategorizeNorm(BoundaryNorm):  # BoundaryNorm instance required my matplot
         if n_categories != expected_n:
             raise ValueError(f"'labels' size must be {expected_n} given the size of 'boundaries'.")
         boundaries = np.array(boundaries)
+        boundaries[-1] = boundaries[-1] + 1e-9  # add infinitesimal threshold to include last boundary value
         super().__init__(boundaries=boundaries, ncolors=n_categories, clip=False)
         self.ticks = boundaries[:-1] + np.diff(boundaries) / 2
         self.ticklabels = np.array(labels)

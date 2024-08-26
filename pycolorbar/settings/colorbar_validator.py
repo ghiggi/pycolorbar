@@ -200,49 +200,19 @@ class NormalizeSettings(BaseModel):
 class CategoryNormSettings(BaseModel):
     """Pydantic model for ``CategoryNorm`` settings."""
 
-    labels: list[str]
-    first_value: Optional[int] = 0
-
-    @field_validator("labels")
-    def validate_labels(cls, v):
-        """Validate ``labels`` for ``CategoryNorm``."""
-        if v is not None:
-            assert isinstance(v, list), "'labels' must be a list."
-            assert len(v) >= 2, "'labels' must have at least two strings"
-            assert all(isinstance(label, str) for label in v), "'labels' must be a list of strings."
-        return v
-
-    @field_validator("first_value")
-    def validate_first_value(cls, v):
-        """Validate ``first_value`` for ``CategoryNorm``."""
-        if v is not None:
-            assert isinstance(v, int), "'first_value' must be an integer."
-        return v
-
-    @model_validator(mode="before")
-    def check_valid_args(cls, values):
-        """Check for no excess parameters in ``CategoryNorm``."""
-        valid_args = {"labels", "first_value"}
-        _check_norm_invalid_args(norm_name="CategoryNorm", args=values.keys(), valid_args=valid_args)
-        return values
-
-
-class ClassNormSettings(BaseModel):
-    """Pydantic model for ``ClassNorm`` settings."""
-
     categories: dict = Field(..., description="A dictionary encoding values and category labels.")
 
     @field_validator("categories")
     def validate_categories(cls, v):
-        """Validate ``categories`` dictionary for ``ClassNorm``."""
+        """Validate ``categories`` dictionary for ``CategoryNorm``."""
         categories = check_categories(categories=v)
         return categories
 
     @model_validator(mode="before")
     def check_valid_args(cls, values):
-        """Check for no excess parameters in ``ClassNorm``."""
+        """Check for no excess parameters in ``CategoryNorm``."""
         valid_args = {"categories"}
-        _check_norm_invalid_args(norm_name="ClassNorm", args=values.keys(), valid_args=valid_args)
+        _check_norm_invalid_args(norm_name="CategoryNorm", args=values.keys(), valid_args=valid_args)
         return values
 
 
@@ -595,7 +565,6 @@ def _check_valid_norm_name(name):
         "PowerNorm",
         "AsinhNorm",
         "CategoryNorm",
-        "ClassNorm",
         "CategorizeNorm",
     ]
     if name not in valid_names:
@@ -620,7 +589,6 @@ def check_norm_settings(norm_settings):
         "PowerNorm": PowerNormSettings,
         "AsinhNorm": AsinhNormSettings,
         "CategoryNorm": CategoryNormSettings,
-        "ClassNorm": ClassNormSettings,
         "CategorizeNorm": CategorizeNormSettings,
     }
     # Retrieve NormSettings Validator
@@ -727,13 +695,13 @@ def resolve_colorbar_reference(cbar_dict, name, checked_references=None):
 def _check_discrete_norm_cmap_settings(cmap_settings, norm_settings):
     """Validate or set the 'n' default value for discrete colormaps."""
     norm = norm_settings.get("name", "Norm")
-    if norm not in ["CategoryNorm", "BoundaryNorm", "ClassNorm", "CategorizeNorm"]:
+    if norm not in ["BoundaryNorm", "CategoryNorm", "CategorizeNorm"]:
         return cmap_settings, norm_settings
 
     # Retrieve expected number of colors
-    if norm in ["CategoryNorm", "CategorizeNorm"]:
+    if norm in ["CategorizeNorm"]:
         expected_ncolors = len(norm_settings["labels"])
-    elif norm == "ClassNorm":
+    elif norm == "CategoryNorm":
         expected_ncolors = len(norm_settings["categories"])
     else:  # "BoundaryNorm"
         expected_ncolors = _get_boundary_norm_expected_ncolors(norm_settings=norm_settings)

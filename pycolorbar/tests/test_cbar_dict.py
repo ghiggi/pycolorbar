@@ -111,7 +111,7 @@ TEST_CBAR_DICT = {
         },
         "norm": {
             "name": "CategoryNorm",
-            "labels": ["Clear Sky", "Liquid", "SC Liquid", "Mixed", "Ice", "Unknown"],
+            "categories": {0: "Clear Sky", 1: "Liquid", 2: "SC Liquid", 3: "Mixed", 4: "Ice", 5: "Unknown"},
         },
     },
     "TWO_CMAP_CBAR": {
