@@ -36,9 +36,7 @@ from pycolorbar.utils.yaml import read_yaml, write_yaml
 
 def is_single_colorbar_settings(dictionary):
     """Determine if a dictionary is a single colorbar settings."""
-    if np.any(np.isin(["cmap", "norm", "cbar", "auxiliary"], list(dictionary))):
-        return True
-    return False
+    return np.any(np.isin(["cmap", "norm", "cbar", "auxiliary"], list(dictionary)))
 
 
 def read_cbar_dict(filepath, name=None, validate=False):

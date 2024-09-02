@@ -54,7 +54,7 @@ from pycolorbar.settings.matplotlib_kwargs import (
 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def basic_cbar_dict():
     """Provides a basic colorbar dictionary for testing."""
     return {
@@ -338,11 +338,11 @@ class TestPlotCbarKwargs:
 
 
 class TestUpdatePlotCbarKwargs:
-    @pytest.fixture()
+    @pytest.fixture
     def default_plot_kwargs(self):
         return {"cmap": plt.get_cmap("viridis"), "norm": Normalize(vmin=0, vmax=1)}
 
-    @pytest.fixture()
+    @pytest.fixture
     def default_cbar_kwargs(self):
         return {"extend": "neither", "label": "Default Label"}
 
@@ -388,7 +388,7 @@ class TestUpdatePlotCbarKwargs:
         # Assert that the others default_cbar_kwargs are kept
         assert "extend" in cbar_kwargs
 
-    def test_user_cmap_resampled_for_categorical_colorbar_with_defaults(self, default_plot_kwargs, default_cbar_kwargs):
+    def test_user_ticklabels_does_not_trigger_resampling_colormap(self, default_plot_kwargs, default_cbar_kwargs):
         """Test resampling user-provided colormap for categorical and discrete colorbar."""
         user_plot_kwargs = {"cmap": plt.get_cmap("Spectral", 256)}
         default_cbar_kwargs["ticklabels"] = ["low", "medium", "high"]
@@ -397,7 +397,7 @@ class TestUpdatePlotCbarKwargs:
             default_cbar_kwargs=default_cbar_kwargs,
             user_plot_kwargs=user_plot_kwargs,
         )
-        assert plot_kwargs["cmap"].N == 3
+        assert plot_kwargs["cmap"].N == 256
 
     def test_user_cmap_resampled_for_categorical_colorbar_with_no_defaults(self):
         """Test that user specified cmap is resampled."""
@@ -694,6 +694,7 @@ class TestUpdatePlotCbarKwargs:
             default_cbar_kwargs=default_cbar_kwargs,
             user_plot_kwargs=user_plot_kwargs,
         )
+        assert plot_kwargs["cmap"].N == 2  # cmap resampled
         assert plot_kwargs["norm"] == user_plot_kwargs["norm"]
         assert cbar_kwargs["ticks"] == [1.0, 2.5]
         assert cbar_kwargs["ticklabels"] == ["cat1", "cat2"]
@@ -703,13 +704,17 @@ class TestUpdatePlotCbarKwargs:
         # Define defaults
         default_plot_kwargs, default_cbar_kwargs = get_plot_cbar_kwargs(cbar_dict)
         # Define user updates
-        user_plot_kwargs = {"norm": CategoryNorm(categories={4: "cat3", 5: "cat4"})}
+        user_plot_kwargs = {
+            "norm": CategoryNorm(categories={4: "cat3", 5: "cat4"}),
+            "cmap": plt.get_cmap("Spectral", 256),
+        }
         # Retrieve updated plot_kwargs and cbar_kwargs
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
             user_plot_kwargs=user_plot_kwargs,
         )
+        assert plot_kwargs["cmap"].N == 2  # cmap resampled
         assert plot_kwargs["norm"] == user_plot_kwargs["norm"]
         assert cbar_kwargs["ticks"] == [4.5, 5.5]
         assert cbar_kwargs["ticks"] == default_cbar_kwargs["ticks"]

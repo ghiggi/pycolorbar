@@ -317,6 +317,7 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
     # Determine flags for user arguments
     user_specified_levels = user_plot_kwargs.get("levels", None) is not None
     user_specified_norm = user_plot_kwargs.get("norm", None) is not None
+
     # -------------------------------------------------------------------------------
     # If norm is not specified in user_plot_kwargs
     # - Update vmin and vmax if specified in user_plot_kwargs
@@ -346,21 +347,11 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
         _remove_defaults_ticks_and_ticklabels(default_cbar_kwargs=default_cbar_kwargs)
 
     # Deal with new user-provided categorical colorbar via categorical norms
-    if isinstance(user_plot_kwargs.get("norm", None), (CategoryNorm, CategorizeNorm)):
+    if user_specified_norm and isinstance(user_plot_kwargs.get("norm"), (CategoryNorm, CategorizeNorm)):
         if user_cbar_kwargs.get("ticks", None) is None:
-            user_cbar_kwargs["ticks"] = list(user_plot_kwargs.get("norm", None).ticks.copy())
+            user_cbar_kwargs["ticks"] = list(user_plot_kwargs["norm"].ticks.copy())
         if user_cbar_kwargs.get("ticklabels", None) is None:
-            user_cbar_kwargs["ticklabels"] = list(user_plot_kwargs.get("norm", None).ticklabels.copy())
-
-    # Deal with categorical/discrete labeled colorbar (when user provides a new cmap)
-    # - If user provided a colormap, resample such colormap if necessary
-    # - If user did not provide a colormap, resample the default if necessary
-    # --> The resampled cmap is assigned to user_plot_kwargs
-    user_plot_kwargs = _resample_user_cmap_if_discrete_colorbar(
-        user_plot_kwargs=user_plot_kwargs,
-        default_plot_kwargs=default_plot_kwargs,
-        default_cbar_kwargs=default_cbar_kwargs,
-    )
+            user_cbar_kwargs["ticklabels"] = list(user_plot_kwargs["norm"].ticklabels.copy())
 
     # Deal with xarray user_plot_kwargs 'levels' option
     # - Define a BoundaryNorm and resample the cmap accordingly
@@ -370,6 +361,15 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
             user_plot_kwargs=user_plot_kwargs,
             user_cbar_kwargs=user_cbar_kwargs,
         )
+
+    # Deal with categorical/discrete labeled colorbar (when user provides a new cmap)
+    # - If user provided a colormap, resample such colormap if necessary
+    # - If user did not provide a colormap, resample the default if necessary
+    # --> The resampled cmap is assigned to user_plot_kwargs
+    user_plot_kwargs = _resample_user_cmap_if_discrete_colorbar(
+        user_plot_kwargs=user_plot_kwargs,
+        default_plot_kwargs=default_plot_kwargs,
+    )
 
     # Drop vmin and vmax from user_plot_kwargs (not accepted by i.e. PolyCollection)
     # - This avoid also downstream bugs ...
@@ -465,21 +465,21 @@ def _resample_cmap(cmap, ncolors):
     return cmap
 
 
-def _resample_user_cmap_if_discrete_colorbar(user_plot_kwargs, default_plot_kwargs, default_cbar_kwargs):
+def _resample_user_cmap_if_discrete_colorbar(user_plot_kwargs, default_plot_kwargs):
     """Resample colormap for categorical colorbars."""
     # Determine the number of colors required
-    # - CASE1: The user specified is discrete (take priority)
+    # - CASE1: The user specified norm is discrete (take priority)
     if isinstance(user_plot_kwargs.get("norm", None), (BoundaryNorm, CategoryNorm, CategorizeNorm)):
-        ncolors = user_plot_kwargs.get("norm", None).Ncmap
-    # - CASE2: By default it's discrete
-    elif default_cbar_kwargs.get("ticklabels", None) is not None:  #
-        ncolors = len(default_cbar_kwargs.get("ticklabels", []))
+        ncolors = user_plot_kwargs["norm"].Ncmap
+    # - CASE2: The default specified norm is discrete
+    elif isinstance(default_plot_kwargs.get("norm", None), (BoundaryNorm, CategoryNorm, CategorizeNorm)):
+        ncolors = default_plot_kwargs["norm"].Ncmap
     else:
         return user_plot_kwargs
     # Retrieve colormap
     cmap = _retrieve_cmap(user_plot_kwargs=user_plot_kwargs, default_plot_kwargs=default_plot_kwargs)
     # Resample the cmap if necessary
-    cmap = _resample_cmap(cmap, ncolors)
+    cmap = _resample_cmap(cmap.copy(), ncolors)
     # Add resampled cmap to user_plot_kwargs
     user_plot_kwargs["cmap"] = cmap
     return user_plot_kwargs
@@ -512,9 +512,9 @@ def _check_levels_validity(levels, vmin, vmax):
 def _process_levels_argument(default_plot_kwargs, user_plot_kwargs, user_cbar_kwargs):
     """It parse the xarray 'levels' argument to resample the colormap and define a BoundaryNorm."""
     # Get user settings
-    vmin = user_plot_kwargs.get("vmin", None)
-    vmax = user_plot_kwargs.get("vmax", None)
-    levels = user_plot_kwargs["levels"]
+    vmin = user_plot_kwargs.pop("vmin", None)
+    vmax = user_plot_kwargs.pop("vmax", None)
+    levels = user_plot_kwargs.pop("levels", None)
     # Retrieve boundaries from levels
     boundaries = _check_levels_validity(levels, vmin=vmin, vmax=vmax)
     # Define number of colors
@@ -530,9 +530,6 @@ def _process_levels_argument(default_plot_kwargs, user_plot_kwargs, user_cbar_kw
     # Add ticks and ticklabels to user_cbar_kwargs
     user_cbar_kwargs["ticks"] = boundaries
     user_cbar_kwargs["ticklabels"] = boundaries
-    # Remove "levels" from user and default kwargs
-    _ = user_plot_kwargs.pop("levels", None)
-    _ = default_plot_kwargs.pop("levels", None)
     # Return
     return user_plot_kwargs, user_cbar_kwargs
 

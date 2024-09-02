@@ -182,6 +182,7 @@ ignore = [
     "PLR2004",
     "PLR0912",
     "PLR0915",
+    "PLR1704",
 ]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
