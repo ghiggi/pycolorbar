@@ -155,7 +155,7 @@ class TestColormapSegmentData:
         """Validate a colormap dictionary with valid segmentdata for a LinearSegmentedColormap."""
         # Tuple
         segment_data = {
-            "red": [(0.0, 0.0, 0.0), (0.5, 1.0, 1.0), (1.0, 1.0, 1.0)],
+            "red": [(np.float64(0.0), 0.0, 0.0), (0.5, 1.0, 1.0), (1.0, 1.0, 1.0)],
             "green": [(0.0, 0.0, 0.0), (0.25, 0.0, 0.0), (0.75, 1.0, 1.0), (1.0, 1.0, 1.0)],
             "blue": [(0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 1.0, 1.0)],
         }
@@ -166,6 +166,13 @@ class TestColormapSegmentData:
         }
         validated_dict = validate_cmap_dict(cmap_dict)
         assert isinstance(validated_dict, dict)
+        assert isinstance(validated_dict["segmentdata"], dict)
+        assert isinstance(validated_dict["segmentdata"]["red"], list)
+        assert isinstance(validated_dict["segmentdata"]["red"][0], list)  # Ensure converted tuple to list
+        assert not isinstance(
+            validated_dict["segmentdata"]["red"][0][0],
+            np.float64,
+        )  # Ensure converted np.float to float
 
         # List
         segment_data = {
@@ -180,6 +187,8 @@ class TestColormapSegmentData:
         }
         validated_dict = validate_cmap_dict(cmap_dict)
         assert isinstance(validated_dict, dict)
+        assert isinstance(validated_dict["segmentdata"]["red"], list)
+        assert isinstance(validated_dict["segmentdata"]["red"][0], list)
 
     def test_invalid_segmentdata(self):
         """Test segmentdata validation with non-monotonically increasing values."""
@@ -212,6 +221,36 @@ class TestColormapSegmentData:
         with pytest.raises(ValidationError) as excinfo:
             validate_cmap_dict(cmap_dict)
         assert "a tuple of three floats" in str(excinfo.value)
+
+        # Missing Blue Channel
+        segment_data = {
+            "red": [[0.0, 0.0, 0.0], [0.5, 1.0, 1.0], [1.0, 1.0, 1.0]],
+            "green": [[0.0, 0.0, 0.0], [0.25, 0.0, 0.0], [0.75, 1.0, 1.0], [1.0, 1.0, 1.0]],
+        }
+        cmap_dict = {
+            "colormap_type": "LinearSegmentedColormap",
+            "color_space": "rgb",
+            "segmentdata": segment_data,
+        }
+        with pytest.raises(ValidationError) as excinfo:
+            validate_cmap_dict(cmap_dict)
+        assert "must contain keys: ['red', 'green', 'blue']" in str(excinfo.value)
+
+        # Excess key
+        segment_data = {
+            "red": [[0.0, 0.0, 0.0], [0.5, 1.0, 1.0], [1.0, 1.0, 1.0]],
+            "green": [[0.0, 0.0, 0.0], [0.25, 0.0, 0.0], [0.75, 1.0, 1.0], [1.0, 1.0, 1.0]],
+            "blue": [[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [1.0, 1.0, 1.0]],
+            "excess": ["dummy"],
+        }
+        cmap_dict = {
+            "colormap_type": "LinearSegmentedColormap",
+            "color_space": "rgb",
+            "segmentdata": segment_data,
+        }
+        with pytest.raises(ValidationError) as excinfo:
+            validate_cmap_dict(cmap_dict)
+        assert "can contain only keys: ['red', 'green', 'blue', 'alpha']" in str(excinfo.value)
 
 
 class TestColormapType:
@@ -259,6 +298,34 @@ def test_colormap_strict_arguments():
         "colormap_type": "ListedColormap",
         "color_space": "rgb",
         "color_palette": np.array([[0, 0, 0], [1, 1, 1]]),
+    }
+    with pytest.raises(ValidationError):
+        validate_cmap_dict(cmap_dict)
+
+
+def test_colormap_colors_uniquely_specified():
+    """Test that color_palette and segmentdata are uniquely specified."""
+    # Test when no color_palette and no segmentdata are specified
+    cmap_dict = {
+        "colormap_type": "ListedColormap",
+        "color_space": "rgb",
+        "color_palette": None,
+        "segmentdata": None,
+    }
+    with pytest.raises(ValidationError):
+        validate_cmap_dict(cmap_dict)
+
+    # Test when color_palette and segmentdata are both specified
+    segment_data = {
+        "red": [[0.0, 0.0, 0.0], [0.5, 1.0, 1.0], [1.0, 1.0, 1.0]],
+        "green": [[0.0, 0.0, 0.0], [0.25, 0.0, 0.0], [0.75, 1.0, 1.0], [1.0, 1.0, 1.0]],
+        "blue": [[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [1.0, 1.0, 1.0]],
+    }
+    cmap_dict = {
+        "colormap_type": "LinearSegmentedColormap",
+        "color_space": "rgb",
+        "color_palette": np.array([[0, 0, 0], [1, 1, 1]]),
+        "segmentdata": segment_data,
     }
     with pytest.raises(ValidationError):
         validate_cmap_dict(cmap_dict)

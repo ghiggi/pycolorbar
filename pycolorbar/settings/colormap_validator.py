@@ -29,7 +29,7 @@ import re
 from typing import Optional, Union
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from pycolorbar.colors.colors_io import check_valid_external_data_range, check_valid_internal_data_range
 from pycolorbar.utils.mpl import get_mpl_named_colors
@@ -154,13 +154,6 @@ class ColormapValidator(BaseModel):
             assert len(v) > 0, "The 'color_palette' array must not be empty."
             assert len(v) > 1, "The 'color_palette' array must have at least 2 colors."
             validate_colors_values(v, color_space=color_space, decoded_colors=values.data.get("colors_decoded"))
-            # Check segmentadata is not specified
-            assert values.data.get("segmentdata", None) is None, "Either specify 'color_palette' or 'segmentdata'"
-        # Check either color_palette or segmentdata are specified
-        if v is None:
-            assert (
-                values.data.get("segmentdata", None) is not None
-            ), "'color_palette' must be provided if 'segmentdata' is not specified"
         return v
 
     @field_validator("segmentdata")
@@ -200,6 +193,19 @@ class ColormapValidator(BaseModel):
             # - Allow for all color spaces !
 
         return v
+
+    @model_validator(mode="after")
+    def validate_colors_inputs(self):
+        """Validate ``segmentdata`` and ``color_palette``."""
+        segmentdata = self.segmentdata
+        color_palette = self.color_palette
+        # Check segmentadata or color_palette is specified
+        if segmentdata is None and color_palette is None:
+            raise ValueError("Specify 'color_palette' or 'segmentdata'")
+        # Check only one between segmentadata and color_palette is specified
+        if segmentdata is not None and color_palette is not None:
+            raise ValueError("Either specify 'color_palette' or 'segmentdata'")
+        return self
 
 
 def _set_default_n(cmap_dict):

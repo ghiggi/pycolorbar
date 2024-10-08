@@ -67,7 +67,7 @@ INVALID_CMAP_DICT = {
 }
 
 
-# colormap_registry =ColormapRegistry.get_instance()
+# colormap_registry = ColormapRegistry.get_instance()
 # colormap_registry.reset()
 # tmp_path = "/tmp"
 
