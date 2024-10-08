@@ -467,13 +467,9 @@ def get_cmap(name: Optional[str] = None, lut: Optional[int] = None):
     pycolorbar_registered_names = colormaps.names + [s + "_r" for s in colormaps.names]
     mpl_registered_names = plt.colormaps()
 
-    # Check if reversed colormap
-    has_r_suffix = name.endswith("_r")
     # Pycolorbar colormap
     if name in pycolorbar_registered_names:
-        cmap = colormaps.get_cmap(name)
-        if has_r_suffix:
-            cmap = cmap.reversed()
+        cmap = colormaps.get_cmap(name)  # this reverse if necessary
         if lut is not None:
             cmap = cmap.resampled(lut)
         return cmap

@@ -153,12 +153,26 @@ class TestColormapSegmentData:
 
     def test_valid_segmentdata(self):
         """Validate a colormap dictionary with valid segmentdata for a LinearSegmentedColormap."""
+        # Tuple
         segment_data = {
             "red": [(0.0, 0.0, 0.0), (0.5, 1.0, 1.0), (1.0, 1.0, 1.0)],
             "green": [(0.0, 0.0, 0.0), (0.25, 0.0, 0.0), (0.75, 1.0, 1.0), (1.0, 1.0, 1.0)],
             "blue": [(0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 1.0, 1.0)],
         }
+        cmap_dict = {
+            "colormap_type": "LinearSegmentedColormap",
+            "color_space": "rgb",
+            "segmentdata": segment_data,
+        }
+        validated_dict = validate_cmap_dict(cmap_dict)
+        assert isinstance(validated_dict, dict)
 
+        # List
+        segment_data = {
+            "red": [[0.0, 0.0, 0.0], [0.5, 1.0, 1.0], [1.0, 1.0, 1.0]],
+            "green": [[0.0, 0.0, 0.0], [0.25, 0.0, 0.0], [0.75, 1.0, 1.0], [1.0, 1.0, 1.0]],
+            "blue": [[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [1.0, 1.0, 1.0]],
+        }
         cmap_dict = {
             "colormap_type": "LinearSegmentedColormap",
             "color_space": "rgb",
