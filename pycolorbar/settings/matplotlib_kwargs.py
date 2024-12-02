@@ -32,7 +32,6 @@ from matplotlib.colors import (
     AsinhNorm,
     BoundaryNorm,
     CenteredNorm,
-    LinearSegmentedColormap,
     ListedColormap,
     LogNorm,
     NoNorm,
@@ -44,30 +43,17 @@ from matplotlib.colors import (
 
 import pycolorbar
 from pycolorbar.norm import CategorizeNorm, CategoryNorm, check_boundaries
-
-
-def _create_combined_cmap(names, n=None, new_n=None):
-    """Combine multiple colormaps together."""
-    # Check for defaults
-    if n is None:
-        n = [None] * len(names)  # 256 for LinearSegmentedColormap, the original number of colors for ListedColormap
-    if new_n is None:  # TODO: define parameter in YAML file
-        new_n = [256] * len(names)
-    # First resample colormaps if asked
-    list_cmaps = [pycolorbar.get_cmap(cmap_name, lut=lut) for cmap_name, lut in zip(names, n)]
-    # Then retrieve a selection of colors from each colormap (256 from each currently !)
-    cmap_colors = np.vstack([cmap(np.linspace(0, 1, lut)) for cmap, lut in zip(list_cmaps, new_n)])
-    # Define the new colormap
-    new_name = "_".join(names)
-    return LinearSegmentedColormap.from_list(name=new_name, colors=cmap_colors)
+from pycolorbar.univariate import combine_cmaps
 
 
 def _get_cmap(cmap_settings):
     """Retrieve the colormap for a given validated colorbar setting."""
     name = cmap_settings.get("name")
     n = cmap_settings.get("n")
+    # nodes = cmap_settings.get("nodes")
+
     # Define colormap
-    return pycolorbar.get_cmap(name=name, lut=n) if isinstance(name, str) else _create_combined_cmap(names=name, n=n)
+    return pycolorbar.get_cmap(name=name, n=n) if isinstance(name, str) else combine_cmaps(cmaps=name, n=n)
 
 
 def _finalize_cmap(cmap, cmap_settings):
@@ -377,8 +363,9 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
     _ = user_plot_kwargs.pop("vmax", None)
 
     # Deal with xarray optional 'extend' plot_kwargs
-    # - extend is copied also in the user_cbar_kwargs
-    if "extend" in user_plot_kwargs and "extend" not in user_cbar_kwargs:
+    # - extend is copied in the user_cbar_kwargs
+    # - if extend is already in user_cbar_kwargs, it's overwritten
+    if user_plot_kwargs.get("extend") is not None:
         user_cbar_kwargs["extend"] = user_plot_kwargs["extend"]
 
     # Update defaults with custom kwargs
@@ -386,6 +373,7 @@ def update_plot_cbar_kwargs(default_plot_kwargs, default_cbar_kwargs, user_plot_
     default_cbar_kwargs.update(user_cbar_kwargs)
 
     # Remove unwanted keys
+    _ = default_plot_kwargs.pop("extend", None)
     _ = default_plot_kwargs.pop("levels", None)
 
     return default_plot_kwargs, default_cbar_kwargs
@@ -459,7 +447,7 @@ def _retrieve_cmap(user_plot_kwargs, default_plot_kwargs):
 
 def _resample_cmap(cmap, ncolors):
     if ncolors > cmap.N:
-        raise ValueError(f"The specified cmap has not enough colors. {ncolors} colors required !")
+        raise ValueError(f"The specified/default cmap has not enough colors. {ncolors} colors required !")
     if ncolors != cmap.N:
         cmap = cmap.resampled(ncolors)
     return cmap

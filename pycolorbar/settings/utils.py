@@ -25,13 +25,3 @@
 
 # -----------------------------------------------------------------------------.
 """Utility functions for settings module."""
-
-
-def get_auxiliary_categories(dictionary):
-    """Retrieve list of categories keys from a cmap or colorbar dictionary."""
-    if "auxiliary" in dictionary:
-        categories = dictionary["auxiliary"].get("category", [])
-        if isinstance(categories, str):
-            categories = [categories]
-        return categories
-    return []

@@ -445,6 +445,7 @@ class TestUpdatePlotCbarKwargs:
             user_plot_kwargs=user_plot_kwargs,
         )
         assert isinstance(plot_kwargs["norm"], BoundaryNorm)
+        assert "levels" not in plot_kwargs
         assert cbar_kwargs["ticks"] == levels
         assert cbar_kwargs["ticklabels"] == levels
         assert len(levels) - 1 == plot_kwargs["cmap"].N  # Resampled to match number of boundaries - 1
@@ -467,6 +468,7 @@ class TestUpdatePlotCbarKwargs:
 
         expected_levels = [0.0, 0.5, 1.0]
         assert isinstance(plot_kwargs["norm"], BoundaryNorm)
+        assert "levels" not in plot_kwargs
         assert cbar_kwargs["ticks"] == expected_levels
         assert cbar_kwargs["ticklabels"] == expected_levels
         assert cbar_kwargs["extend"] == "both"  # keep other cbar_kwargs
@@ -657,13 +659,26 @@ class TestUpdatePlotCbarKwargs:
 
     def test_extend_copied_to_user_cbar_kwargs_if_not_specified(self, default_plot_kwargs, default_cbar_kwargs):
         """Test 'extend' in user_plot_kwargs is copied to user_cbar_kwargs if not already specified."""
+        default_cbar_kwargs = {"extend": "neither"}
         user_plot_kwargs = {"extend": "both"}
         plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
             user_plot_kwargs=user_plot_kwargs,
         )
+        assert "extend" not in plot_kwargs
         assert cbar_kwargs["extend"] == "both"
+
+        # Other case
+        default_cbar_kwargs = {"extend": "both"}
+        user_plot_kwargs = {"extend": "neither"}
+        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+            default_plot_kwargs=default_plot_kwargs,
+            default_cbar_kwargs=default_cbar_kwargs,
+            user_plot_kwargs=user_plot_kwargs,
+        )
+        assert "extend" not in plot_kwargs
+        assert cbar_kwargs["extend"] == "neither"
 
     @pytest.mark.parametrize("cbar_dict", categorical_cbar_dicts)
     def test_default_categorical_colorbar(self, cbar_dict):

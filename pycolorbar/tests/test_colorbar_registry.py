@@ -60,7 +60,7 @@ def colorbar_test_filepath(tmp_path):
     """Fixture to create a temporary colorbar YAML file."""
     filepath = tmp_path / "temp_colorbar.yaml"
     cbar_dict1 = {"cmap": {"name": "viridis"}}
-    cbar_dict2 = {"cmap": {"name": "viridis"}, "auxiliary": {"category": "TEST"}}
+    cbar_dict2 = {"cmap": {"name": "viridis"}, "auxiliary": {"category": ["TEST", "TEST1"]}}
     cbar_dicts = {"TEST_CBAR_1": cbar_dict1, "TEST_CBAR_2": cbar_dict2}
     write_yaml(cbar_dicts, filepath)
     return filepath
@@ -377,6 +377,12 @@ def test_available_colorbars(colorbar_registry, colorbar_test_filepath):
     # Test select specific category
     names = pycolorbar.available_colorbars(category="TEST")
     assert names == ["TEST_CBAR_2"]
+
+    names = pycolorbar.available_colorbars(category=["TEST", "TEST1"])
+    assert names == ["TEST_CBAR_2"]
+
+    names = pycolorbar.available_colorbars(category=["TEST", "TEST2"])
+    assert names == []
 
     # Test include/exclude reference colorbars
     reference_cbar_dict = {"reference": "TEST_CBAR_1"}
