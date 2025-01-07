@@ -29,10 +29,18 @@ import matplotlib.patches as mpatches
 import numpy as np
 from matplotlib.transforms import Bbox
 
+# -----------------------------------------------------------------------------.
 # NOTES
 # How to rotate subplot by 45 degrees (not easy)
 # - Create image, rotate, load image, attach to plot
 # - https://stackoverflow.com/questions/62357483/how-to-rotate-a-subplot-by-45-degree-in-matplotlib
+
+
+# Bbox([[xmin, ymin], [xmax, ymax]])
+# Bbox.from_extents(xmin, ymin, xmax, ymax)
+# Bbox.from_bounds(xmin, ymin, width, height)
+
+# -----------------------------------------------------------------------------.
 
 
 def get_locations_acronyms():
@@ -147,21 +155,45 @@ def get_inset_bounds(
     if isinstance(border_pad, (int, float)):
         border_pad = (border_pad, border_pad)
 
+    # ----------------------------------------------------------------.
     # Get the bounding box of the parent axes in figure coordinates
     bbox = ax.get_position()
     parent_width = bbox.width
     parent_height = bbox.height
 
-    # Compute the inset width and height
+    # Compute the relative inset width and height
     # - Take into account possible different aspect ratios
     inset_height_abs = inset_height * parent_height
     inset_width_abs = inset_height_abs * aspect_ratio
     inset_width = inset_width_abs / parent_width
 
-    # parent_aspect_ratio = parent_width/parent_height
-    # print(bbox)
-    # print(parent_aspect_ratio)
+    # ----------------------------------------------------------------.
+    # Get axis position Bbox
+    # ax_bbox = ax.get_position() # get the original position
 
+    # # Get figure width and height
+    # fig_width, fig_height = ax.figure.get_size_inches()
+
+    # # Define width and height in inches
+    # ax_height_in_inches = fig_height * ax_bbox.height
+    # # ax_width_in_inches = fig_width * ax_bbox.width
+
+    # # Now compute the inset width and height in inches
+    # new_ax_height_in_inches = ax_height_in_inches*inset_height
+    # new_ax_width_in_inches = new_ax_height_in_inches * aspect_ratio
+
+    # # Now convert to relative position
+    # new_ax_width = new_ax_width_in_inches/fig_width
+    # new_ax_height = new_ax_height_in_inches/fig_height
+
+    # inset_width = new_ax_width
+    # inset_height = new_ax_height
+
+    # #----------------------------------------------------------------.
+    # print("Width:", inset_width)
+    # print("Height:", inset_height)
+
+    # ----------------------------------------------------------------.
     # If loc specify (x0,y0) return the inset bounds
     if isinstance(loc, (list, tuple)) and len(loc) == 2:
         return [loc[0], loc[1], inset_width, inset_height]

@@ -28,7 +28,11 @@ import contextlib
 import os
 from importlib.metadata import PackageNotFoundError, version
 
-from pycolorbar.bivariate.cmap import BivariateColormap, available_bivariate_colormaps  # noqa
+from pycolorbar.bivariate.cmap import (  # noqa
+    BivariateColormap,
+    BivariateTransparencyColormap,
+    available_bivariate_colormaps,
+)
 from pycolorbar.settings.colorbar_registry import (  # noqa
     ColorbarRegistry,
     available_colorbars,

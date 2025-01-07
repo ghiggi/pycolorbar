@@ -395,10 +395,10 @@ def get_bivariate_cmap_from_two_cmaps(cmap_x=plt.cm.Blues, cmap_y=plt.cm.Reds, n
 
     Parameters
     ----------
-    cmap_x : matplotlib.colors.Colormap
-        First univariate colormap.
-    cmap_y : matplotlib.colors.Colormap
-        Second univariate colormap.
+    cmap_x : matplotlib.colors.Colormap or str
+        Univariate colormap for the x axis.
+    cmap_y : matplotlib.colors.Colormap or str
+        Univariate colormap for the y axis.
     n : int or tuple
         Either a single integer or a (n_x, n_y) tuple specifying the number of colormap colors
         on the x and y axis.
@@ -408,6 +408,11 @@ def get_bivariate_cmap_from_two_cmaps(cmap_x=plt.cm.Blues, cmap_y=plt.cm.Reds, n
     numpy.ndarray
         Shape (n_y, n_x, 4) array of RGBA representing the combined colormap.
     """
+    import pycolorbar
+
+    cmap_x = pycolorbar.get_cmap(cmap_x)
+    cmap_y = pycolorbar.get_cmap(cmap_y)
+
     # Retrieve number of colors per axis
     n_x, n_y = check_n(n)
 
@@ -1148,6 +1153,7 @@ def plot_bivariate_palette(
     ylim=None,
     disable_axis=False,
     origin="upper",
+    aspect="auto",
     **imshow_kwargs,
 ):
     """Plot the bivariate colormap.
@@ -1166,6 +1172,12 @@ def plot_bivariate_palette(
         If True, the axis will be turned off. Default is False.
     origin : {'upper', 'lower'}, optional
         The origin of the colormap. Default is 'upper'.
+    aspect: str or float
+        Either 'equal' or 'auto' or float.
+        Controls the axes scaling (y/x-scale).
+        If 'auto' fill the Axes position rectangle with data.
+        If 'equal', ensure same scaling between x and y axis.
+        The default is 'auto'.
     **imshow_kwargs : dict, optional
         Additional keyword arguments to pass to `imshow`.
 
@@ -1223,6 +1235,9 @@ def plot_bivariate_palette(
     if disable_axis:
         ax.axis("off")
 
+    # Set aspect
+    ax.set_aspect(aspect)
+
     # Return
     return p
 
@@ -1255,6 +1270,7 @@ def add_bivariate_colorbar(
     bivariate_cmap,
     cax,
     origin="lower",
+    aspect="auto",
     # Options
     xlabel=None,
     ylabel=None,
@@ -1276,6 +1292,11 @@ def add_bivariate_colorbar(
         The axis on which to draw the colorbar.
     origin : {'lower', 'upper'}, optional
         The origin of the colorbar. Default is 'lower'.
+    aspect: str, optional
+        Either 'equal' or 'auto'.
+        If 'auto' fill the Axes position rectangle with data.
+        If 'equal', ensure same scaling between x and y axis.
+        The default is 'auto'.
     xlabel : str, optional
         The label for the x-axis. Default is None.
     ylabel : str, optional
@@ -1334,6 +1355,7 @@ def add_bivariate_colorbar(
         ylim=ylim,
         disable_axis=False,
         origin="lower",
+        aspect=aspect,
         **imshow_kwargs,
     )
 
@@ -1352,17 +1374,15 @@ def add_bivariate_colorbar(
         cax.set_title(title, **title_kwargs)
 
     if xlabel is not None:
-        cax.set_title(xlabel, **xlabel_kwargs)
+        cax.set_xlabel(xlabel, **xlabel_kwargs)
 
     if ylabel is not None:
-        cax.set_title(ylabel, **ylabel_kwargs)
+        cax.set_ylabel(ylabel, **ylabel_kwargs)
 
     # Invert axis origin if specified as "upper"
     if origin == "upper":
         cax.invert_yaxis()
 
-    # Adjust layout or style if necessary
-    cax.set_aspect("auto")  # so it does not force equal aspect
     return p
 
 
@@ -1372,7 +1392,7 @@ def add_bivariate_legend(
     ax,
     projection=None,
     # Inset options
-    aspect_ratio=1,
+    box_aspect=1,
     height=0.2,  # percentage [0-1]
     pad=0.005,  # figure coordinates
     loc="upper right",
@@ -1399,7 +1419,7 @@ def add_bivariate_legend(
         The axes to which the bivariate legend will be added.
     projection : str or None, optional
         The projection type of the inset axes. Default is None.
-    aspect_ratio : float, optional
+    box_aspect : float, optional
         The aspect ratio of the inset axes. Default is 1.
     height : float, optional
         The height of the inset axes as a percentage of the plot height.
@@ -1445,7 +1465,7 @@ def add_bivariate_legend(
         loc=loc,
         inset_height=height,
         inside_figure=inside_figure,
-        aspect_ratio=aspect_ratio,
+        aspect_ratio=box_aspect,
         border_pad=pad,
     )
 
@@ -1499,7 +1519,7 @@ def plot_bivariate_colorbar(
     location="right",
     size="30%",
     pad=0.45,
-    aspect=1,
+    box_aspect=1,
     **kwargs,
 ):
     """Plot a bivariate colorbar.
@@ -1524,9 +1544,12 @@ def plot_bivariate_colorbar(
         The size of the colorbar relative to the parent axes. The default is '30%'.
     pad : float, optional
         The padding between the parent axes and the colorbar. The default is 0.45.
-    aspect : float, optional
-        The aspect ratio of the colorbar. The default is 1.
+    box_aspect : float, optional
+        The aspect ratio of the colorbar axis box. The default is 1.
         Additional keyword arguments passed to ``add_bivariate_colorbar``.
+    **kwargs : dict
+        Additional keyword arguments passed to the bivariate colorbar.
+        See the add_bivariate_colorbar documentation.
 
     Returns
     -------
@@ -1539,7 +1562,7 @@ def plot_bivariate_colorbar(
     elif cax is None:
         divider = make_axes_locatable(ax)
         cax = divider.append_axes(location, size=size, pad=pad, axes_class=plt.Axes)
-        cax.set_box_aspect(aspect)
+        cax.set_box_aspect(box_aspect)
 
     # Add the 2D colorbar with custom ticks
     p = add_bivariate_colorbar(
@@ -1660,10 +1683,10 @@ class BivariateColormap:
 
         Parameters
         ----------
-        cmap_x : matplotlib.colors.Colormap
-            First univariate colormap.
-        cmap_y : matplotlib.colors.Colormap
-            Second univariate colormap.
+        cmap_x : matplotlib.colors.Colormap or str
+            Univariate colormap for the x axis.
+        cmap_y : matplotlib.colors.Colormap or str
+            Univariate colormap for the y axis.
         n : int or tuple, optional
             Either a single integer or a (n_x, n_y) tuple specifying
             the number of colormap colors on the x and y axis.
@@ -1719,6 +1742,76 @@ class BivariateColormap:
         )
         return cls(rgba_array, luminance_factor=luminance_factor)
 
+    def __getitem__(self, key):
+        """Retrieve a subset of the colormap."""
+        rgba_array = self.rgba_array[key]
+        return self._copy_attributes(BivariateColormap(rgba_array=rgba_array))
+
+    def _copy_attributes(self, new_instance):
+        new_instance._bad = self._bad
+        return new_instance
+
+    def __setitem__(self, key, value):
+        """Modify the colormap palette."""
+        self.rgba_array[key] = value
+        self.shape = self.rgba_array.shape
+        self.n_x = self.shape[1]
+        self.n_y = self.shape[0]
+
+    def adapt_interval(self, interval_x=None, interval_y=None):
+        """
+        Subset the bivariate colormap based on the  specified interval fractions.
+
+        Parameters
+        ----------
+        interval_x : tuple
+            A tuple of two float values between 0 and 1, indicating the fraction of the colors to retain on the x axis.
+            If None, no subsetting is performed.
+        interval_y : tuple
+            A tuple of two float values between 0 and 1, indicating the fraction of the colors to retain on the y axis.
+            If None, no subsetting is performed.
+
+        Returns
+        -------
+        pycolorbar.BiviariateColormap
+        """
+        from pycolorbar.univariate.cmap import check_interval
+
+        # Check intervals
+        interval_x = check_interval(interval_x)
+        interval_y = check_interval(interval_y)
+
+        # Define indexing
+        n_x = self.n_x
+        n_y = self.n_y
+        x_start, x_end = int(interval_x[0] * n_x), int(interval_x[1] * n_x)
+        y_start, y_end = int(interval_y[0] * n_y), int(interval_y[1] * n_y)
+        x_indices = slice(x_start, x_end)
+        y_indices = slice(y_start, y_end)
+        return self[y_indices, x_indices]
+
+    def set_bad(self, color):
+        """
+        Set the color for bad (masked) values.
+
+        Parameters
+        ----------
+        color : color spec
+            The color to use for bad values.
+        """
+        self._bad = color
+
+    def set_alpha(self, alpha):
+        """
+        Set the alpha (transparency) value for the entire colormap.
+
+        Parameters
+        ----------
+        alpha : float
+            The alpha value to set, where 0 is fully transparent and 1 is fully opaque.
+        """
+        self.rgba_array[:, :, 3] = alpha
+
     def change_luminance_gradient(self, luminance_factor=None):
         """Change the luminance gradient of the colormap.
 
@@ -1737,7 +1830,7 @@ class BivariateColormap:
             The colormap with the new luminance gradient.
         """
         rgba_array = apply_luminance_gradient(self.rgba_array, luminance_factor=luminance_factor)
-        return BivariateColormap(rgba_array=rgba_array)
+        return self._copy_attributes(BivariateColormap(rgba_array=rgba_array))
 
     def rot90(self, *, clockwise=True):
         """Rotate the colormap by 90 degrees.
@@ -1758,7 +1851,7 @@ class BivariateColormap:
             rgba_array = np.rot90(self.rgba_array, k=-1, axes=(0, 1))
         else:
             rgba_array = np.rot90(self.rgba_array, k=1, axes=(0, 1))
-        return BivariateColormap(rgba_array=rgba_array)
+        return self._copy_attributes(BivariateColormap(rgba_array=rgba_array))
 
     def rot180(self, *, clockwise=True):
         """Rotate the colormap by 180 degrees.
@@ -1784,7 +1877,7 @@ class BivariateColormap:
         creating a mirror image along the vertical axis.
         """
         rgba_array = np.fliplr(self.rgba_array)
-        return BivariateColormap(rgba_array=rgba_array)
+        return self._copy_attributes(BivariateColormap(rgba_array=rgba_array))
 
     def flipud(self):
         """Flip the colormap array in the up/down direction.
@@ -1793,7 +1886,7 @@ class BivariateColormap:
         effectively reversing the order of the rows.
         """
         rgba_array = np.flipud(self.rgba_array)
-        return BivariateColormap(rgba_array=rgba_array)
+        return self._copy_attributes(BivariateColormap(rgba_array=rgba_array))
 
     def resampled(self, *, n_x=None, n_y=None, interp_method="linear"):
         """
@@ -1817,11 +1910,7 @@ class BivariateColormap:
             A new BivariateCmap instance resampled to have an rgba_array of shape (n_y, n_x).
         """
         rgba_array = resample_rgba_array(self.rgba_array, n_x=n_x, n_y=n_y, interp_method=interp_method)
-
-        # Build a new BivariateColormap (or BivariateCmap) instance
-        # TODO: copy any relevant fields like `_under`, `_over`, etc.
-        cmap = BivariateColormap(rgba_array=rgba_array)
-        return cmap
+        return self._copy_attributes(BivariateColormap(rgba_array=rgba_array))
 
     def __call__(self, x, y, *, norm_x=None, norm_y=None, interp_method="nearest"):
         """
@@ -1900,7 +1989,7 @@ class BivariateColormap:
     # Alias
     map = __call__
 
-    @copy_docstring(add_bivariate_legend)
+    @copy_docstring(plot_bivariate_palette)
     def plot(self, ax=None, **kwargs):  # noqa: D102
         # Plot colormap
         return plot_bivariate_palette(self.rgba_array, ax=ax, **kwargs)
@@ -1961,3 +2050,63 @@ class BivariateColormap:
             "</div>"
         )
         return html
+
+
+def get_bivariate_transparancy_rgba_array(cmap, n_x, n_y, alpha_min=0.1, alpha_max=1):
+    """Create the RGBA array for the bivariate transparency colormap."""
+    import pycolorbar
+
+    cmap = pycolorbar.get_cmap(cmap)
+
+    # Generate the base colormap
+    base_colors = cmap(np.linspace(0, 1, n_x))
+
+    # Generate the alpha values
+    alphas = np.linspace(alpha_max, alpha_min, n_y)
+
+    # Create the RGBA array
+    rgba_array = np.ones((n_y, n_x, 4))
+    for i in range(n_y):
+        rgba_array[i, :, :3] = base_colors[:, :3]
+        rgba_array[i, :, 3] = alphas[i]
+
+    return rgba_array
+
+
+class BivariateTransparencyColormap(BivariateColormap):
+    """Class representing a bivariate transparency colormap."""
+
+    def __init__(self, cmap, alpha_min=0.2, alpha_max=1, n=None):
+        """
+        Initialize the bivariate colormap with transparency.
+
+        Parameters
+        ----------
+        cmap : matplotlib.colors.Colormap or str
+            The colormap to be used.
+        alpha_min : float, optional
+            The minimum alpha (transparency) value, by default 0.2.
+        alpha_max : float, optional
+            The maximum alpha (transparency) value, by default 1.
+        n : int or tuple of int, optional
+            The number of discrete colors in the colormap. If an integer is provided,
+            it is used for both dimensions. If a tuple is provided, it should be of
+            the form (n_x, n_y), where n_x is the number of colors in the x dimension
+            and n_y is the number of colors in the y dimension. If None, a default
+            value is used.
+
+        Notes
+        -----
+        The y dimension corresponds to the transparency levels.
+        """
+        n_x, n_y = check_n(n)
+        rgba_array = get_bivariate_transparancy_rgba_array(
+            cmap=cmap,
+            n_x=n_x,
+            n_y=n_y,
+            alpha_min=alpha_min,
+            alpha_max=alpha_max,
+        )
+        super().__init__(rgba_array)
+        self.alpha_min = alpha_min
+        self.alpha_max = alpha_max
