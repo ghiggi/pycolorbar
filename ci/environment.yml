@@ -6,6 +6,13 @@ dependencies:
   - numpy<=1.26.4
   - matplotlib
   - pydantic>=2.0.0
+  # Optional
+  - scipy
+  - pandas
+  - geopandas
+  - xarray
+  - viscm
+  - colorspacious
   # Docs
   - jupyter
   - sphinx=5.1.1

@@ -207,7 +207,7 @@ def _count_string_decimals(value):
 def _ensure_increasing_or_equal_values(arr):
     result = [arr[0]]  # Start with the first element
     for i in range(1, len(arr)):
-        result.append(max(arr[i], result[-1]))  # Append maximum of current value and previous result
+        result.append(np.nanmax(arr[i], result[-1]))  # Append maximum of current value and previous result
     return result
 
 

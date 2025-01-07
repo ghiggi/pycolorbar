@@ -483,7 +483,7 @@ def plot_viscm_diagnostic(cmap):
         from viscm import viscm
     except ImportError:
         raise ImportError(
-            "The 'colorspacious' package is required but not found. "
+            "The 'viscm' package is required but not found. "
             "Please install it using the following command: "
             "conda install -c conda-forge viscm",
         ) from None
