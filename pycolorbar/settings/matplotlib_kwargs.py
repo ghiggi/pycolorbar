@@ -232,11 +232,14 @@ def _dynamic_formatting_floats(values, cap=4):
     """
     values = np.array(values, dtype=float)
     decimals_values = [_decimal_places(value, cap=cap) for value in values]
-    labels = [_format_label(value, decimals) for value, decimals in zip(values, decimals_values)]
+    labels = [_format_label(value, decimals) for value, decimals in zip(values, decimals_values, strict=False)]
     # Ensure only decreasing decimals
     actual_decimals = [_count_string_decimals(label) for label in labels]
     final_decimals = _ensure_increasing_or_equal_values(actual_decimals[::-1])[::-1]
-    labels = [_format_label(value, decimals, strip_zero=False) for value, decimals in zip(values, final_decimals)]
+    labels = [
+        _format_label(value, decimals, strip_zero=False)
+        for value, decimals in zip(values, final_decimals, strict=False)
+    ]
     return ["0" if float(label) == 0 else label for label in labels]
 
 

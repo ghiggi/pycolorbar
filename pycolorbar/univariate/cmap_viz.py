@@ -50,7 +50,7 @@ def _plot_colormaps_subplots(cmaps, plot_func, cols=None, subplot_size=None, sub
     axes = axes.ravel()
 
     # Loop through colormaps and axes
-    for cmap, ax in zip(cmaps, axes[:n]):
+    for cmap, ax in zip(cmaps, axes[:n], strict=False):
         _ = plot_func(cmap=cmap, ax=ax, **plot_kwargs)
 
     # Turn off any remaining axes

@@ -79,7 +79,7 @@ class ColorEncoderDecoder:
                     *self.external_data_range[channel],
                     *self.internal_data_range[channel],
                 )
-                for channel, val in zip(self.external_data_range.keys(), colors.T)
+                for channel, val in zip(self.external_data_range.keys(), colors.T, strict=False)
             ],
         ).T
 
@@ -104,7 +104,7 @@ class ColorEncoderDecoder:
                     *self.internal_data_range[channel],
                     *self.external_data_range[channel],
                 )
-                for channel, val in zip(self.internal_data_range.keys(), colors.T)
+                for channel, val in zip(self.internal_data_range.keys(), colors.T, strict=False)
             ],
         ).T
 

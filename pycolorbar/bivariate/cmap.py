@@ -898,7 +898,7 @@ def create_pandas_category_norm(series):
     """
     indices = np.arange(0, len(series.cat.categories)).astype(int).tolist()
     categories = list(series.cat.categories)
-    categories_dict = dict(zip(indices, categories))
+    categories_dict = dict(zip(indices, categories, strict=False))
     norm = CategoryNorm(categories_dict)
     return norm
 
@@ -1405,6 +1405,7 @@ def add_bivariate_legend(
     fancybox_ec="none",
     fancybox_lw=0.5,
     fancybox_alpha=0.4,
+    fancybox_shape="square",
     # Colorbar options
     **kwargs,
 ):
@@ -1475,14 +1476,22 @@ def add_bivariate_legend(
         bounds=cax_bounds,  # [x0, y0, width, height]
         projection=projection,
     )
+    # Increase order to give space for fancy box !
+    fancybox_zorder = cax.get_zorder() + 1
+    cax.set_zorder(cax.get_zorder() + 2)
+
+    # Define zorder before adding colorbar
+    # zorder_before_cbar = max([_.zorder for _ in ax.get_children()])
 
     # Add the 2D colorbar with custom ticks
     p_cbar = add_bivariate_colorbar(
         cax=cax,
         bivariate_cmap=bivariate_cmap,
-        zorder=ax.get_zorder() + 2,
+        # zorder=zorder_before_cbar + 1,
         **kwargs,
     )
+
+    # _ = [artist.set_zorder(artist.get_zorder() + zorder_before_cbar+1) for artist in p_cbar.axes.get_children()]
 
     # Adapt the cax position to include ticks and ticklabels
     if optimize_layout and inside_figure:
@@ -1494,7 +1503,6 @@ def add_bivariate_legend(
         cax.set_position(new_cax_pos)
 
     # Add fancy box in background
-    # TODO: fancy_box should be drawn behind the bivariate_colorbar. Currently it makes the colorbar opaque
     if fancybox:
         fancy_bbox = get_tightbbox_position(cax)
         _ = add_fancybox(
@@ -1503,10 +1511,12 @@ def add_bivariate_legend(
             fc=fancybox_fc,
             ec=fancybox_ec,
             lw=fancybox_lw,
+            shape=fancybox_shape,
             alpha=fancybox_alpha,
             pad=fancybox_pad,
-            zorder=ax.get_zorder() + 1,
+            zorder=fancybox_zorder,
         )
+
     return p_cbar
 
 

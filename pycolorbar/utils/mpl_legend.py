@@ -268,7 +268,7 @@ def optimize_inset_position(ax, cax, pad=0):
     return new_pos
 
 
-def add_fancybox(ax, bbox, fc="white", ec="none", lw=0.5, alpha=0.5, pad=0, zorder=None):
+def add_fancybox(ax, bbox, fc="white", ec="none", lw=0.5, alpha=0.5, pad=0, shape="square", zorder=None):
     """Add fancy box.
 
     The bbox can be derived using get_tightbbox_position(ax_legend).
@@ -277,7 +277,7 @@ def add_fancybox(ax, bbox, fc="white", ec="none", lw=0.5, alpha=0.5, pad=0, zord
         (bbox.x0, bbox.y0),
         width=bbox.width,
         height=bbox.height,
-        boxstyle=f"square,pad={pad}",
+        boxstyle=f"{shape},pad={pad}",
         fc=fc,  # facecolor
         ec=ec,  # edgecolor
         lw=lw,  # linewidth
@@ -286,5 +286,4 @@ def add_fancybox(ax, bbox, fc="white", ec="none", lw=0.5, alpha=0.5, pad=0, zord
         zorder=zorder,
         clip_on=False,
     )
-    ax.figure.add_artist(fancy_patch)
-    return fancy_patch
+    return ax.add_artist(fancy_patch)
