@@ -12,7 +12,7 @@ from PIL.PngImagePlugin import PngInfo
 
 from pycolorbar.norm import CategorizeNorm, CategoryNorm
 from pycolorbar.utils.docstring import copy_docstring
-from pycolorbar.utils.mpl_legend import add_fancybox, get_inset_bounds, get_tightbbox_position, optimize_inset_position
+from pycolorbar.utils.mpl_legend import add_colorbar_inset
 
 # Import optional packages
 try:
@@ -1390,17 +1390,16 @@ def add_bivariate_legend(
     *,
     bivariate_cmap,
     ax,
-    projection=None,
     # Inset options
     box_aspect=1,
-    height=0.2,  # percentage [0-1]
-    pad=0.005,  # figure coordinates
+    height=0.2,
+    pad=0.005,
     loc="upper right",
     inside_figure=True,
     optimize_layout=True,
     # Fancybox options
     fancybox=False,
-    fancybox_pad=0,  # figure coordinates
+    fancybox_pad=0,
     fancybox_fc="white",
     fancybox_ec="none",
     fancybox_lw=0.5,
@@ -1418,35 +1417,33 @@ def add_bivariate_legend(
         The bivariate colormap to be used for the legend.
     ax : matplotlib.axes.Axes
         The axes to which the bivariate legend will be added.
-    projection : str or None, optional
-        The projection type of the inset axes. Default is None.
     box_aspect : float, optional
-        The aspect ratio of the inset axes. Default is 1.
+        Aspect ratio of the inset Axes. Default is 1.
     height : float, optional
-        The height of the inset axes as a percentage of the plot height.
-        Default is 0.2.
+        Height of the inset as a fraction [0-1] of the main Axes. Default is 0.2.
     pad : float, optional
-        The padding between the inset axes and the main plot in figure coordinates.
-        Default is 0.005.
+        Padding between the inset and main Axes in figure coordinates. Default is 0.005.
     loc : str or tuple, optional
-        The location of the inset axes. Default is "upper right".
+        Location of the inset. Default is 'upper right'.
     inside_figure : bool, optional
-        Whether the inset axes should be inside the figure. Default is True.
+        Whether inset is inside the figure region. Default is True.
     optimize_layout : bool, optional
-        Whether to optimize the layout of the inset axes. Default is True.
-        If True, do not call fig.tigh_layout() afterwards() !
+        Whether to auto-adjust the inset position for ticklabels. Default is True.
+        NOTE: If True, do not call `fig.tight_layout()` afterwards.
     fancybox : bool, optional
-        Whether to add a fancy box around the inset axes. Default is False.
+        Whether to draw a fancy box behind the inset. Default is False.
     fancybox_pad : float, optional
-        The padding of the fancy box in figure coordinates. Default is 0.
+        Padding of the fancy box in figure coordinates. Default is 0.
     fancybox_fc : str, optional
-        The face color of the fancy box. Default is "white".
+        Face color of the fancy box. Default is 'white'.
     fancybox_ec : str, optional
-        The edge color of the fancy box. Default is "none".
+        Edge color of the fancy box. Default is 'none'.
     fancybox_lw : float, optional
-        The line width of the fancy box. Default is 0.5.
+        Line width of the fancy box. Default is 0.5.
     fancybox_alpha : float, optional
-        The alpha transparency of the fancy box. Default is 0.4.
+        Alpha of the fancy box. Default is 0.4.
+    fancybox_shape : {'circle', 'square'}, optional
+        Shape of the fancy box. Default is 'square'.
     **kwargs : dict
         Additional keyword arguments passed to the bivariate colorbar.
         See the add_bivariate_colorbar documentation.
@@ -1457,66 +1454,32 @@ def add_bivariate_legend(
         The image object representing the bivariate colorbar.
 
     """
-    # Define inset location relative to main plot (ax) in normalized units
-    # - Lower-left corner of inset Axes, and its width and height
-    # - [x0, y0, width, height]
-    # - If loc is (x0,y0) it just compute width and height.
-    cax_bounds = get_inset_bounds(
-        ax=ax,
-        loc=loc,
-        inset_height=height,
-        inside_figure=inside_figure,
-        aspect_ratio=box_aspect,
-        border_pad=pad,
-    )
-
-    # Define inset position
-    # cax = ax.figure.add_axes(cax_bounds, projection=projection)
-    cax = ax.inset_axes(
-        bounds=cax_bounds,  # [x0, y0, width, height]
-        projection=projection,
-    )
-    # Increase order to give space for fancy box !
-    fancybox_zorder = cax.get_zorder() + 1
-    cax.set_zorder(cax.get_zorder() + 2)
-
-    # Define zorder before adding colorbar
-    # zorder_before_cbar = max([_.zorder for _ in ax.get_children()])
-
-    # Add the 2D colorbar with custom ticks
-    p_cbar = add_bivariate_colorbar(
-        cax=cax,
+    # The actual colorbar plotting function
+    colorbar_func = add_bivariate_colorbar
+    colorbar_func_kwargs = dict(
         bivariate_cmap=bivariate_cmap,
-        # zorder=zorder_before_cbar + 1,
         **kwargs,
     )
-
-    # _ = [artist.set_zorder(artist.get_zorder() + zorder_before_cbar+1) for artist in p_cbar.axes.get_children()]
-
-    # Adapt the cax position to include ticks and ticklabels
-    if optimize_layout and inside_figure:
-        # Set new position
-        # - If 'inset_axes' was used, cax has an AxesLocator
-        # - We remove that to manually control it.
-        new_cax_pos = optimize_inset_position(ax=ax, cax=cax, pad=pad)
-        cax.set_axes_locator(None)
-        cax.set_position(new_cax_pos)
-
-    # Add fancy box in background
-    if fancybox:
-        fancy_bbox = get_tightbbox_position(cax)
-        _ = add_fancybox(
-            ax=ax,
-            bbox=fancy_bbox,
-            fc=fancybox_fc,
-            ec=fancybox_ec,
-            lw=fancybox_lw,
-            shape=fancybox_shape,
-            alpha=fancybox_alpha,
-            pad=fancybox_pad,
-            zorder=fancybox_zorder,
-        )
-
+    p_cbar = add_colorbar_inset(
+        ax=ax,
+        colorbar_func=colorbar_func,
+        colorbar_func_kwargs=colorbar_func_kwargs,
+        # Inset options
+        projection=None,
+        box_aspect=box_aspect,
+        height=height,
+        pad=pad,
+        loc=loc,
+        inside_figure=inside_figure,
+        optimize_layout=optimize_layout,
+        fancybox=fancybox,
+        fancybox_pad=fancybox_pad,
+        fancybox_fc=fancybox_fc,
+        fancybox_ec=fancybox_ec,
+        fancybox_lw=fancybox_lw,
+        fancybox_alpha=fancybox_alpha,
+        fancybox_shape=fancybox_shape,
+    )
     return p_cbar
 
 
@@ -1532,34 +1495,50 @@ def plot_bivariate_colorbar(
     box_aspect=1,
     **kwargs,
 ):
-    """Plot a bivariate colorbar.
+    """
+    Plot a bivariate colorbar.
+
+    This function plots a 2D colorbar representing the specified
+    bivariate colormap. You can either provide:
+
+    - An existing Axes (`ax`) in which to place the colorbar (the colorbar will
+      be appended to one of its sides).
+    - A dedicated Axes object (`cax`) for direct drawing of the colorbar
+      on the specified `cax`.
+    - Or no Axes at all, in which case a new figure and Axes are created.
+
+    If both `ax` and `cax` are given, `ax` is ignored !.
 
     Parameters
     ----------
     bivariate_cmap : pycolorbar.BivariateColormap
         The colormap to be used for the bivariate colorbar.
     ax : matplotlib.axes.Axes, optional
-        The Axes in which to create or place the colorbar.
-        If None, the current axes (via plt.gca()) will be used unless `cax` is provided.
+        The Axes to which the colorbar should be appended. Ignored if
+        `cax` is provided. If both `ax` and `cax` are None, a new figure
+        and Axes are created.
     cax : matplotlib.axes.Axes, optional
-        If provided, the colorbar is drawn into this axes.
-        Otherwise an axis is created to the 'location' side of the current 'ax' axes.
-    origin : str, optional
-        Either 'lower' or 'upper'. It indicates where to locate the axis origin.
-        The default is 'lower'.
-    location : str, optional
-        The side of the of plot where to place the colorbar.
-        Either 'right', 'top', 'left' or 'bottom'. The default is 'right'.
-    size : str or float, optional
-        The size of the colorbar relative to the parent axes. The default is '30%'.
+        The Axes in which to directly draw the colorbar. If provided,
+        `ax` is ignored.
+    origin : {'lower', 'upper'}, optional
+        Indicates where to locate the origin in the colorbar Axes.
+        Default is 'lower'.
+    location : {'right', 'left', 'top', 'bottom'}, optional
+        The side of the plot where the colorbar should be placed
+        (when `ax` is used). Default is 'right'.
+    size : float or str, optional
+        The size of the colorbar relative to the parent Axes when using
+        `append_axes`. For instance, `'30%'` means 30% of the parent Axes
+        width (or height, depending on `location`). Default is `'30%'`.
     pad : float, optional
-        The padding between the parent axes and the colorbar. The default is 0.45.
+        The padding between the parent Axes and the colorbar, in inches.
+        Default is 0.45.
     box_aspect : float, optional
-        The aspect ratio of the colorbar axis box. The default is 1.
-        Additional keyword arguments passed to ``add_bivariate_colorbar``.
+        The aspect ratio of the colorbar Axes box. Default is 1.
     **kwargs : dict
-        Additional keyword arguments passed to the bivariate colorbar.
-        See the add_bivariate_colorbar documentation.
+        Additional keyword arguments passed to the internal
+        ``add_bivariate_colorbar`` function, which is responsible for
+        actually rendering the colorbar content.
 
     Returns
     -------
@@ -1567,12 +1546,14 @@ def plot_bivariate_colorbar(
         The image object representing the bivariate colorbar.
     """
     # Determine colorbar axis
-    if ax is None:
-        cax = plt.gca()
-    elif cax is None:
+    if cax is not None:
+        pass
+    elif ax is not None:  # and cax is None
         divider = make_axes_locatable(ax)
         cax = divider.append_axes(location, size=size, pad=pad, axes_class=plt.Axes)
         cax.set_box_aspect(box_aspect)
+    else:
+        fig, cax = plt.subplots()
 
     # Add the 2D colorbar with custom ticks
     p = add_bivariate_colorbar(

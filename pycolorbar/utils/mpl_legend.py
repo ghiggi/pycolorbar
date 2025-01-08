@@ -287,3 +287,121 @@ def add_fancybox(ax, bbox, fc="white", ec="none", lw=0.5, alpha=0.5, pad=0, shap
         clip_on=False,
     )
     return ax.add_artist(fancy_patch)
+
+
+def add_colorbar_inset(
+    *,
+    ax,
+    colorbar_func,
+    colorbar_func_kwargs,
+    projection=None,
+    box_aspect=1,
+    height=0.2,
+    pad=0.005,
+    loc="upper right",
+    inside_figure=True,
+    optimize_layout=True,
+    # Fancybox options
+    fancybox=False,
+    fancybox_pad=0,
+    fancybox_fc="white",
+    fancybox_ec="none",
+    fancybox_lw=0.5,
+    fancybox_alpha=0.4,
+    fancybox_shape="square",
+):
+    """Helper function to add an inset Axes and plot a colorbar within it.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Parent Axes to which the inset will be added.
+    colorbar_func : callable
+        A function that takes `cax` and extra keyword arguments to plot
+        the actual colorbar (e.g., `plot_bivariate_colorbar`).
+    colorbar_func_kwargs : dict
+        Extra kwargs passed directly to `colorbar_func`.
+    projection : str or None, optional
+        Projection type of the inset Axes, passed to `ax.inset_axes()`.
+    box_aspect : float, optional
+        Aspect ratio of the inset Axes. Default is 1.
+    height : float, optional
+        Height of the inset as a fraction of the main Axes. Default is 0.2.
+    pad : float, optional
+        Padding between the inset and main Axes in figure coordinates. Default is 0.005.
+    loc : str or tuple, optional
+        Location of the inset. Default is 'upper right'.
+    inside_figure : bool, optional
+        Whether inset is inside the figure region. Default is True.
+    optimize_layout : bool, optional
+        Whether to auto-adjust the inset position for ticklabels. Default is True.
+        NOTE: If True, do not call `fig.tight_layout()` afterwards.
+    fancybox : bool, optional
+        Whether to draw a fancy box behind the inset. Default is False.
+    fancybox_pad : float, optional
+        Padding of the fancy box in figure coordinates. Default is 0.
+    fancybox_fc : str, optional
+        Face color of the fancy box. Default is 'white'.
+    fancybox_ec : str, optional
+        Edge color of the fancy box. Default is 'none'.
+    fancybox_lw : float, optional
+        Line width of the fancy box. Default is 0.5.
+    fancybox_alpha : float, optional
+        Alpha of the fancy box. Default is 0.4.
+    fancybox_shape : {'circle', 'square'}, optional
+        Shape of the fancy box. Default is 'square'.
+
+    Returns
+    -------
+    matplotlib.image.AxesImage
+        The image (or artist) returned by `colorbar_func`.
+    """
+    # Compute the bounds for the inset Axes
+    cax_bounds = get_inset_bounds(
+        ax=ax,
+        loc=loc,
+        inset_height=height,
+        inside_figure=inside_figure,
+        aspect_ratio=box_aspect,
+        border_pad=pad,
+    )
+
+    # Create the inset Axes
+    cax = ax.inset_axes(bounds=cax_bounds, projection=projection)  # [x0, y0, width, height]
+
+    # Raise z-order so the colorbar is on top and fancybox behind
+    fancybox_zorder = cax.get_zorder() + 1
+    cax.set_zorder(cax.get_zorder() + 2)
+
+    # Plot the colorbar in the inset
+    print(colorbar_func_kwargs)
+    p_cbar = colorbar_func(
+        cax=cax,
+        **colorbar_func_kwargs,
+    )
+
+    # Adjust Axes position to accommodate ticklabels
+    if optimize_layout and inside_figure:
+        # Set new position
+        # - Since 'inset_axes' was used, cax has an AxesLocator
+        # - We remove the AxesLocator so we can set manually
+        new_cax_pos = optimize_inset_position(ax=ax, cax=cax, pad=pad)
+        cax.set_axes_locator(None)
+        cax.set_position(new_cax_pos)
+
+    # Optionally add fancy box behind the inset
+    if fancybox:
+        fancy_bbox = get_tightbbox_position(cax)
+        add_fancybox(
+            ax=ax,
+            bbox=fancy_bbox,
+            fc=fancybox_fc,
+            ec=fancybox_ec,
+            lw=fancybox_lw,
+            shape=fancybox_shape,
+            alpha=fancybox_alpha,
+            pad=fancybox_pad,
+            zorder=fancybox_zorder,
+        )
+
+    return p_cbar

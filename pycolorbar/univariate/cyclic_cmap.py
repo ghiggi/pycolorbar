@@ -1,3 +1,4 @@
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import ListedColormap
@@ -131,12 +132,16 @@ def plot_circular_colormap(
     # Create figure and axis
     if ax is None:
         fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+    if not isinstance(ax, mpl.projections.polar.PolarAxes):
+        msg = "plot_circular_colormap require a matplotlib.projection.PolarAxes. " + "Set projection='polar'"
+        raise ValueError(msg)
+
     # Set the 0° location to the top (zenith) instead of the default right
     ax.set_theta_zero_location("N")  # "N" stands for North (top)
     # Make the angle increase in the clockwise direction
     ax.set_theta_direction(-1)
     # Plot the colormesh on axis with colormap
-    _ = ax.pcolormesh(theta_mesh, radius_mesh, values, cmap=cmap)
+    p = ax.pcolormesh(theta_mesh, radius_mesh, values, cmap=cmap)
     # Draw inner and outer circle line
     if add_contours:
         theta = np.linspace(0, 2 * np.pi, nties)
@@ -150,4 +155,4 @@ def plot_circular_colormap(
         ax.set_title(cmap.name, fontsize=10, weight="bold")
     # Disable polar grid lines
     ax.grid(False)
-    return ax
+    return p

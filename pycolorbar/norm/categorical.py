@@ -39,8 +39,9 @@ def check_boundaries(boundaries, arg_name="boundaries"):
     """Check boundaries/levels validity."""
     if not isinstance(boundaries, (list, np.ndarray)):
         raise TypeError(f"'{arg_name}' should be a list or a numpy array.")
+    boundaries = np.array(boundaries).tolist()
     if not all(isinstance(b, (int, float)) for b in boundaries):
-        raise ValueError("'{arg_name}' must be a list of numbers.")
+        raise ValueError(f"'{arg_name}' must be a list of numbers.")
     if len(boundaries) < 3:
         raise ValueError(f"Expecting '{arg_name}' of at least size 3.")
     if not is_monotonically_increasing(boundaries):
