@@ -27,7 +27,6 @@
 """Define the register of univiariate colorbars."""
 
 import os
-from typing import Optional
 
 import numpy as np
 
@@ -245,7 +244,7 @@ class ColorbarRegistry:
             sort_keys=sort_keys,
         )
 
-    def validate(self, name: Optional[str] = None):
+    def validate(self, name: str | None = None):
         """
         Validate the registered colorbars. If a specific name is provided, only that colorbar is validated.
 

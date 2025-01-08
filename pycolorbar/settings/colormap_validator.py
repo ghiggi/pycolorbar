@@ -26,7 +26,6 @@
 # -----------------------------------------------------------------------------.
 """Implementation of pydantic validator for univariate colormap YAML files."""
 import re
-from typing import Optional, Union
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
@@ -62,7 +61,7 @@ def check_color_space(color_space):
 
 def is_monotonically_increasing(values):
     """Check if a list of values is monotonically increasing."""
-    return all(x <= y for x, y in zip(values, values[1:]))
+    return all(x <= y for x, y in zip(values, values[1:], strict=False))
 
 
 class ColormapValidator(BaseModel):
@@ -102,19 +101,19 @@ class ColormapValidator(BaseModel):
     # NOTE: The order here governs the call and validation order of below methods
 
     # Internal flag
-    colors_decoded: Optional[bool] = True
+    colors_decoded: bool | None = True
 
     # Mandatory colormap fields
     colormap_type: str
     color_space: str
 
     # Optional colormap fields
-    color_palette: Optional[Union[np.ndarray, list]] = None  # mandatory if segmentdata not provided !
-    segmentdata: Optional[dict] = None  # LinearSegmentedColormap
+    color_palette: np.ndarray | list | None = None  # mandatory if segmentdata not provided !
+    segmentdata: dict | None = None  # LinearSegmentedColormap
     # gamma: Optional[float] = None   # LinearSegmentedColormap
 
-    n: Optional[int] = None  # None for ListedColormap, 256 for LinearSegmentedColormap
-    auxiliary: Optional[dict] = {}  # auxiliary information of the colormap (not checked !)
+    n: int | None = None  # None for ListedColormap, 256 for LinearSegmentedColormap
+    auxiliary: dict | None = {}  # auxiliary information of the colormap (not checked !)
 
     # --------------------------------------------------
     # TODO:

@@ -28,7 +28,6 @@
 
 import os
 import tempfile
-from typing import Optional
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -281,7 +280,7 @@ class ColormapRegistry:
             cmap = cmap.reversed(name)
         return cmap
 
-    def validate(self, name: Optional[str] = None):
+    def validate(self, name: str | None = None):
         """
         Validate the registered colormaps. If a specific name is provided, only that colormap is validated.
 
@@ -371,7 +370,7 @@ class ColormapRegistry:
         plot_colormaps(cmaps, subplot_size=subplot_size)
 
 
-def register_colormaps(directory: str, name: Optional[str] = None, verbose: bool = True, force: bool = True):
+def register_colormaps(directory: str, name: str | None = None, verbose: bool = True, force: bool = True):
     """
     Register all colormap YAML files present in the specified directory (if name=None).
 
@@ -453,11 +452,11 @@ def get_cmap_dict(name):
 
 
 def get_cmap(
-    name: Optional[str] = None,
-    interval: Optional[tuple] = None,
-    alpha: Optional[float] = None,
-    n: Optional[int] = None,
-    bias: Optional[float] = 1,
+    name: str | None = None,
+    interval: tuple | None = None,
+    alpha: float | None = None,
+    n: int | None = None,
+    bias: float | None = 1,
 ):
     """
     Get a colormap instance.

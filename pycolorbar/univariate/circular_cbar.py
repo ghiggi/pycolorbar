@@ -108,7 +108,7 @@ def _add_ticklabels(ax, center, ticks, ticklabels, r_max, direction, theta_offse
     None
     """
     ticks = (direction * ticks - theta_offset) % 360
-    for tick, label in zip(ticks, ticklabels):
+    for tick, label in zip(ticks, ticklabels, strict=False):
         ha, va = _get_ticklabels_alignment(tick)
         ax.text(
             center[0] + np.cos(np.deg2rad(tick)) * (r_max + ticklabels_offset),

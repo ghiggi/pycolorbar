@@ -189,13 +189,13 @@ def get_cmap_segmentdata(cmap, n=None):
     r2 = rgb[:, 0]  # Left-hand value of red at sample point
 
     # Create lists of tuples for red, green, and blue segment data
-    R = list(zip(x, r2, r3))  # Red segment data
-    G = list(zip(x, g2, g3))  # Green segment data
-    B = list(zip(x, b2, b3))  # Blue segment data
+    R = list(zip(x, r2, r3, strict=False))  # Red segment data
+    G = list(zip(x, g2, g3, strict=False))  # Green segment data
+    B = list(zip(x, b2, b3, strict=False))  # Blue segment data
 
     # Create a dictionary to store the segment data for each color channel
     k = ["red", "green", "blue"]
-    segmentdata = dict(zip(k, [R, G, B]))
+    segmentdata = dict(zip(k, [R, G, B], strict=False))
 
     return segmentdata
 
@@ -676,7 +676,7 @@ def _check_cmaps(cmaps, n):
     if n is None:
         n = [None] * len(cmaps)
     # Retrieve and resample cmap if necessary
-    cmaps = [pycolorbar.get_cmap(cm, n=cm_n) for cm, cm_n in zip(cmaps, n)]
+    cmaps = [pycolorbar.get_cmap(cm, n=cm_n) for cm, cm_n in zip(cmaps, n, strict=False)]
     return cmaps
 
 

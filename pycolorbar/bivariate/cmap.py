@@ -898,7 +898,7 @@ def create_pandas_category_norm(series):
     """
     indices = np.arange(0, len(series.cat.categories)).astype(int).tolist()
     categories = list(series.cat.categories)
-    categories_dict = dict(zip(indices, categories))
+    categories_dict = dict(zip(indices, categories, strict=False))
     norm = CategoryNorm(categories_dict)
     return norm
 

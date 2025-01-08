@@ -64,7 +64,9 @@ def load_cpt(filepath):
 
     # Convert HSV to RGB [0-1]
     if color_model == "HSV":
-        r, g, b = zip(*[colorsys.hsv_to_rgb(rv / 360.0, gv, bv) for rv, gv, bv in zip(r, g, b)])
+        r, g, b = zip(
+            *[colorsys.hsv_to_rgb(rv / 360.0, gv, bv) for rv, gv, bv in zip(r, g, b, strict=False)], strict=False
+        )
 
     # Convert RGB [0-255] to RGB [0-1]
     if color_model == "RGB":
