@@ -38,7 +38,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
-from pycolorbar.norm import CategorizeNorm, CategoryNorm
+from pycolorbar.norm import CategorizeNorm, CategoryNorm, is_categorical_norm
 from pycolorbar.utils.docstring import copy_docstring
 from pycolorbar.utils.mpl_legend import add_colorbar_inset
 
@@ -902,6 +902,23 @@ def define_norm(arr):
     return Normalize(vmin=vmin, vmax=vmax)
 
 
+def check_expected_number_categories(n, n_categories, dim_name, obj="norm"):
+    """Check that number of color matches the number of categories."""
+    if n_categories != n:
+        msg = (
+            f"The colormap has {n} colors on {dim_name}, but the {obj} indicates {n_categories} categories. "
+            + "Please adapt the bivariate colormap to the number of expected categories."
+        )
+        raise ValueError(msg)
+
+
+def check_cmap_ncolors(norm, n, dim_name):
+    """Check for the number of colors for categorical norms."""
+    if norm is not None and is_categorical_norm(norm):
+        n_categories = norm.Ncmap
+        check_expected_number_categories(n, n_categories, dim_name=dim_name)
+
+
 def create_pandas_category_norm(series):
     """Create a CategoryNorm object for a pandas Categorical series.
 
@@ -1036,6 +1053,10 @@ def map_array_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 0
     if x.shape != y.shape:
         raise ValueError("x and y must have the same shape.")
 
+    # Check number of colors if categorical norm
+    check_cmap_ncolors(norm_y, n=n_y, dim_name="y")
+    check_cmap_ncolors(norm_x, n=n_x, dim_name="x")
+
     # Build a mask for NaNs
     mask = np.isnan(x) | np.isnan(y)
 
@@ -1091,6 +1112,22 @@ def map_pandas_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 
 
     # Retrieve number of x and y colors
     n_y, n_x, _ = rgba_array.shape
+
+    # Check for categorical pd.Series
+    if isinstance(x.dtype, pd.CategoricalDtype):
+        check_expected_number_categories(
+            n=n_x,
+            n_categories=len(x.cat.categories),
+            dim_name="x",
+            obj="categorical pd.Series",
+        )
+    if isinstance(y.dtype, pd.CategoricalDtype):
+        check_expected_number_categories(
+            n=n_y,
+            n_categories=len(y.cat.categories),
+            dim_name="y",
+            obj="categorical pd.Series",
+        )
 
     # Build initial mask for NaNs
     mask = x.isna() | y.isna()

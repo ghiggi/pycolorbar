@@ -25,6 +25,12 @@
 
 # -----------------------------------------------------------------------------.
 """Initialize norm module."""
-from pycolorbar.norm.categorical import CategorizeNorm, CategoryNorm, check_boundaries, check_categories
+from pycolorbar.norm.categorical import (
+    CategorizeNorm,
+    CategoryNorm,
+    check_boundaries,
+    check_categories,
+    is_categorical_norm,
+)
 
-__all__ = ["CategoryNorm", "CategorizeNorm", "check_boundaries", "check_categories"]
+__all__ = ["CategoryNorm", "CategorizeNorm", "check_boundaries", "check_categories", "is_categorical_norm"]

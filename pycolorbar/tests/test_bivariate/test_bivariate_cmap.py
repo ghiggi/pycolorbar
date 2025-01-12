@@ -180,6 +180,20 @@ class TestBivariateColormapMapping:
         mapped = bivariate_cmap(x, y, norm_x=norm_x, norm_y=norm_y)
         self.check_mapped_output_shape_and_range(mapped, x.shape)
 
+    def test_n_categories_disagree_with_cmap_n_colors(self, bivariate_cmap):
+        """Test raise error if number categories differ from number of colors."""
+        x = np.array([0, 1, 2, 6, 7, 9], dtype=float)
+        y = np.array([1, 3, 5, 7, 9, 10], dtype=float)
+
+        norm_x = BoundaryNorm(boundaries=[0, 3, 6, 10, 11], ncolors=4)
+        norm_y = BoundaryNorm(boundaries=[0, 2, 8, 10, 11], ncolors=4)
+
+        with pytest.raises(ValueError):
+            bivariate_cmap(x, y, norm_x=norm_x, norm_y=None)
+
+        with pytest.raises(ValueError):
+            bivariate_cmap(x, y, norm_x=None, norm_y=norm_y)
+
     def test_pandas_series_numeric(self, bivariate_cmap):
         """Test mapping numeric Pandas Series."""
         x = pd.Series([0.0, 5.0, 10.0, np.nan])
@@ -194,8 +208,8 @@ class TestBivariateColormapMapping:
 
     def test_pandas_series_categorical(self, bivariate_cmap):
         """Test mapping categorical Pandas Series."""
-        cats_x = pd.Series(["A", "B", "C", "C"], dtype="category")
-        cats_y = pd.Series(["C", "D", "D", "E"], dtype="category")
+        cats_x = pd.Series(["A", "B", "C"], dtype="category")  # 3 categories
+        cats_y = pd.Series(["C", "D", "E"], dtype="category")  # 3 categories
 
         # This should automatically map categories to [0..1].
         mapped = bivariate_cmap(cats_x, cats_y)
@@ -204,6 +218,17 @@ class TestBivariateColormapMapping:
         # Check correct value
         np.testing.assert_allclose(bivariate_cmap.rgba_array[-1, 0], mapped[0])
         np.testing.assert_allclose(bivariate_cmap.rgba_array[0, -1], mapped[-1])
+
+    def test_pandas_series_categorical_disagree_n_colors(self, bivariate_cmap):
+        """Test mapping categorical Pandas Series."""
+        series_numeric = pd.Series([1, 2, 3, 4])
+        series_categorical = pd.Series(["C", "D", "E", "F"], dtype="category")  # 4 categories
+
+        # This should automatically map categories to [0..1].
+        with pytest.raises(ValueError):
+            bivariate_cmap(x=series_numeric, y=series_categorical)
+        with pytest.raises(ValueError):
+            bivariate_cmap(x=series_categorical, y=series_numeric)
 
     def test_geopandas_series(self, bivariate_cmap):
         """Test mapping values from a GeoDataFrame."""
@@ -495,7 +520,7 @@ TEST_NORM_DICTS = {
     "Normalize": Normalize(0, 2),
     "BoundaryNorm": BoundaryNorm(boundaries=[0, 1, 2, 3], ncolors=3, clip=True),
     "Categorize": CategorizeNorm(boundaries=[0, 1, 2, 3], labels=["1", "2", "3"]),
-    "CategoryNorm": CategoryNorm({0: "A", 1: "B", 2: "C", 3: "D"}),
+    "CategoryNorm": CategoryNorm({0: "A", 1: "B", 2: "C"}),
 }
 
 

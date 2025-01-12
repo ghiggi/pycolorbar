@@ -62,6 +62,11 @@ def check_categories(categories):
     return categories
 
 
+def is_categorical_norm(norm):
+    """Check if a norm is categorical."""
+    return isinstance(norm, (BoundaryNorm, CategoryNorm, CategorizeNorm))
+
+
 class CategoryNorm(BoundaryNorm):  # BoundaryNorm instance required my matplotlib !
     """Generate a colormap index based on a category dictionary.
 

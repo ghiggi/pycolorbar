@@ -197,13 +197,17 @@ class TestColorbarRegistry:
         # Test with custom kwargs
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(
             name="TEST_CBAR_1",
-            user_plot_kwargs={"vmin": 10, "vmax": 20},
+            user_plot_kwargs={"vmin": 10, "vmax": 20, "col": "d1", "row": "d2"},
             user_cbar_kwargs={},
         )
         assert isinstance(plot_kwargs["cmap"], Colormap)
         assert isinstance(plot_kwargs["norm"], Normalize)
         assert plot_kwargs["norm"].vmin == 10.0
         assert plot_kwargs["norm"].vmax == 20.0
+
+        # Check that auxiliary arguments (i.e. for FacetGrid) are not discarded
+        assert plot_kwargs["col"] == "d1"
+        assert plot_kwargs["row"] == "d2"
 
         # Test inexisting colorbar configuration with no custom kwargs
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(name="INEXISTING")
