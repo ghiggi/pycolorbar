@@ -54,6 +54,7 @@ from pycolorbar.settings.colormap_registry import (  # noqa
 )
 from pycolorbar.settings.colormap_validator import validate_cmap_dict  # noqa
 from pycolorbar.settings.colormap_visualization import show_colormap, show_colormaps  # noqa
+from pycolorbar.univariate.colorbar import add_colorbar_legend, plot_colorbar, set_colorbar_fully_transparent  # noqa
 
 # Create a module-level instance of ColormapRegistry
 colormaps = ColormapRegistry.get_instance()

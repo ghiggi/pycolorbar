@@ -374,7 +374,6 @@ def add_colorbar_inset(
     cax.set_zorder(cax.get_zorder() + 2)
 
     # Plot the colorbar in the inset
-    print(colorbar_func_kwargs)
     p_cbar = colorbar_func(
         cax=cax,
         **colorbar_func_kwargs,

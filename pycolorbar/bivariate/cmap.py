@@ -1,3 +1,31 @@
+# -----------------------------------------------------------------------------.
+# MIT License
+
+# Copyright (c) 2024 pycolorbar developers
+#
+# This file is part of pycolorbar.
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# -----------------------------------------------------------------------------.
+"""Module defining BivariateColormap functionalities."""
+
 import base64
 import io
 import os
@@ -735,13 +763,10 @@ def get_bivariate_cmap_from_name(name, n, diagonal_tilt=0.8, offdiag_tilt=1, int
         return rgba_array
 
     ##------------------------------------------------------------------------.
-    # Retrieve bivariate choropleth cmaps
-    if name in BIVARIATE_CMAPS_DICT:
-        rgba_array = load_bivariate_palette(name=name, n=n, interp_method=interp_method)
-        return rgba_array
-
-    ##------------------------------------------------------------------------.
-    raise ValueError("The requested bivariate cmap is not yet implemented.")
+    # Retrieve bivariate cmap from file or dictionary
+    # if name in BIVARIATE_CMAPS_DICT:
+    rgba_array = load_bivariate_palette(name=name, n=n, interp_method=interp_method)
+    return rgba_array
 
 
 ####------------------------------------------------------------------------.
@@ -923,28 +948,26 @@ def normalize_array(arr, norm):
         Array of same shape as `arr` with values in [0..1], except for NaNs in `arr`,
         which propagate as NaNs here.
     """
-    # Normalize using provided norm to [0-1]
-    if norm is not None:
-        # The norm typically normalize values to [0-1]
-        arr_normed = norm(arr)
-        # If norm scaled to integer indices instead of 1
-        # --> (i.e. Boundary Norm, CategoryNorm, CategorizeNorm), scale to [0-1]
-        if hasattr(norm, "Ncmap"):
-            arr_normed = arr_normed.data / norm.Ncmap
-        return arr_normed
-
     # Deal with case if all NaN values
     if np.all(np.isnan(arr)):
         return np.ones_like(arr) * np.nan
 
-    # Otherwise normalize based on min/max values of data
+    # If norm not provided, normalize based on min/max values of data
     # --> TODO: This does not happen anymore
-    vmin, vmax = np.nanmin(arr), np.nanmax(arr)
-    rng = vmax - vmin
-    if rng > 0:
-        arr_normed = (arr - vmin) / rng
-    else:
-        raise ValueError(f"Please specify the norm. All array values are {vmin}.")
+    # if norm is None:
+    #     vmin, vmax = np.nanmin(arr), np.nanmax(arr)
+    #     rng = vmax - vmin
+    #     if rng > 0:
+    #         arr_normed = (arr - vmin) / rng
+    #      return arr_normed
+
+    # Normalize using provided norm to [0-1]
+    # - The norm typically normalize values to [0-1]
+    arr_normed = norm(arr)
+    # - If norm scaled to integer indices instead of 1
+    # --> (i.e. Boundary Norm, CategoryNorm, CategorizeNorm), scale to [0-1]
+    if hasattr(norm, "Ncmap"):
+        arr_normed = arr_normed.data / norm.Ncmap
     return arr_normed
 
 
@@ -1513,7 +1536,7 @@ def plot_bivariate_colorbar(
     ----------
     bivariate_cmap : pycolorbar.BivariateColormap
         The colormap to be used for the bivariate colorbar.
-    ax : matplotlib.axes.Axes, optional
+    ax : matplotlib.axes.Axes or cartopy.mpl.geoaxes.GeoAxesSubplot, optional
         The Axes to which the colorbar should be appended. Ignored if
         `cax` is provided. If both `ax` and `cax` are None, a new figure
         and Axes are created.
@@ -1735,7 +1758,35 @@ class BivariateColormap:
 
     def __getitem__(self, key):
         """Retrieve a subset of the colormap."""
-        rgba_array = self.rgba_array[key]
+        if not isinstance(key, tuple) or len(key) != 2:
+            raise ValueError("Exactly two slices (for y,x) are required.")
+
+        y_slice, x_slice = key
+        if not isinstance(x_slice, slice) or not isinstance(y_slice, slice):
+            raise ValueError("Subset both dimensions with slice objects.")
+
+        # Check slice length >= 2 for x dimension
+        start_x, stop_x, step_x = x_slice.indices(self.rgba_array.shape[1])
+        if ((stop_x - start_x) // step_x) < 2:
+            raise ValueError("x slice must include at least 2 elements.")
+
+        # Check slice length >= 2 for y dimension
+        start_y, stop_y, step_y = y_slice.indices(self.rgba_array.shape[0])
+        if ((stop_y - start_y) // step_y) < 2:
+            raise ValueError("y slice must include at least 2 elements.")
+
+        rgba_array = self.rgba_array.copy()[y_slice, x_slice, :]
+        return self._copy_attributes(BivariateColormap(rgba_array=rgba_array))
+
+    def __eq__(self, other):
+        """Check equality of two BivariateColormap instances."""
+        if not isinstance(other, BivariateColormap):
+            return False
+        return np.all(self.rgba_array == other.rgba_array) and self._bad == other._bad
+
+    def copy(self):
+        """Create a copy of the BivariateColormap instance."""
+        rgba_array = self.rgba_array.copy()
         return self._copy_attributes(BivariateColormap(rgba_array=rgba_array))
 
     def _copy_attributes(self, new_instance):
@@ -1781,7 +1832,7 @@ class BivariateColormap:
         y_indices = slice(y_start, y_end)
         return self[y_indices, x_indices]
 
-    def set_bad(self, color):
+    def set_bad(self, color, alpha=None):
         """
         Set the color for bad (masked) values.
 
@@ -1790,7 +1841,7 @@ class BivariateColormap:
         color : color spec
             The color to use for bad values.
         """
-        self._bad = color
+        self._bad = mpl.colors.to_rgba(color, alpha=alpha)
 
     def set_alpha(self, alpha):
         """
@@ -1981,9 +2032,9 @@ class BivariateColormap:
     map = __call__
 
     @copy_docstring(plot_bivariate_palette)
-    def plot(self, ax=None, **kwargs):  # noqa: D102
+    def plot(self, ax=None, disable_axis=True, **kwargs):  # noqa: D102
         # Plot colormap
-        return plot_bivariate_palette(self.rgba_array, ax=ax, **kwargs)
+        return plot_bivariate_palette(self.rgba_array, ax=ax, disable_axis=disable_axis, **kwargs)
 
     @copy_docstring(plot_bivariate_colorbar)
     def plot_colorbar(self, ax=None, cax=None, **kwargs):  # noqa: D102

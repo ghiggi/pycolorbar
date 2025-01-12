@@ -1,3 +1,30 @@
+# -----------------------------------------------------------------------------.
+# MIT License
+
+# Copyright (c) 2024 pycolorbar developers
+#
+# This file is part of pycolorbar.
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# -----------------------------------------------------------------------------.
+"""Module with functions to plot circular univariate colorbars."""
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -420,13 +447,13 @@ def add_circular_colorbar(
     ----------
     cmap : matplotlib.colors.Colormap
         The colormap to be used.
+    method : {'discrete', 'polar'}, optional
+        - 'discrete': Use a wedge-based approach (similar to a ListedColormap).
+        - 'polar': Use a polar projection with pcolormesh.
     ax : matplotlib.axes.Axes
             The Axes into which the colorbar will be inserted (or serve as the parent
             if `cax` is not provided). If None and `cax` is None, a new Axes/figure
             may be created automatically depending on the method.
-    method : {'discrete', 'polar'}, optional
-        - 'discrete': Use a wedge-based approach (similar to a ListedColormap).
-        - 'polar': Use a polar projection with pcolormesh.
     cax : matplotlib.axes.Axes, optional
         If provided, draw the colorbar directly in this Axes. Otherwise,
         an inset Axes will be appended to `ax` (if `ax` is provided).
@@ -599,7 +626,7 @@ def plot_circular_colorbar(
     ----------
     cmap : matplotlib.colors.Colormap
         The colormap to be used for the bivariate colorbar.
-    ax : matplotlib.axes.Axes, optional
+    ax : matplotlib.axes.Axes or cartopy.mpl.geoaxes.GeoAxesSubplot, optional
         The Axes to which the colorbar should be appended. Ignored if
         `cax` is provided. If both `ax` and `cax` are None, a new figure
         and Axes are created.
