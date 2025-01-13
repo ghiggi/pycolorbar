@@ -66,8 +66,15 @@ def plot_circular_colormap(
     r_min=0.2,
     r_max=1,
     ax=None,
-    add_contours=True,
-    add_cmap_name=True,
+    add_title=True,
+    antialiased=False,
+    # Orientation
+    clockwise=True,
+    zero_location="N",
+    # Contours
+    add_contour=True,
+    contour_color="black",
+    contour_linewidth=None,
     # Options for sine ramp of Kovesi
     n_cycles=0,  # 50
     amplitude=np.pi / 5,
@@ -78,31 +85,45 @@ def plot_circular_colormap(
 
     Parameters
     ----------
-    cmap : Colormap
+    cmap : matplotlib.colors.Colormap
         The colormap to be used for the plot.
     r_min : float, optional
         The minimum radius for the colormap circle. The default value is 0.2.
     r_max : float, optional
         The maximum radius for the colormap circle. The default value is  1.
     ax : matplotlib.axes._subplots.PolarAxesSubplot, optional
-        The axis on which to plot. If None, a new figure and axis are created. The default is None.
-    add_contours : bool, optional
+        The polar axis on which to plot. If None, a new figure and axis are created.
+        The default is None.
+    antialiased : bool, optional
+        Whether to apply antialiasing to the pcolormesh plot. Default is `False`.
+    add_title: bool, optional
+        Whether to add the colormap name as a title. Default is `True`.
+    clockwise : bool, optional
+        If `True`, the angles increase in the clockwise direction. Default is `True`.
+    zero_location : str, optional
+        The location of the zero angle. For example, "N" for North. Default is `"N"`.
+    add_contour : bool, optional
         Whether to add contour lines at the inner and outer boundaries.
-        The default is True.
-    add_cmap_name: bool, optional
-        Whether to add colormap name. The default is True.
+        The default is True..
+    contour_color : str or color, optional
+        The color of the contour lines. Default is `"black"`.
+    contour_linewidth : float, optional
+        The linewidth of the contour lines. If `None`, the default linewidth is used.
     n_cycles : int, optional
-        The number of sine wave cycles in the radial direction. Set to 0 to omit the spiral pattern.
+        The number of sine wave cycles in the radial direction.
+        Set to 0 to omit the spiral pattern.
         The default is 0.
     amplitude : float, optional
-        Amplitude of the sine wave component in the spiral pattern. The default value is np.pi/5.
+        Amplitude of the sine wave component in the spiral pattern.
+        The default value is np.pi/5.
     power : int, optional
-        Power of the radial distance in the spiral pattern. The default value is 4.
+        Power of the radial distance in the spiral pattern.
+        The default value is 4.
 
     Returns
     -------
-    ax : matplotlib.axes._subplots.PolarAxesSubplot
-        The axis with the plotted circular colormap.
+    matplotlib.collections.QuadMesh
+        The QuadMesh object representing the plotted circular colormap.
 
     References
     ----------
@@ -123,11 +144,6 @@ def plot_circular_colormap(
         power=power,
         shape=shape,
     )
-    # theta = np.linspace(0, 2*np.pi, nties)
-    # radius = np.linspace(r_min, r_max, 2)
-    # radius_mesh, theta_mesh = np.meshgrid(radius, theta)      # create a r,theta meshgrid
-    # # Define values between 0 and 1 for colors
-    # values = np.expand_dims(np.linspace(0, 1, nties)[:-1], axis=1)
 
     # Create figure and axis
     if ax is None:
@@ -137,22 +153,31 @@ def plot_circular_colormap(
         raise ValueError(msg)
 
     # Set the 0° location to the top (zenith) instead of the default right
-    ax.set_theta_zero_location("N")  # "N" stands for North (top)
+    ax.set_theta_zero_location(zero_location)
+
     # Make the angle increase in the clockwise direction
-    ax.set_theta_direction(-1)
+    if clockwise:
+        ax.set_theta_direction(-1)
+    else:
+        ax.set_theta_direction(1)
+
     # Plot the colormesh on axis with colormap
-    p = ax.pcolormesh(theta_mesh, radius_mesh, values, cmap=cmap)
+    p = ax.pcolormesh(theta_mesh, radius_mesh, values, cmap=cmap, antialiased=antialiased)
+
     # Draw inner and outer circle line
-    if add_contours:
+    if add_contour:
         theta = np.linspace(0, 2 * np.pi, nties)
-        ax.plot(theta, np.ones(theta.shape) * r_min, c="black")
-        ax.plot(theta, np.ones(theta.shape) * r_max, c="black")
+        ax.plot(theta, np.ones(theta.shape) * r_min, c=contour_color, linewidth=contour_linewidth)
+        ax.plot(theta, np.ones(theta.shape) * r_max, c=contour_color, linewidth=contour_linewidth)
+
     # Turnoff radial tick labels (yticks)
     ax.set_yticklabels([])
     ax.set_xticklabels([])
+
     # Add cmap name
-    if add_cmap_name:
+    if add_title:
         ax.set_title(cmap.name, fontsize=10, weight="bold")
+
     # Disable polar grid lines
     ax.grid(False)
     return p

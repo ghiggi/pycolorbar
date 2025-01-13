@@ -514,6 +514,7 @@ def test_plot():
     cmap = BivariateColormap.from_name("stevens.bluered", n=3)
     p = cmap.plot()
     assert isinstance(p, mpl.image.AxesImage)
+    plt.close()
 
 
 TEST_NORM_DICTS = {
@@ -542,21 +543,25 @@ def test_plot_colorbar(norm_type):
     # Plot colorbar
     p = cmap.plot_colorbar(xlabel="X", ylabel="Y", title="TITLE")
     assert isinstance(p, mpl.image.AxesImage)
+    plt.close()
 
     # Plot colorbar with inverted y axis
     p = cmap.plot_colorbar(origin="upper")
     assert isinstance(p, mpl.image.AxesImage)
+    plt.close()
 
     # Plot colorbar to the sides of a plot ax
     fig, ax = plt.subplots()
     ax.imshow(img_rgb)
     p = cmap.plot_colorbar(origin="upper", ax=ax)
     assert isinstance(p, mpl.image.AxesImage)
+    plt.close()
 
     # Plot colorbar into the specified cax
     fig, cax = plt.subplots()
     p = cmap.plot_colorbar(origin="upper", cax=cax)
     assert isinstance(p, mpl.image.AxesImage)
+    plt.close()
 
 
 def test_add_legend():
@@ -570,3 +575,4 @@ def test_add_legend():
     p = plt.imshow(img_rgb)  # dummy for creating an image
     p_cbar = cmap.add_legend(ax=p.axes)
     assert isinstance(p_cbar, mpl.image.AxesImage)
+    plt.close()

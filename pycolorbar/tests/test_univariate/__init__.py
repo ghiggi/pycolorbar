@@ -24,4 +24,4 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
-"""Utility functions for settings module."""
+"""Test univariate olormap and colorbar functionalities."""

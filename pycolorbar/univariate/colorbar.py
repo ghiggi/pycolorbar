@@ -32,17 +32,21 @@ from pycolorbar.utils.mpl_legend import add_colorbar_inset
 
 
 def _get_orientation_location(cbar_kwargs):
+
     location = cbar_kwargs.get("location", None)
     orientation = cbar_kwargs.get("orientation", None)
+
     # Set defaults
     if location is None and orientation is None:
         return "vertical", "right"
+
     # Check orientation is horizontal or vertical
     if orientation is not None and orientation not in ("horizontal", "vertical"):
         raise ValueError("Invalid orientation. Choose 'horizontal' or 'vertical'.")
     # Check location is top, left, right or bottom
     if location is not None and location not in ("top", "left", "right", "bottom"):
         raise ValueError("Invalid location. Choose 'top', 'left', 'right', or 'bottom'.")
+
     # Check compatible arguments
     if orientation is not None and location is not None:
         if orientation == "vertical":
@@ -52,11 +56,13 @@ def _get_orientation_location(cbar_kwargs):
         elif location not in ("bottom", "top"):
             raise ValueError("Invalid location for horizontal orientation. Choose 'bottom' or 'top'.")
         return orientation, location
+
     # Return with default location if missing
     if orientation is not None:
         if orientation == "vertical":
             return "vertical", "right"
         return "horizontal", "bottom"
+
     # Return with correct orientation if missing
     # if location is not None:
     if location in ("right", "left"):
@@ -98,9 +104,13 @@ def plot_colorbar(p, *, ax=None, cax=None, **cbar_kwargs):
     """
     cbar_kwargs = cbar_kwargs.copy()  # otherwise pop ticklabels outside the function
     ticklabels = cbar_kwargs.pop("ticklabels", None)
-    if cax is None:
+
+    # Define colorbar axis
+    if cax is None and ax is not None:
         # Defne colorbar axis
         orientation, location = _get_orientation_location(cbar_kwargs)
+        cbar_kwargs.pop("location", None)
+        cbar_kwargs.pop("orientation", None)
         divider = make_axes_locatable(ax)
         if orientation == "vertical":
             size = cbar_kwargs.pop("size", "5%")

@@ -1,4 +1,3 @@
-from pycolorbar.univariate.circular_cbar import plot_circular_colorbar, plot_circular_colorbar_discrete
 from pycolorbar.univariate.cmap import (
     adapt_cmap,
     combine_cmaps,
@@ -15,8 +14,12 @@ from pycolorbar.univariate.cmap import (
     is_isoluminant_cmap,
     is_sequential_cmap,
 )
+from pycolorbar.univariate.cmap_cyclic import get_discrete_cyclic_cmap, plot_circular_colormap
 from pycolorbar.univariate.cmap_viz import plot_circular_colormaps, plot_colormap, plot_colormaps
-from pycolorbar.univariate.cyclic_cmap import get_discrete_cyclic_cmap, plot_circular_colormap
+from pycolorbar.univariate.colorbar_circular import (
+    add_circular_colorbar_legend,
+    plot_circular_colorbar,
+)
 
 __all__ = [
     "adapt_cmap",
@@ -35,9 +38,9 @@ __all__ = [
     "get_shifted_cmap",
     "get_discrete_cyclic_cmap",
     "plot_circular_colormap",
-    "plot_circular_colorbar",
-    "plot_circular_colorbar_discrete",
     "plot_circular_colormaps",
+    "plot_circular_colorbar",
+    "add_circular_colorbar_legend",
     "plot_colormap",
     "plot_colormaps",
 ]

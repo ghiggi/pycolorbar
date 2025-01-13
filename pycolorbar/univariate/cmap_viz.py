@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from pycolorbar.univariate.cmap import get_cmap_colors, get_cmap_lab, get_cmap_lightness
-from pycolorbar.univariate.cyclic_cmap import plot_circular_colormap
+from pycolorbar.univariate.cmap_cyclic import plot_circular_colormap
 
 
 def _plot_colormaps_subplots(cmaps, plot_func, cols=None, subplot_size=None, subplot_kw=None, dpi=200, **plot_kwargs):
