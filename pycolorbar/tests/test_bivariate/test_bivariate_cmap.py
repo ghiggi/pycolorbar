@@ -270,7 +270,8 @@ class TestBivariateColormapMapping:
         # Create two xr.DataArrays with dimension to be broadcasted
         x = xr.DataArray([0, 1, 2, 3], dims=("points",))
         y = xr.DataArray([[0, 10, 20, 30], [30, 20, 10, 0]], dims=("realizations", "points"))
-        x_broadcasted, y_broadcasted = xr.broadcast(x, y)
+
+        # x_broadcasted, y_broadcasted = xr.broadcast(x, y)
 
         # Map colors
         mapped = bivariate_cmap(x, y)

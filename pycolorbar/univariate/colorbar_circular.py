@@ -448,7 +448,7 @@ def plot_circular_colorbar_wedges(
         )
         # Add ticks line
         if add_ticks:
-            _ = _add_ticks(
+            _add_ticks(
                 ax=cax,
                 ticks=ticks,
                 r_max=r_max,
@@ -467,7 +467,7 @@ def plot_circular_colorbar_wedges(
     cax.set_axis_off()
     # Adapt limits
     if adapt_limits:
-        _ = _set_adaptive_limits(ax=cax, r_max=r_max, center=center, margin_factor=0.1)
+        _set_adaptive_limits(ax=cax, r_max=r_max, center=center, margin_factor=0.1)
     # Return ax
     return collection
 

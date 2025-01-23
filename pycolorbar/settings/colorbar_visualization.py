@@ -48,11 +48,11 @@ def _draw_colorbar(plot_kwargs, cbar_kwargs, fig, ax=None, cax=None):
     return cbar
 
 
-def plot_colorbar(plot_kwargs, cbar_kwargs, ax=None, subplot_size=(6, 1)):
+def plot_colorbar(plot_kwargs, cbar_kwargs, ax=None, subplot_size=(6, 1), dpi=100):
     """Plot a single colorbar."""
     # Initialize figure if necessary
     if ax is None:
-        fig, ax = plt.subplots(figsize=subplot_size, layout="constrained")
+        fig, ax = plt.subplots(figsize=subplot_size, layout="constrained", dpi=dpi)
     # Draw figure
     _ = _draw_colorbar(plot_kwargs=plot_kwargs, cbar_kwargs=cbar_kwargs, fig=fig, ax=None, cax=ax)
     plt.show()

@@ -33,6 +33,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import pycolorbar
 from pycolorbar.univariate.colorbar import (
+    _get_orientation_location,
     add_colorbar_legend,
     plot_colorbar,
     set_colorbar_fully_transparent,
@@ -77,6 +78,40 @@ def test_plot_colorbar():
     p_cbar = plot_colorbar(p, ax=ax, ticklabels=ticklabels)  # without ticks !
     assert isinstance(p_cbar, mpl.colorbar.Colorbar)
     plt.close()
+
+
+class TestGetOrientationLocation:
+    """Test arguments for colorbar positioning."""
+
+    def test_defaults(self):
+        assert _get_orientation_location({}) == ("vertical", "right")
+
+    def test_defaults_with_valid_orientation(self):
+        assert _get_orientation_location({"orientation": "vertical"}) == ("vertical", "right")
+        assert _get_orientation_location({"orientation": "horizontal"}) == ("horizontal", "bottom")
+
+    def test_defaults_with_valid_location(self):
+        assert _get_orientation_location({"location": "left"}) == ("vertical", "left")
+        assert _get_orientation_location({"location": "bottom"}) == ("horizontal", "bottom")
+
+    def test_valid_orientation_location_combinations(self):
+        assert _get_orientation_location({"orientation": "horizontal", "location": "top"}) == ("horizontal", "top")
+        assert _get_orientation_location({"orientation": "vertical", "location": "left"}) == ("vertical", "left")
+
+    def test_invalid_orientation(self):
+        with pytest.raises(ValueError):
+            _get_orientation_location({"orientation": "invalid"})
+
+    def test_invalid_location(self):
+        with pytest.raises(ValueError):
+            _get_orientation_location({"location": "invalid"})
+
+    def test_invalid_orientation_location_combination(self):
+        with pytest.raises(ValueError):
+            _get_orientation_location({"orientation": "vertical", "location": "top"})
+
+        with pytest.raises(ValueError):
+            _get_orientation_location({"orientation": "horizontal", "location": "left"})
 
 
 def test_plot_colorbar_orientation_and_location():
