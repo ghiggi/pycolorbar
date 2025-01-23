@@ -28,14 +28,18 @@
 
 import os
 import tempfile
-from typing import Optional
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
+from pycolorbar.settings.categories import (
+    check_category_list,
+    get_aux_category,
+    get_matplotlib_cmaps,
+)
 from pycolorbar.settings.colormap_io import read_cmap_dict, write_cmap_dict
-from pycolorbar.settings.utils import get_auxiliary_categories
+from pycolorbar.univariate import adapt_cmap
 from pycolorbar.utils.yaml import list_yaml_files
 
 # Matplotlib Registry Initialization:
@@ -46,6 +50,16 @@ from pycolorbar.utils.yaml import list_yaml_files
 #
 #   _colormaps = ColormapRegistry()
 #   globals().update(_colormaps)
+
+
+def flatten_list(nested_list):
+    """Flatten a nested list into a single-level list."""
+    if isinstance(nested_list, list) and len(nested_list) == 0:
+        return nested_list
+    # If list is already flat, return as is to avoid flattening to chars
+    if isinstance(nested_list, list) and not isinstance(nested_list[0], list):
+        return nested_list
+    return [item for sublist in nested_list for item in sublist] if isinstance(nested_list, list) else [nested_list]
 
 
 class ColormapRegistry:
@@ -266,7 +280,7 @@ class ColormapRegistry:
             cmap = cmap.reversed(name)
         return cmap
 
-    def validate(self, name: Optional[str] = None):
+    def validate(self, name: str | None = None):
         """
         Validate the registered colormaps. If a specific name is provided, only that colormap is validated.
 
@@ -309,36 +323,37 @@ class ColormapRegistry:
         cmap_dict = self.get_cmap_dict(name)
         write_cmap_dict(cmap_dict=cmap_dict, filepath=filepath, force=force)
 
-    def _get_subset_names(self, category):
+    def _get_category_subset(self, category):
+        """List subset of colormaps matching the specified category."""
+        category = check_category_list(category)
+
         names = []
         for name in self.names:
             cmap_dict = self.get_cmap_dict(name)
-            categories = get_auxiliary_categories(cmap_dict)
-            categories = [cat.upper() for cat in categories]
-            if category.upper() in categories:
+            aux_category = get_aux_category(cmap_dict)  # list of upper case strings
+            if np.all(np.isin(category, aux_category)):  # intersection !
                 names.append(name)
         return names
 
     def available(self, category=None, include_reversed=False):
-        """List the name of available colormaps for a specific category."""
-        names = self.names if category is None else self._get_subset_names(category=category)
-
+        """List the name of available colormaps for specific categories."""
+        names = self.names if category is None else self._get_category_subset(category=category)
         if include_reversed:
             names = [name + "_r" for name in names] + names
         return sorted(names)
 
     def show_colormap(self, name):
         """Display a colormap."""
-        from pycolorbar.settings.colormap_visualization import plot_colormap
+        from pycolorbar.univariate import plot_colormap
 
         cmap = self.get_cmap(name)
         plot_colormap(cmap)
 
     def show_colormaps(self, category=None, include_reversed=False, subplot_size=None):
-        """Display available colormaps (optionally of a specific category)."""
-        from pycolorbar.settings.colormap_visualization import plot_colormaps
+        """Display available colormaps."""
+        from pycolorbar.univariate import plot_colormaps
 
-        # Retrieve available colormaps (of a given category)
+        # Retrieve available colormaps (of given categories)
         names = self.available(category=category, include_reversed=include_reversed)
         if len(names) == 0:
             raise ValueError("No colormaps are yet registered in the pycolorbar ColormapRegistry.")
@@ -355,7 +370,7 @@ class ColormapRegistry:
         plot_colormaps(cmaps, subplot_size=subplot_size)
 
 
-def register_colormaps(directory: str, name: Optional[str] = None, verbose: bool = True, force: bool = True):
+def register_colormaps(directory: str, name: str | None = None, verbose: bool = True, force: bool = True):
     """
     Register all colormap YAML files present in the specified directory (if name=None).
 
@@ -436,7 +451,13 @@ def get_cmap_dict(name):
     return colormaps.get_cmap_dict(name)
 
 
-def get_cmap(name: Optional[str] = None, lut: Optional[int] = None):
+def get_cmap(
+    name: str | None = None,
+    interval: tuple | None = None,
+    alpha: float | None = None,
+    n: int | None = None,
+    bias: float | None = 1,
+):
     """
     Get a colormap instance.
 
@@ -445,142 +466,56 @@ def get_cmap(name: Optional[str] = None, lut: Optional[int] = None):
     name : str
         The name of a colormap known to pycolorbar or Matplotlib.
         If the name ends with the suffix `_r`, the colormap is reversed.
-    lut : int or None
-        If not `None` (the default), the colormap will be resampled to have *lut* entries in the lookup table.
+    interval : tuple of float, optional
+        A tuple (start, end) with values between 0 and 1, indicating the fraction of the colormap to use.
+        Defaults to using the full colormap (0, 1).
+    n : int, optional
+        If not `None` (the default), the colormap will be resampled to have n entries in the lookup table.
         If the name ends with the suffix `_r`, the resampling is done after reversing the colormap.
+    alpha : float, optional
+        A transparency value to apply to the colors, where 0 is fully transparent and 1 is fully opaque.
+        If `alpha` is None (the default), the original transparency of the colors is preserved.
+    bias : float, optional
+        A factor that skews the distribution of colors in the colormap.
+        A `bias` of 1 (default) results in no bias.
+        Values less than 1 space the colors more widely at the high end of the color map.
+        Values greater than 1 space the colors more widely at the lower end of the colormap.
 
     Returns
     -------
-    Colormap
+    matplotlib.colors.Colormap
+        A new colormap that reflects the specified interval, n, alpha and bias values.
     """
     colormaps = ColormapRegistry.get_instance()
 
     # Use default matplotlib colormap
     if name is None:
-        return plt.get_cmap(name=name, lut=lut)
-
-    # If already colormap provided, return it
-    if isinstance(name, mpl.colors.Colormap):
-        return name
-
-    # Retrieve registered colormaps names
-    pycolorbar_registered_names = colormaps.names + [s + "_r" for s in colormaps.names]
-    mpl_registered_names = plt.colormaps()
-
-    # Check if reversed colormap
-    has_r_suffix = name.endswith("_r")
-    # Pycolorbar colormap
-    if name in pycolorbar_registered_names:
-        cmap = colormaps.get_cmap(name)
-        if has_r_suffix:
-            cmap = cmap.reversed()
-        if lut is not None:
-            cmap = cmap.resampled(lut)
-        return cmap
-
-    # Matplotlib registered colormap
-    if name in mpl_registered_names:
-        return plt.get_cmap(name=name, lut=lut)
-    # Unavailable colormap
-    raise ValueError(
-        f"{name} is not registered in pycolorbar and matplotlib !\n "
-        f"Valid matplotlib colormap are {mpl_registered_names}.\n "
-        f"Valid pycolorbar colormap are {pycolorbar_registered_names}.",
-    )
-
-
-def _get_mpl_cmap_by_category(category):
-    """Return matplotlib colormap names by category.
-
-    See: https://matplotlib.org/stable/users/explain/colors/colormaps.html#choosing-colormaps
-    """
-    type_dict = {
-        "PERCEPTUAL": ["viridis", "plasma", "inferno", "magma", "cividis"],  # PERCEPTUALLY UNIFORM
-        "SEQUENTIAL": [
-            "viridis",
-            "plasma",
-            "inferno",
-            "magma",
-            "cividis",
-            "Greys",
-            "Purples",
-            "Blues",
-            "Greens",
-            "Oranges",
-            "Reds",
-            "YlOrBr",
-            "YlOrRd",
-            "OrRd",
-            "PuRd",
-            "RdPu",
-            "BuPu",
-            "GnBu",
-            "PuBu",
-            "YlGnBu",
-            "PuBuGn",
-            "BuGn",
-            "YlGn",
-            "binary",
-            "gist_yarg",
-            "gist_gray",
-            "gray",
-            "bone",
-            "pink",
-            "spring",
-            "summer",
-            "autumn",
-            "winter",
-            "cool",
-            "Wistia",
-            "hot",
-            "afmhot",
-            "gist_heat",
-            "copper",
-        ],
-        "DIVERGING": [
-            "PiYG",
-            "PRGn",
-            "BrBG",
-            "PuOr",
-            "RdGy",
-            "RdBu",
-            "RdYlBu",
-            "RdYlGn",
-            "Spectral",
-            "coolwarm",
-            "bwr",
-            "seismic",
-        ],
-        "QUALITATIVE": [
-            "Pastel1",
-            "Pastel2",
-            "Paired",
-            "Accent",
-            "Dark2",
-            "Set1",
-            "Set2",
-            "Set3",
-            "tab10",
-            "tab20",
-            "tab20b",
-            "tab20c",
-        ],
-        "CYCLIC": ["twilight", "twilight_shifted", "hsv"],
-    }
-    type_dict["CATEGORICAL"] = type_dict["QUALITATIVE"]
-    return type_dict.get(category.upper(), [])
-
-
-def _get_matplotlib_cmaps(category=None, include_reversed=False):
-    if category is None:
-        names = plt.colormaps()
-        names = [name for name in names if not name.endswith("_r")]
+        cmap = plt.get_cmap(name=name)
+    # If already a colormap
+    elif isinstance(name, mpl.colors.Colormap):
+        cmap = name
+    # Else retrieve registered
     else:
-        names = _get_mpl_cmap_by_category(category=category)
-    # Include names with _r suffix
-    if include_reversed:
-        names = [name + "_r" for name in names] + names
-    return names
+        # Retrieve registered colormaps names
+        pycolorbar_registered_names = colormaps.names + [s + "_r" for s in colormaps.names]
+        mpl_registered_names = plt.colormaps()
+
+        # Get pycolorbar colormap
+        if name in pycolorbar_registered_names:
+            cmap = colormaps.get_cmap(name)  # this reverse if necessary
+        # Or registered matplotlib colormap
+        elif name in mpl_registered_names:
+            cmap = plt.get_cmap(name=name)
+        # Unavailable colormap
+        else:
+            raise ValueError(
+                f"{name} is not registered in pycolorbar and matplotlib !\n "
+                f"Valid matplotlib colormap are {mpl_registered_names}.\n "
+                f"Valid pycolorbar colormap are {pycolorbar_registered_names}.",
+            )
+    # Adapt colormap if asked
+    cmap = adapt_cmap(cmap, interval=interval, n=n, alpha=alpha, bias=bias)
+    return cmap
 
 
 def available_colormaps(category=None, include_reversed=False):
@@ -589,11 +524,11 @@ def available_colormaps(category=None, include_reversed=False):
 
     Parameters
     ----------
-    category : str, optional
-        The name of an optional category to subset the list of registered colormaps.
-        In the colormap YAML file, the `auxiliary/category` field enable to specify the relevant
+    category : str or list,  optional
+        The name(s) of an optional category to subset the list of registered colormaps.
+        In the colormap YAML file, the `auxiliary/category` field lists the relevant
         categories of the colormap.
-        Common categories are `'diverging'`, `'cyclic'`, `'sequential'`,
+        Common colormap categories are `'diverging'`, `'cyclic'`, `'sequential'`,
         `'categorical'`, `'qualitative'`, `'perceptual'`.
         If `None` (the default), returns all available colormaps.
     include_reversed : bool, optional
@@ -606,8 +541,11 @@ def available_colormaps(category=None, include_reversed=False):
         List of registered colormaps.
     """
     colormaps = ColormapRegistry.get_instance()
+    category = check_category_list(category)
     names = colormaps.available(category=category, include_reversed=include_reversed)
-    names += _get_matplotlib_cmaps(category=category, include_reversed=include_reversed)
+    # Add matplotlib colormaps
+    # - Only if categories is None or the specified category is a colormap category.
+    names += get_matplotlib_cmaps(category=category, include_reversed=include_reversed)
     return sorted(np.unique(names))
 
 

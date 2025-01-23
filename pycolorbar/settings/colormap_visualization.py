@@ -25,63 +25,9 @@
 
 # -----------------------------------------------------------------------------.
 """Define functions to visualize univariate colormaps."""
-import math
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import numpy as np
-
-
-def plot_colormap(cmap, dpi=200):
-    """Plot a single colormap."""
-    fig, ax = plt.subplots(figsize=(4, 0.4), dpi=dpi)
-    mpl.colorbar.ColorbarBase(ax, cmap=cmap, orientation="horizontal")
-    ax.set_title(cmap.name, fontsize=10, weight="bold")
-    plt.show()
-
-
-def plot_colormaps(cmaps, cols=None, subplot_size=None, dpi=200):
-    """Plot a list of colormaps."""
-    # Define subplot_size
-    if subplot_size is None:
-        subplot_size = (2, 0.5)
-
-    # Define number of subplots
-    n = len(cmaps)
-
-    # Define a layout most similar to a square
-    if cols is None:
-        cols = math.ceil(math.sqrt(n))
-        cols = min(cols, 6)
-
-    # Define number of rows required
-    rows = int(np.ceil(n / cols))
-
-    # Define figure width and height
-    fig_width = cols * subplot_size[0]
-    fig_height = rows * subplot_size[1]
-
-    # Create dummy image for colormap
-    im = np.outer(np.ones(10), np.arange(100))
-
-    # Initialize figure
-    fig, axes = plt.subplots(rows, cols, figsize=(fig_width, fig_height), dpi=dpi)
-    fig.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.1, wspace=0.1)
-
-    # Flatten axes for easy iteration
-    axes = axes.ravel()
-
-    # Loop through colormaps and axes
-    for cmap, ax in zip(cmaps, axes):
-        ax.set_title(cmap.name, fontsize=10, weight="bold")
-        ax.imshow(im, cmap=cmap)
-        ax.axis("off")  # Set axis off
-
-    # Turn off any remaining axes
-    for ax in axes[n:]:
-        ax.axis("off")
-
-    plt.show()
+from pycolorbar.settings.categories import check_category_list
+from pycolorbar.univariate import plot_colormap, plot_colormaps
 
 
 def show_colormap(cmap):
@@ -97,9 +43,11 @@ def show_colormaps(category=None, include_reversed=False, cols=None, subplot_siz
     import pycolorbar
 
     # Retrieve list of colormaps names
-    if category is not None and category == "pycolorbar":
-        names = pycolorbar.colormaps.available(include_reversed=include_reversed)
-    else:  # include also matplotlib
+    category = check_category_list(category)  # return upper case names
+    if category is not None and "PYCOLORBAR" in category:
+        category = [category for category in category if category != "PYCOLORBAR"]
+        names = pycolorbar.colormaps.available(category=category, include_reversed=include_reversed)
+    else:  # include also matplotlib colormaps
         names = pycolorbar.available_colormaps(category=category, include_reversed=include_reversed)
 
     # Retrieve colormaps to display
@@ -109,4 +57,4 @@ def show_colormaps(category=None, include_reversed=False, cols=None, subplot_siz
     if len(cmaps) > 0:
         plot_colormaps(cmaps, cols=cols, subplot_size=subplot_size)
     else:
-        print(f"No colormaps are available within the category '{category}'.")
+        print(f"No colormaps are available for categories '{category}'.")

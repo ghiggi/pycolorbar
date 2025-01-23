@@ -27,7 +27,6 @@
 """Implementation of pydantic validator for univariate colorbar YAML files."""
 
 import re
-from typing import Optional, Union
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -44,14 +43,14 @@ class ColormapSettings(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    name: Union[str, list[str]]
-    n: Optional[Union[int, list[int]]] = None
-    bad_color: Optional[Union[str, list, tuple]] = None
-    bad_alpha: Optional[float] = None
-    over_color: Optional[Union[str, list, tuple]] = None
-    over_alpha: Optional[float] = None
-    under_color: Optional[Union[str, list, tuple]] = None
-    under_alpha: Optional[float] = None
+    name: str | list[str]
+    n: int | list[int] | None = None
+    bad_color: str | list | tuple | None = None
+    bad_alpha: float | None = None
+    over_color: str | list | tuple | None = None
+    over_alpha: float | None = None
+    under_color: str | list | tuple | None = None
+    under_alpha: float | None = None
 
     @field_validator("name")
     def validate_name(cls, v):
@@ -172,9 +171,9 @@ def _get_boundary_norm_expected_ncolors(norm_settings):
 class NormalizeSettings(BaseModel):
     """Pydanctic model for ``Normalize`` settings."""
 
-    vmin: Optional[float] = None
-    vmax: Optional[float] = None
-    clip: Optional[bool] = False
+    vmin: float | None = None
+    vmax: float | None = None
+    clip: bool | None = False
 
     @field_validator("clip")
     def validate_clip(cls, v):
@@ -257,9 +256,9 @@ class BoundaryNormSettings(BaseModel):
     """Pydantic model for ``BoundaryNorm`` settings."""
 
     boundaries: list[float] = Field(..., description="A list of boundary values.")
-    clip: Optional[bool] = False
-    extend: Optional[str] = "neither"
-    ncolors: Optional[int] = None  # "ncolors" if not specified is determined based on len(boundaries) and extend
+    clip: bool | None = False
+    extend: str | None = "neither"
+    ncolors: int | None = None  # "ncolors" if not specified is determined based on len(boundaries) and extend
 
     @field_validator("boundaries")
     def validate_boundaries(cls, v):
@@ -321,9 +320,9 @@ class BoundaryNormSettings(BaseModel):
 class NoNormSettings(BaseModel):
     """Pydanctic model for ``NoNorm`` settings."""
 
-    vmin: Optional[float] = None
-    vmax: Optional[float] = None
-    clip: Optional[bool] = False
+    vmin: float | None = None
+    vmax: float | None = None
+    clip: bool | None = False
 
     @field_validator("clip")
     def validate_clip(cls, v):
@@ -349,9 +348,9 @@ class NoNormSettings(BaseModel):
 class CenteredNormSettings(BaseModel):
     """Pydantic model for ``CenteredNorm`` settings."""
 
-    vcenter: Optional[Union[int, float]] = 0
-    halfrange: Optional[Union[int, float]] = None
-    clip: Optional[bool] = False
+    vcenter: int | float | None = 0
+    halfrange: int | float | None = None
+    clip: bool | None = False
 
     @field_validator("clip")
     def validate_clip(cls, v):
@@ -384,8 +383,8 @@ class TwoSlopeNormSettings(BaseModel):
     """Pydantic model for ``TwoSlopeNorm`` settings."""
 
     vcenter: float = Field(..., description="Value over which to center the colormap.")
-    vmin: Optional[float] = None
-    vmax: Optional[float] = None
+    vmin: float | None = None
+    vmax: float | None = None
 
     @field_validator("vcenter")
     def validate_vcenter(cls, v):
@@ -411,9 +410,9 @@ class TwoSlopeNormSettings(BaseModel):
 class LogNormSettings(BaseModel):
     """Pydantic model for ``LogNorm`` settings."""
 
-    vmin: Optional[float] = None
-    vmax: Optional[float] = None
-    clip: Optional[bool] = False
+    vmin: float | None = None
+    vmax: float | None = None
+    clip: bool | None = False
 
     @field_validator("clip")
     def validate_clip(cls, v):
@@ -442,11 +441,11 @@ class SymLogNormSettings(BaseModel):
     """Pydanctic model for ``SymLogNorm`` settings."""
 
     linthresh: float = Field(..., description="SymLogNorm linthres value.")
-    linscale: Optional[float] = 1.0
-    base: Optional[float] = 10
-    vmin: Optional[float] = None
-    vmax: Optional[float] = None
-    clip: Optional[bool] = False
+    linscale: float | None = 1.0
+    base: float | None = 10
+    vmin: float | None = None
+    vmax: float | None = None
+    clip: bool | None = False
 
     @field_validator("linthresh")
     def validate_linthresh(cls, v):
@@ -486,9 +485,9 @@ class PowerNormSettings(BaseModel):
     """Pydantic model for ``PowerNorm`` settings."""
 
     gamma: float = Field(..., description="PowerNorm gamma value.")
-    vmin: Optional[float] = None
-    vmax: Optional[float] = None
-    clip: Optional[bool] = False
+    vmin: float | None = None
+    vmax: float | None = None
+    clip: bool | None = False
 
     @field_validator("gamma")
     def validate_gamma(cls, v):
@@ -520,10 +519,10 @@ class PowerNormSettings(BaseModel):
 class AsinhNormSettings(BaseModel):
     """Pydantic model for ``AsinhNorm`` settings."""
 
-    linear_width: Optional[Union[int, float]] = 1
-    vmin: Optional[float] = None
-    vmax: Optional[float] = None
-    clip: Optional[bool] = False
+    linear_width: int | float | None = 1
+    vmin: float | None = None
+    vmax: float | None = None
+    clip: bool | None = False
 
     @field_validator("linear_width")
     def validate_linear_width(cls, v):
@@ -608,16 +607,16 @@ class ColorbarSettings(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    extend: Optional[str] = "neither"
-    extendfrac: Optional[Union[float, list[float], str]] = "auto"
-    extendrect: Optional[bool] = False
-    label: Optional[str] = None  # title of colorbar
-    ticklabels: Optional[list[str]] = None
-    ticks: Optional[list[Union[int, float]]] = None  # title of colorbar
-    ticklocation: Optional[str] = "auto"
-    spacing: Optional[str] = "uniform"  # or proportional
-    drawedges: Optional[bool] = False
-    shrink: Optional[float] = 1
+    extend: str | None = "neither"
+    extendfrac: float | list[float] | str | None = "auto"
+    extendrect: bool | None = False
+    label: str | None = None  # title of colorbar
+    ticklabels: list[str] | None = None
+    ticks: list[int | float] | None = None  # title of colorbar
+    ticklocation: str | None = "auto"
+    spacing: str | None = "uniform"  # or proportional
+    drawedges: bool | None = False
+    shrink: float | None = 1
 
     @field_validator("extend")
     def validate_extend(cls, v):

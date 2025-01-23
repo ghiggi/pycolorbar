@@ -67,7 +67,7 @@ documentation.
 Consider adding relevant colormap categories within the ``category`` field of the ``auxiliary`` subdictionary.
 These categories help differentiate between colormaps based on:
 
-- the type of colormap: ``cyclic``, ``diverging``, ``sequential``, ``qualitative``, ``perceptual``.
+- the type of colormap: ``cyclic``, ``diverging``, ``sequential``, ``qualitative``, ``perceptual``, ``rainbow``, ``spectral``, ``cvd_friendly``.
 - the variables for which the colormap is commonly used (i.e. ``elevation``, ``bathymetry``, ``precipitation``, ``temperature``, etc.).
 - the author or source agency of the colormap (i.e. ``brewer``, ``crameri``, ``meteoswiss``, ``nasa``, etc.).
 

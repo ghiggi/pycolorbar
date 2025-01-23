@@ -24,6 +24,7 @@
 # SOFTWARE.
 
 # -----------------------------------------------------------------------------.
+"""Test directories utilities."""
 import os
 
 import pytest

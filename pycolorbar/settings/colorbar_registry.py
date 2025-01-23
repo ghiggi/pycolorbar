@@ -27,11 +27,12 @@
 """Define the register of univiariate colorbars."""
 
 import os
-from typing import Optional
 
+import numpy as np
+
+from pycolorbar.settings.categories import check_category_list, get_aux_category
 from pycolorbar.settings.colorbar_io import read_cbar_dicts, write_cbar_dicts
 from pycolorbar.settings.colorbar_validator import validate_cbar_dict
-from pycolorbar.settings.utils import get_auxiliary_categories
 from pycolorbar.utils.yaml import list_yaml_files
 
 
@@ -243,7 +244,7 @@ class ColorbarRegistry:
             sort_keys=sort_keys,
         )
 
-    def validate(self, name: Optional[str] = None):
+    def validate(self, name: str | None = None):
         """
         Validate the registered colorbars. If a specific name is provided, only that colorbar is validated.
 
@@ -295,22 +296,22 @@ class ColorbarRegistry:
                 names.append(name)
         return names
 
+    def _get_category_subset(self, category, candidates_names):
+        """List subset of colorbars matching the specified category."""
+        category = check_category_list(category)  # ensure upper case
+        names = []
+        for name in candidates_names:
+            cbar_dict = self.get_cbar_dict(name, resolve_reference=True)
+            aux_category = get_aux_category(cbar_dict)  # list of upper case strings
+            if np.all(np.isin(category, aux_category)):  # intersection !
+                names.append(name)
+        return names
+
     def available(self, category=None, exclude_referenced=False):
         """List the name of available colorbars for a specific category."""
         names = self.get_standalone_settings() if exclude_referenced else self.names
-
-        if category is None:
-            return names
-
-        # Subset names by category
-        cat_names = []
-        for name in names:
-            cbar_dict = self.get_cbar_dict(name, resolve_reference=True)
-            categories = get_auxiliary_categories(cbar_dict)
-            categories = [cat.upper() for cat in categories]
-            if category.upper() in categories:
-                cat_names.append(name)
-        return cat_names
+        names = names if category is None else self._get_category_subset(category=category, candidates_names=names)
+        return names
 
     def show_colorbar(self, name, user_plot_kwargs=None, user_cbar_kwargs=None, fig_size=(6, 1)):
         """Display a colorbar (updated with optional user arguments)."""
@@ -511,9 +512,9 @@ def available_colorbars(category=None, exclude_referenced=False):
 
     Parameters
     ----------
-    category : str, optional
-        The name of an optional category to subset the list of registered colorbars.
-        In the colorbar YAML file, the `auxiliary/category` field enable to specify the relevant
+    category : str or list,  optional
+        The name(s) of an optional category to subset the list of registered colorbars.
+        In the colormap YAML file, the `auxiliary/category` field lists the relevant
         categories of the colorbar.
         If `None` (the default), returns all available colorbars.
     exclude_referenced : bool, optional

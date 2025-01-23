@@ -48,11 +48,11 @@ def _draw_colorbar(plot_kwargs, cbar_kwargs, fig, ax=None, cax=None):
     return cbar
 
 
-def plot_colorbar(plot_kwargs, cbar_kwargs, ax=None, subplot_size=(6, 1)):
+def plot_colorbar(plot_kwargs, cbar_kwargs, ax=None, subplot_size=(6, 1), dpi=100):
     """Plot a single colorbar."""
     # Initialize figure if necessary
     if ax is None:
-        fig, ax = plt.subplots(figsize=subplot_size, layout="constrained")
+        fig, ax = plt.subplots(figsize=subplot_size, layout="constrained", dpi=dpi)
     # Draw figure
     _ = _draw_colorbar(plot_kwargs=plot_kwargs, cbar_kwargs=cbar_kwargs, fig=fig, ax=None, cax=ax)
     plt.show()
@@ -60,6 +60,11 @@ def plot_colorbar(plot_kwargs, cbar_kwargs, ax=None, subplot_size=(6, 1)):
 
 def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
     """Plot multiple colorbars in a single figure."""
+    # If a single colorbar setting, plot with plot_colorbar
+    if len(list_args) == 1:
+        name, plot_kwargs, cbar_kwargs = list_args[0]
+        return plot_colorbar(plot_kwargs=plot_kwargs, cbar_kwargs=cbar_kwargs, dpi=dpi)
+
     # Define subplot_size
     if subplot_size is None:
         subplot_size = (5, 1.2)  # 3 --> 2
@@ -86,7 +91,7 @@ def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
     axes = axes.ravel()
 
     # Loop through colorbars and axes
-    for (name, plot_kwargs, cbar_kwargs), ax in zip(list_args, axes):
+    for (name, plot_kwargs, cbar_kwargs), ax in zip(list_args, axes, strict=False):
         _ = _draw_colorbar(plot_kwargs=plot_kwargs, cbar_kwargs=cbar_kwargs, fig=fig, ax=None, cax=ax)
         ax.set_title(name, fontsize=10, weight="bold")
     # Turn off any remaining axes
@@ -94,7 +99,7 @@ def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
         ax.axis("off")
 
     fig.tight_layout()
-    plt.show()
+    plt.show()  # noqa
 
 
 def show_colorbar(name=None, user_plot_kwargs=None, user_cbar_kwargs=None, fig_size=(6, 1)):

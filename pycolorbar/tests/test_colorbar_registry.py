@@ -60,7 +60,7 @@ def colorbar_test_filepath(tmp_path):
     """Fixture to create a temporary colorbar YAML file."""
     filepath = tmp_path / "temp_colorbar.yaml"
     cbar_dict1 = {"cmap": {"name": "viridis"}}
-    cbar_dict2 = {"cmap": {"name": "viridis"}, "auxiliary": {"category": "TEST"}}
+    cbar_dict2 = {"cmap": {"name": "viridis"}, "auxiliary": {"category": ["TEST", "TEST1"]}}
     cbar_dicts = {"TEST_CBAR_1": cbar_dict1, "TEST_CBAR_2": cbar_dict2}
     write_yaml(cbar_dicts, filepath)
     return filepath
@@ -197,13 +197,17 @@ class TestColorbarRegistry:
         # Test with custom kwargs
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(
             name="TEST_CBAR_1",
-            user_plot_kwargs={"vmin": 10, "vmax": 20},
+            user_plot_kwargs={"vmin": 10, "vmax": 20, "col": "d1", "row": "d2"},
             user_cbar_kwargs={},
         )
         assert isinstance(plot_kwargs["cmap"], Colormap)
         assert isinstance(plot_kwargs["norm"], Normalize)
         assert plot_kwargs["norm"].vmin == 10.0
         assert plot_kwargs["norm"].vmax == 20.0
+
+        # Check that auxiliary arguments (i.e. for FacetGrid) are not discarded
+        assert plot_kwargs["col"] == "d1"
+        assert plot_kwargs["row"] == "d2"
 
         # Test inexisting colorbar configuration with no custom kwargs
         plot_kwargs, cbar_kwargs = colorbar_registry.get_plot_kwargs(name="INEXISTING")
@@ -377,6 +381,12 @@ def test_available_colorbars(colorbar_registry, colorbar_test_filepath):
     # Test select specific category
     names = pycolorbar.available_colorbars(category="TEST")
     assert names == ["TEST_CBAR_2"]
+
+    names = pycolorbar.available_colorbars(category=["TEST", "TEST1"])
+    assert names == ["TEST_CBAR_2"]
+
+    names = pycolorbar.available_colorbars(category=["TEST", "TEST2"])
+    assert names == []
 
     # Test include/exclude reference colorbars
     reference_cbar_dict = {"reference": "TEST_CBAR_1"}

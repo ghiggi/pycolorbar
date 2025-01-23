@@ -25,11 +25,11 @@
 
 # -----------------------------------------------------------------------------.
 """Implementation of pydantic validator for univariate colormap YAML files."""
+import itertools
 import re
-from typing import Optional, Union
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from pycolorbar.colors.colors_io import check_valid_external_data_range, check_valid_internal_data_range
 from pycolorbar.utils.mpl import get_mpl_named_colors
@@ -62,7 +62,7 @@ def check_color_space(color_space):
 
 def is_monotonically_increasing(values):
     """Check if a list of values is monotonically increasing."""
-    return all(x <= y for x, y in zip(values, values[1:]))
+    return all(x <= y for x, y in itertools.pairwise(values))
 
 
 class ColormapValidator(BaseModel):
@@ -102,19 +102,19 @@ class ColormapValidator(BaseModel):
     # NOTE: The order here governs the call and validation order of below methods
 
     # Internal flag
-    colors_decoded: Optional[bool] = True
+    colors_decoded: bool | None = True
 
     # Mandatory colormap fields
     colormap_type: str
     color_space: str
 
     # Optional colormap fields
-    color_palette: Optional[Union[np.ndarray, list]] = None  # mandatory if segmentdata not provided !
-    segmentdata: Optional[dict] = None  # LinearSegmentedColormap
+    color_palette: np.ndarray | list | None = None  # mandatory if segmentdata not provided !
+    segmentdata: dict | None = None  # LinearSegmentedColormap
     # gamma: Optional[float] = None   # LinearSegmentedColormap
 
-    n: Optional[float] = None  # None for ListedColormap, 256 for LinearSegmentedColormap
-    auxiliary: Optional[dict] = {}  # auxiliary information of the colormap (not checked !)
+    n: int | None = None  # None for ListedColormap, 256 for LinearSegmentedColormap
+    auxiliary: dict | None = {}  # auxiliary information of the colormap (not checked !)
 
     # --------------------------------------------------
     # TODO:
@@ -154,10 +154,6 @@ class ColormapValidator(BaseModel):
             assert len(v) > 0, "The 'color_palette' array must not be empty."
             assert len(v) > 1, "The 'color_palette' array must have at least 2 colors."
             validate_colors_values(v, color_space=color_space, decoded_colors=values.data.get("colors_decoded"))
-        if v is None:
-            assert (
-                values.data.get("segmentdata", None) is not None
-            ), "'color_palette' must be provided if 'segmentdata' is not specified"
         return v
 
     @field_validator("segmentdata")
@@ -174,27 +170,49 @@ class ColormapValidator(BaseModel):
             if any(key not in v for key in required_keys):
                 raise ValueError(f"'segmentdata' dictionary must contain keys: {required_keys}.")
 
-            # Validate structure and monotonically increasing positions
+            # Check only valid keys
+            valid_keys = ["red", "green", "blue", "alpha"]
+            if any(key not in valid_keys for key in v):
+                raise ValueError(f"'segmentdata' dictionary can contain only keys: {valid_keys}.")
+
+            # Validate structure
             for key in required_keys:
-                if not all(isinstance(item, tuple) and len(item) == 3 for item in v[key]):
+                if not all(isinstance(item, (list, tuple)) and len(item) == 3 for item in v[key]):
                     raise ValueError(f"Each item in '{key}' must be a tuple of three floats.")
+                # Positions must be monotonically increasing
                 positions = [item[0] for item in v[key]]
                 if not is_monotonically_increasing(positions):
                     raise ValueError(f"Positions in '{key}' must be monotonically increasing.")
 
+            # Ensure positions and color values are float and list is used instead of tuple
+            v = {k: [[float(value) for value in triplet] for triplet in list_values] for k, list_values in v.items()}
+
             # TODO:
-            # - Check colors validity (encodded/decoded)
-            # - Support encoding/decoding of the dictionary
+            # - Currently support only rgb and rgba and does not encode/decode!
+            # - Support encoding/decoding of the dictionary (with keys having different sizes ...)
             # - Allow for all color spaces !
-            # - Currently support only rgb and rgba !
 
         return v
 
-    # TODO: check 'name' is not a key
-    # TODO: check not invalid kwargs !
+    @model_validator(mode="after")
+    def validate_colors_inputs(self):
+        """Validate ``segmentdata`` and ``color_palette``."""
+        segmentdata = self.segmentdata
+        color_palette = self.color_palette
+        # Check segmentadata or color_palette is specified
+        if segmentdata is None and color_palette is None:
+            raise ValueError("Specify 'color_palette' or 'segmentdata'")
+        # Check only one between segmentadata and color_palette is specified
+        if segmentdata is not None and color_palette is not None:
+            raise ValueError("Either specify 'color_palette' or 'segmentdata'")
+        return self
 
 
 def _set_default_n(cmap_dict):
+    # If 'n' is specified, set as integer
+    if cmap_dict["n"] is not None:
+        cmap_dict["n"] = int(cmap_dict["n"])
+
     # Set default value for LinearSegmentedColormap.from_list
     if (
         cmap_dict["n"] is None
@@ -202,6 +220,7 @@ def _set_default_n(cmap_dict):
         and cmap_dict["colormap_type"] == "LinearSegmentedColormap"
     ):
         cmap_dict["n"] = 256
+
     return cmap_dict
 
 
@@ -223,6 +242,7 @@ def validate_cmap_dict(cmap_dict: dict, decoded_colors=True):
 
     """
     # TODO: currently assumes that colors are already decoded (i.e. in 0-1 range for RGB)]
+    # TODO: currently do not check segmentadata colors
     # TODO: set defaults with pydantic?
     # --> Return what ColormapValidator returns?
 

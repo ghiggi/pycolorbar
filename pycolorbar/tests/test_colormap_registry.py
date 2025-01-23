@@ -67,7 +67,7 @@ INVALID_CMAP_DICT = {
 }
 
 
-# colormap_registry =ColormapRegistry.get_instance()
+# colormap_registry = ColormapRegistry.get_instance()
 # colormap_registry.reset()
 # tmp_path = "/tmp"
 
@@ -242,6 +242,16 @@ class TestColormapRegistry:
         cmap = colormap_registry.get_cmap(cmap_name)
         # Assert colormap is reverted
         assert cmap.reversed() == colormap_registry.get_cmap(cmap_name + "_r")
+
+    def test_get_cmap_at_root(self, colormap_registry):
+        """Test get_cmap at root."""
+        import pycolorbar
+
+        cmap_name = "test_cmap"
+        colormap_registry.add_cmap_dict(cmap_dict=TEST_CMAP_DICT, name=cmap_name, verbose=False)
+        # Assert colormap is reverted
+        cmap = pycolorbar.get_cmap(cmap_name)
+        assert cmap.reversed() == pycolorbar.get_cmap(cmap_name + "_r")
 
     def test_validate(self, colormap_registry):
         """Test validate method."""
