@@ -33,4 +33,4 @@ from pycolorbar.norm.categorical import (
     is_categorical_norm,
 )
 
-__all__ = ["CategoryNorm", "CategorizeNorm", "check_boundaries", "check_categories", "is_categorical_norm"]
+__all__ = ["CategorizeNorm", "CategoryNorm", "check_boundaries", "check_categories", "is_categorical_norm"]
