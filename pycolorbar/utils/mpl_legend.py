@@ -404,3 +404,95 @@ def add_colorbar_inset(
         )
 
     return p_cbar
+
+
+def resize_cax(cax, width_percent=None, height_percent=None, x_alignment="left", y_alignment="center"):
+    """
+    Resize a colorbar axis based on percentages with specified alignment.
+
+    Parameters
+    ----------
+    cax : matplotlib.axes.Axes
+        The colorbar axes to adjust
+    width_percent : float or None
+        If provided, new width as percentage of the original (e.g., 80 = 80% of original width)
+    height_percent : float or None
+        If provided, new height as percentage of the original (e.g., 90 = 90% of original height)
+    x_alignment : str
+        Horizontal alignment: 'left', 'center', or 'right'
+    y_alignment : str
+        Vertical alignment: 'bottom', 'center', or 'top'
+    """
+    # Get current position (relative to figure)
+    pos = cax.get_position()
+
+    # Store original dimensions
+    orig_width = pos.width
+    orig_height = pos.height
+    orig_x0 = pos.x0
+    orig_y0 = pos.y0
+
+    # Calculate new dimensions
+    new_width = orig_width * (width_percent / 100) if width_percent is not None else orig_width
+    new_height = orig_height * (height_percent / 100) if height_percent is not None else orig_height
+
+    # Calculate new x0 based on alignment
+    if x_alignment == "left":
+        new_x0 = orig_x0
+    elif x_alignment == "center":
+        new_x0 = orig_x0 + (orig_width - new_width) / 2
+    elif x_alignment == "right":
+        new_x0 = orig_x0 + (orig_width - new_width)
+    else:
+        raise ValueError("x_alignment must be 'left', 'center', or 'right'")
+
+    # Calculate new y0 based on alignment
+    if y_alignment == "bottom":
+        new_y0 = orig_y0
+    elif y_alignment == "center":
+        new_y0 = orig_y0 + (orig_height - new_height) / 2
+    elif y_alignment == "top":
+        new_y0 = orig_y0 + (orig_height - new_height)
+    else:
+        raise ValueError("y_alignment must be 'bottom', 'center', or 'top'")
+
+    # Apply new position
+    new_pos = [new_x0, new_y0, new_width, new_height]
+    cax.set_position(new_pos)
+
+    return cax
+
+
+def pad_cax(cax, pad_left=0, pad_right=0, pad_top=0, pad_bottom=0):
+    """
+    Add padding to a colorbar axis based on percentages of current dimensions.
+
+    Parameters
+    ----------
+    cax : matplotlib.axes.Axes
+        The colorbar axes to adjust
+    pad_left, pad_right, pad_top, pad_bottom : float
+        Padding values as percentage of the current dimension (e.g., 10 = 10% padding)
+    """
+    # Get current position
+    pos = cax.get_position()
+
+    # Calculate padding in figure coordinates
+    left_pad = pos.width * (pad_left / 100)
+    right_pad = pos.width * (pad_right / 100)
+    top_pad = pos.height * (pad_top / 100)
+    bottom_pad = pos.height * (pad_bottom / 100)
+
+    # Calculate new dimensions
+    new_width = pos.width - left_pad - right_pad
+    new_height = pos.height - top_pad - bottom_pad
+
+    # Calculate new position
+    new_x0 = pos.x0 + left_pad
+    new_y0 = pos.y0 + bottom_pad
+
+    # Apply new position
+    new_pos = [new_x0, new_y0, new_width, new_height]
+    cax.set_position(new_pos)
+
+    return cax

@@ -104,13 +104,14 @@ def plot_colorbar(p, *, ax=None, cax=None, **cbar_kwargs):
     """
     cbar_kwargs = cbar_kwargs.copy()  # otherwise pop ticklabels outside the function
     ticklabels = cbar_kwargs.pop("ticklabels", None)
+    label_position = cbar_kwargs.pop("label_position", None)
+
+    # Define orientation
+    orientation, location = _get_orientation_location(cbar_kwargs)
 
     # Define colorbar axis
     if cax is None and ax is not None:
-        # Defne colorbar axis
-        orientation, location = _get_orientation_location(cbar_kwargs)
-        cbar_kwargs.pop("location", None)
-        cbar_kwargs.pop("orientation", None)
+        # Define colorbar axis
         divider = make_axes_locatable(ax)
         if orientation == "vertical":
             size = cbar_kwargs.pop("size", "5%")
@@ -123,7 +124,7 @@ def plot_colorbar(p, *, ax=None, cax=None, **cbar_kwargs):
         p.figure.add_axes(cax)
 
     # Add colorbar
-    cbar = plt.colorbar(p, cax=cax, ax=ax, **cbar_kwargs)
+    cbar = plt.colorbar(mappable=p, cax=cax, ax=ax, **cbar_kwargs)
     if ticklabels is not None:
         # Retrieve ticks
         ticks = cbar_kwargs.get("ticks", None)
@@ -135,6 +136,11 @@ def plot_colorbar(p, *, ax=None, cax=None, **cbar_kwargs):
         # Add custom ticklabels
         p.colorbar.set_ticks(ticks, labels=ticklabels)
         # _ = cbar.ax.set_yticklabels(ticklabels) if orientation == "vertical" else cbar.ax.set_xticklabels(ticklabels)
+    if label_position is not None:
+        if orientation == "vertical":
+            cbar.ax.yaxis.set_label_position(label_position)
+        else:
+            cbar.ax.xaxis.set_label_position(label_position)
     return cbar
 
 
