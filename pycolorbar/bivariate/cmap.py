@@ -33,7 +33,7 @@ import os
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.colors import BoundaryNorm, Normalize
+from matplotlib.colors import BoundaryNorm, LogNorm, Normalize
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -1258,10 +1258,10 @@ def plot_bivariate_palette(
 
     # Define xlim and ylim
     if xlim is None:
-        xlim = [0, n_x - 1]
+        xlim = [0 - 0.5, n_x - 1 + 0.5]
     xlim = list(xlim)
     if ylim is None:
-        ylim = [0, n_y - 1]
+        ylim = [0 - 0.5, n_y - 1 + 0.5]
     ylim = list(ylim)
 
     # Initialize plot if necessary
@@ -1270,15 +1270,7 @@ def plot_bivariate_palette(
         fig, ax = plt.subplots(1, 1)
 
     # Define extent (at pixel outer corners)
-    x_half_pixel = np.diff(np.linspace(xlim[0], xlim[1], n_x))[0] / 2
-    x_lim = xlim
-    x_lim[0] = x_lim[0] - x_half_pixel
-    x_lim[1] = x_lim[1] + x_half_pixel
-    y_half_pixel = np.diff(np.linspace(ylim[0], ylim[1], n_y))[0] / 2
-    y_lim = ylim
-    y_lim[0] = y_lim[0] - y_half_pixel
-    y_lim[1] = y_lim[1] + y_half_pixel
-    extent = x_lim + y_lim
+    extent = xlim + ylim
 
     # Flip RGBA 2D array on y axis depending on the origin
     # --> origin is used to specify where the origin axis is located
@@ -1302,11 +1294,79 @@ def plot_bivariate_palette(
     return p
 
 
+def get_log_ticks(vmin, vmax):
+    """Return log ticks."""
+    return np.power(10, np.arange(np.floor(np.log10(vmin)), np.ceil(np.log10(vmax)) + 1))
+
+
+def set_log_axis(ax, major_ticks, axis):
+    """
+    Set logarithmic-like ticks on a linear axis for imshow plots.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes object to modify
+    major_ticks : array-like
+        The positions for major ticks in data coordinates.
+    axis : str, optional
+        The axis to modify ("x" or "y").
+    """
+    # Get the image extent
+    extent = ax.get_images()[0].get_extent()
+
+    # Generate minor ticks
+    minor_ticks = []
+    for i in range(len(major_ticks) - 1):
+        current_major = major_ticks[i]
+        minor_ticks.extend(np.arange(2, 10) * current_major)
+
+    # Convert to arrays
+    major_ticks = np.array(major_ticks)
+    minor_ticks = np.array(minor_ticks)
+
+    # Get axis limits
+    axis_min, axis_max = major_ticks[0], major_ticks[-1]
+
+    # Get relevant dimension for pixel conversion
+    if axis.lower() == "y":
+        extent_min, extent_max = extent[2], extent[3]
+    else:
+        extent_min, extent_max = extent[0], extent[1]
+
+    # Convert to pixel positions
+    major_data_pos = extent_min + (extent_max - extent_min) * (np.log10(major_ticks) - np.log10(axis_min)) / (
+        np.log10(axis_max) - np.log10(axis_min)
+    )
+
+    minor_data_pos = extent_min + (extent_max - extent_min) * (np.log10(minor_ticks) - np.log10(axis_min)) / (
+        np.log10(axis_max) - np.log10(axis_min)
+    )
+
+    # Create tick labels
+    major_tick_labels = [f"{x:.0f}" for x in major_ticks]
+
+    # Set ticks based on axis
+    if axis.lower() == "y":
+        ax.set_yticks(major_data_pos)
+        ax.set_yticklabels(major_tick_labels)
+        ax.set_yticks(minor_data_pos, minor=True)
+        ax.yaxis.set_tick_params(which="minor", length=4)
+        ax.yaxis.set_tick_params(which="major", length=8)
+
+    else:
+        ax.set_xticks(major_data_pos)
+        ax.set_xticklabels(major_tick_labels)
+        ax.set_xticks(minor_data_pos, minor=True)
+        ax.xaxis.set_tick_params(which="minor", length=4)
+        ax.xaxis.set_tick_params(which="major", length=8)
+
+
 def get_axis_defaults(norm):
     """Return a tuple ((axis_min, axis_max), ticks, ticklabels) from a matplotlib norm."""
     if isinstance(norm, (CategoryNorm, CategorizeNorm)):
-        value_lims = (0, norm.Ncmap - 1)
-        ticks = np.arange(0, norm.Ncmap)  # + 0.5
+        value_lims = (0, norm.Ncmap)
+        ticks = np.arange(0, norm.Ncmap) + 0.5
         ticklabels = norm.ticklabels.copy()
         return (value_lims, ticks, ticklabels)
     if isinstance(norm, BoundaryNorm):
@@ -1315,11 +1375,17 @@ def get_axis_defaults(norm):
         ticklabels = None  # ticklabels = _dynamic_formatting_floats(ticks)
         return (value_lims, ticks, ticklabels)
     if hasattr(norm, "vmin") and hasattr(norm, "vmax"):
-        # For e.g. Normalize, LogNorm, CenterNorm etc.
         value_lims = norm.vmin, norm.vmax
-        # Define some default ticks
-        ticks = np.linspace(norm.vmin, norm.vmax, 3)
-        ticklabels = None
+        if isinstance(norm, LogNorm):
+            ticks = get_log_ticks(vmin=norm.vmin, vmax=norm.vmax)
+            ticklabels = None
+        # TODO: SymmetricLogNorm,
+        else:
+            # For e.g. Normalize, CenterNorm etc.
+            value_lims = norm.vmin, norm.vmax
+            # Define some default ticks
+            ticks = np.linspace(norm.vmin, norm.vmax, 3)
+            ticklabels = None
         return (value_lims, ticks, ticklabels)
     # If we can't detect boundaries or vmin/vmax
     raise NotImplementedError(f"Unsupported {type(norm).__name__!s} norm.")
@@ -1419,15 +1485,25 @@ def add_bivariate_colorbar(
         **imshow_kwargs,
     )
 
-    # Add ticks
+    # Deal with log axis
+    log_axis_x = isinstance(norm_x, LogNorm)
+    log_axis_y = isinstance(norm_y, LogNorm)
+
+    # Add ticks and ticklabels
     xticks_kwargs.setdefault("ticks", x_ticks)
     xticks_kwargs.setdefault("labels", x_ticklabels)
     yticks_kwargs.setdefault("ticks", y_ticks)
     yticks_kwargs.setdefault("labels", y_ticklabels)
     if xticks_kwargs.get("ticks", None) is not None:
-        cax.set_xticks(**xticks_kwargs)
+        if log_axis_x:
+            set_log_axis(ax=cax, major_ticks=xticks_kwargs["ticks"], axis="x")
+        else:
+            cax.set_xticks(**xticks_kwargs)
     if yticks_kwargs.get("ticks", None) is not None:
-        cax.set_yticks(**yticks_kwargs)
+        if log_axis_y:
+            set_log_axis(ax=cax, major_ticks=yticks_kwargs["ticks"], axis="y")
+        else:
+            cax.set_yticks(**yticks_kwargs)
 
     # Add labels and title
     if title is not None:
