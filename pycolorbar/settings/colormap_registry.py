@@ -453,9 +453,9 @@ def get_cmap_dict(name):
 
 def get_cmap(
     name: str | None = None,
+    n: int | None = None,
     interval: tuple | None = None,
     alpha: float | None = None,
-    n: int | None = None,
     bias: float | None = 1,
 ):
     """
@@ -466,12 +466,12 @@ def get_cmap(
     name : str
         The name of a colormap known to pycolorbar or Matplotlib.
         If the name ends with the suffix `_r`, the colormap is reversed.
-    interval : tuple of float, optional
-        A tuple (start, end) with values between 0 and 1, indicating the fraction of the colormap to use.
-        Defaults to using the full colormap (0, 1).
     n : int, optional
         If not `None` (the default), the colormap will be resampled to have n entries in the lookup table.
         If the name ends with the suffix `_r`, the resampling is done after reversing the colormap.
+    interval : tuple of float, optional
+        A tuple (start, end) with values between 0 and 1, indicating the fraction of the colormap to use.
+        Defaults to using the full colormap (0, 1).
     alpha : float, optional
         A transparency value to apply to the colors, where 0 is fully transparent and 1 is fully opaque.
         If `alpha` is None (the default), the original transparency of the colors is preserved.
