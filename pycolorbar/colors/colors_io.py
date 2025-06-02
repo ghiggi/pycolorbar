@@ -53,8 +53,8 @@ class ColorEncoderDecoder:
 
         self.external_data_range = external_data_range
         self.internal_data_range = internal_data_range
-        self.decoding_functions = {channel: self._default_decode for channel in self.external_data_range}
-        self.encoding_functions = {channel: self._default_encode for channel in self.internal_data_range}
+        self.decoding_functions = dict.fromkeys(self.external_data_range, self._default_decode)
+        self.encoding_functions = dict.fromkeys(self.internal_data_range, self._default_encode)
         self.ndim = len(external_data_range)
         self.name = name
 
