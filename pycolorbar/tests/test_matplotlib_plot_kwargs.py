@@ -377,7 +377,7 @@ class TestUpdatePlotCbarKwargs:
         """Test ticks and ticklabels are removed from default_cbar_kwargs if norm is specified by the user."""
         user_plot_kwargs = {"norm": Normalize(vmin=0, vmax=2)}
         default_cbar_kwargs = {"ticks": ["whatever"], "ticklabels": ["whatever"], "extend": "both"}
-        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+        _, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
             user_plot_kwargs=user_plot_kwargs,
@@ -392,7 +392,7 @@ class TestUpdatePlotCbarKwargs:
         """Test resampling user-provided colormap for categorical and discrete colorbar."""
         user_plot_kwargs = {"cmap": plt.get_cmap("Spectral", 256)}
         default_cbar_kwargs["ticklabels"] = ["low", "medium", "high"]
-        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+        plot_kwargs, _ = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
             user_plot_kwargs=user_plot_kwargs,
@@ -409,7 +409,7 @@ class TestUpdatePlotCbarKwargs:
             "norm": CategoryNorm(categories={0: "cat1", 2: "cat2"}),
         }
         # Retrieve updated plot_kwargs and cbar_kwargs
-        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+        plot_kwargs, _ = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
             user_plot_kwargs=user_plot_kwargs,
@@ -533,7 +533,7 @@ class TestUpdatePlotCbarKwargs:
     def test_user_vmin_vmax_update_default_norm(self, default_plot_kwargs, default_cbar_kwargs):
         """Test updating default norm using vmin and vmax from user_plot_kwargs when norm not specified."""
         user_plot_kwargs = {"vmin": 0, "vmax": 2}
-        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+        plot_kwargs, _ = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
             user_plot_kwargs=user_plot_kwargs,
@@ -743,7 +743,7 @@ class TestUpdatePlotCbarKwargs:
         # Define user updates
         user_plot_kwargs = {"cmap": cmap}
         # Retrieve updated plot_kwargs and cbar_kwargs
-        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+        plot_kwargs, _ = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
             user_plot_kwargs=user_plot_kwargs,
@@ -757,7 +757,7 @@ class TestUpdatePlotCbarKwargs:
         # CASE1: Update ticklabels only
         user_cbar_kwargs = {"ticklabels": ["new_name1", "new_name2"]}
         # Retrieve updated plot_kwargs and cbar_kwargs
-        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+        _, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
             user_cbar_kwargs=user_cbar_kwargs,
@@ -768,7 +768,7 @@ class TestUpdatePlotCbarKwargs:
         # CASE2: Update ticks only
         user_cbar_kwargs = {"ticks": [0, 1]}
         # Retrieve updated plot_kwargs and cbar_kwargs
-        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+        _, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
             user_cbar_kwargs=user_cbar_kwargs,
@@ -779,7 +779,7 @@ class TestUpdatePlotCbarKwargs:
         # CASE3: Update ticks and ticklabels
         user_cbar_kwargs = {"ticks": [-1, -2], "ticklabels": ["new_name1", "new_name2"]}
         # Retrieve updated plot_kwargs and cbar_kwargs
-        plot_kwargs, cbar_kwargs = update_plot_cbar_kwargs(
+        _, cbar_kwargs = update_plot_cbar_kwargs(
             default_plot_kwargs=default_plot_kwargs,
             default_cbar_kwargs=default_cbar_kwargs,
             user_cbar_kwargs=user_cbar_kwargs,

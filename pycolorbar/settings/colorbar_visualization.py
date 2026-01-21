@@ -99,7 +99,8 @@ def plot_colorbars(list_args, cols=None, subplot_size=None, dpi=200):
         ax.axis("off")
 
     fig.tight_layout()
-    plt.show()  # noqa
+    plt.show()
+    return fig
 
 
 def show_colorbar(name=None, user_plot_kwargs=None, user_cbar_kwargs=None, fig_size=(6, 1)):

@@ -73,7 +73,7 @@ def test_plot_colorbar():
     assert isinstance(p_cbar, mpl.colorbar.Colorbar)
     plt.close()
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots()  # noqa: RUF059
     p = plt.scatter(data, data, c=data, cmap=cmap)
     p_cbar = plot_colorbar(p, ax=ax, ticklabels=ticklabels)  # without ticks !
     assert isinstance(p_cbar, mpl.colorbar.Colorbar)

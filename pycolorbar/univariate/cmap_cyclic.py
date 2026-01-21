@@ -147,7 +147,7 @@ def plot_circular_colormap(
 
     # Create figure and axis
     if ax is None:
-        fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+        fig, ax = plt.subplots(subplot_kw={"projection": "polar"})  # noqa: RUF059
     if not isinstance(ax, mpl.projections.polar.PolarAxes):
         msg = "plot_circular_colormap require a matplotlib.projection.PolarAxes. " + "Set projection='polar'"
         raise ValueError(msg)

@@ -62,7 +62,7 @@ def test_plot_circular_colormap_with_axes():
         plot_circular_colormap(cmap, ax=ax)
 
     # Assert works if axis is in polar projection
-    fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+    fig, ax = plt.subplots(subplot_kw={"projection": "polar"})  # noqa: RUF059
     p = plot_circular_colormap(cmap, ax=ax)
     assert isinstance(p, mpl.collections.QuadMesh)
     plt.close()

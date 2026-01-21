@@ -67,7 +67,7 @@ class TestGetInsetBounds:
     @pytest.mark.parametrize("inside_figure", [True, False])
     def test_by_position(self, inside_figure):
         """Test get_inset_bounds returns expected bounds."""
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots()  # noqa: RUF059
         bounds = get_inset_bounds(
             ax=ax,
             loc="upper right",
@@ -83,7 +83,7 @@ class TestGetInsetBounds:
         x0 = 0.5
         y0 = 0.4
         loc = (x0, y0)
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots()  # noqa: RUF059
         bounds = get_inset_bounds(
             ax=ax,
             loc=(0.5, 0.4),
@@ -96,7 +96,7 @@ class TestGetInsetBounds:
 
 def test_tightbbox_position():
     """Test get_tightbbox_position returns bbox in figure coords."""
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots()  # noqa: RUF059
     bbox = get_tightbbox_position(ax)
     assert bbox.width >= 0
     assert bbox.height >= 0
@@ -104,7 +104,7 @@ def test_tightbbox_position():
 
 def test_optimize_inset_position():
     """Test optimize_inset_position modifies cax position."""
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots()  # noqa: RUF059
     cax = ax.inset_axes([0.7, 0.7, 0.2, 0.2])
     new_pos = optimize_inset_position(ax, cax, pad=0.01)
     assert new_pos.width == cax.get_position().width
@@ -112,7 +112,7 @@ def test_optimize_inset_position():
 
 def test_add_fancybox():
     """Test add_fancybox returns a FancyBboxPatch."""
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots()  # noqa: RUF059
     bbox = Bbox.from_extents(0.5, 0.5, 0.6, 0.6)
     patch = add_fancybox(ax, bbox)
     assert isinstance(patch, mpl.patches.FancyBboxPatch)
@@ -120,7 +120,7 @@ def test_add_fancybox():
 
 def test_add_colorbar_inset():
     """Test add_colorbar_inset returns the created colorbar artist."""
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots()  # noqa: RUF059
 
     def dummy_func(cax, **kwargs):
         return cax.imshow([[1, 2], [3, 4]])

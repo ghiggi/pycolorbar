@@ -559,7 +559,7 @@ def test_plot_colorbar(norm_type):
     plt.close()
 
     # Plot colorbar into the specified cax
-    fig, cax = plt.subplots()
+    fig, cax = plt.subplots()  # noqa: RUF059
     p = cmap.plot_colorbar(origin="upper", cax=cax)
     assert isinstance(p, mpl.image.AxesImage)
     plt.close()

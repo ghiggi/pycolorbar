@@ -81,6 +81,7 @@ def plot_colormap(cmap, dpi=200, ax=None, **plot_kwargs):
         fig, ax = plt.subplots(figsize=(4, 0.4), dpi=dpi)
     ax = _plot_colormap(cmap=cmap, ax=ax, **plot_kwargs)
     plt.show()
+    return fig
 
 
 def plot_colormaps(cmaps, cols=None, subplot_size=None, dpi=200, **plot_kwargs):
@@ -163,7 +164,7 @@ def plot_lightness(cmap, ax=None, difference=False, labelsize=6, ticksize=6, s=2
         The axes with the lightness plot.
     """
     if ax is None:
-        fig, ax = plt.subplots(figsize=(3, 0.8), dpi=200)
+        fig, ax = plt.subplots(figsize=(3, 0.8), dpi=200)  # noqa: RUF059
     colors = get_cmap_colors(cmap)
     lightness = get_cmap_lightness(cmap)
     title = "Lightness"
@@ -208,7 +209,7 @@ def plot_rgb_components(cmap, ax=None, labelsize=6, ticksize=6, s=2, **plot_kwar
         The axes with the RGB component plots.
     """
     if ax is None:
-        fig, ax = plt.subplots(figsize=(3, 0.8), dpi=200)
+        fig, ax = plt.subplots(figsize=(3, 0.8), dpi=200)  # noqa: RUF059
 
     # Get RGB colors from colormap
     colors = get_cmap_colors(cmap)
@@ -272,7 +273,7 @@ def plot_lab_components(cmap, ax=None, add_legend=True, labelsize=6, ticksize=6,
         The axes with the RGB component plots.
     """
     if ax is None:
-        fig, ax = plt.subplots(figsize=(3, 0.8), dpi=200)
+        fig, ax = plt.subplots(figsize=(3, 0.8), dpi=200)  # noqa: RUF059
 
     # Get RGB colors from colormap
     lab = get_cmap_lab(cmap)
@@ -445,7 +446,7 @@ def plot_deltae(cmap, ax=None, accurate=True, labelsize=6, ticksize=6, s=2, **pl
     >>> plot_deltae(cmap)
     """
     if ax is None:
-        fig, ax = plt.subplots(figsize=(3, 0.8), dpi=200)
+        fig, ax = plt.subplots(figsize=(3, 0.8), dpi=200)  # noqa: RUF059
 
     # Get RGB colors from colormap
     lab = get_cmap_lab(cmap)

@@ -57,7 +57,7 @@ def test_plot_circular_colorbar_polar():
     plt.close()
 
     # Plot colorbar to the sides on an existing axis
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots()  # noqa: RUF059
     ax.scatter([0, 1, 2], [0, 1, 2])
     p = plot_circular_colorbar(cmap, ax=ax, use_wedges=False, ticks=ticks, ticklabels=ticklabels)
     assert isinstance(p, mpl.collections.QuadMesh)
@@ -87,7 +87,7 @@ def test_plot_circular_colorbar_wedges():
     plt.close()
 
     # Plot colorbar to the sides on an existing axis
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots()  # noqa: RUF059
     ax.scatter([0, 1, 2], [0, 1, 2])
     p = plot_circular_colorbar(cmap, ax=ax, use_wedges=True, ticks=ticks, ticklabels=ticklabels)
     assert isinstance(p, mpl.collections.PatchCollection)
@@ -102,7 +102,7 @@ def test_add_circular_colorbar_legend(use_wedges):
     cmap = pycolorbar.get_cmap("twilight")
     cmap = get_discrete_cyclic_cmap(cmap, n)
     # Create plot
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots()  # noqa: RUF059
     ax.scatter([0, 1, 2], [0, 1, 2])
     # Add legend
     p = add_circular_colorbar_legend(

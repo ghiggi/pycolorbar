@@ -342,11 +342,12 @@ class ColorbarRegistry:
         # If only 1 colormap registered, plot it with the other method
         if len(names) == 1:
             self.show_colorbar(name=names[0])
-            return
+            return None
 
         # Display colorbars
         list_args = [[name, *list(self.get_plot_kwargs(name=name))] for name in names]
-        plot_colorbars(list_args, subplot_size=subplot_size)
+        fig = plot_colorbars(list_args, subplot_size=subplot_size)
+        return fig
 
     def get_plot_kwargs(self, name=None, user_plot_kwargs=None, user_cbar_kwargs=None):
         """Get pycolorbar plot kwargs (updated with optional user arguments)."""

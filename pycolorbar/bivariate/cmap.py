@@ -1267,7 +1267,7 @@ def plot_bivariate_palette(
     # Initialize plot if necessary
     axis_not_provided = ax is None
     if axis_not_provided:
-        fig, ax = plt.subplots(1, 1)
+        fig, ax = plt.subplots(1, 1)  # noqa: RUF059
 
     # Define extent (at pixel outer corners)
     extent = xlim + ylim
@@ -1689,7 +1689,7 @@ def plot_bivariate_colorbar(
         cax = divider.append_axes(location, size=size, pad=pad, axes_class=plt.Axes)
         cax.set_box_aspect(box_aspect)
     else:
-        fig, cax = plt.subplots()
+        fig, cax = plt.subplots()  # noqa: RUF059
 
     # Add the 2D colorbar with custom ticks
     p = add_bivariate_colorbar(
@@ -1731,7 +1731,7 @@ class BivariateColormap:
 
         # Resample rgb array if n is specified
         n_x, n_y = check_n(n, both_integers=False)
-        rgba_array = resample_rgba_array(rgba_array, n_x=n_x, n_y=n_x, interp_method=interp_method)
+        rgba_array = resample_rgba_array(rgba_array, n_x=n_x, n_y=n_y, interp_method=interp_method)
 
         # Apply luminance gradient if specified
         self.rgba_array = apply_luminance_gradient(rgba_array, luminance_factor=luminance_factor)
@@ -1896,6 +1896,11 @@ class BivariateColormap:
         if not isinstance(other, BivariateColormap):
             return False
         return np.all(self.rgba_array == other.rgba_array) and self._bad == other._bad
+
+    def __hash__(self):
+        """Return a hash value for the BivariateColormap instance."""
+        # TODO: also hash norm?
+        return hash((self.rgba_array.tobytes(), self._bad))
 
     def copy(self):
         """Create a copy of the BivariateColormap instance."""
