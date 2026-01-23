@@ -11,7 +11,8 @@ readme = "README.md"
 authors = [
 	{ name = "Gionata Ghiggi", email = "gionata.ghiggi@epfl.ch" },
 ]
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Science/Research",
@@ -30,7 +31,8 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Scientific/Engineering :: Visualization",
+
 ]
 keywords = ["colormap", "colorbar", "bivariate", "trivariate"]
 dependencies = [
