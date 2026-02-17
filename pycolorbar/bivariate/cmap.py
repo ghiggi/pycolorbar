@@ -33,7 +33,7 @@ import os
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.colors import BoundaryNorm, LogNorm, Normalize
+from matplotlib.colors import BoundaryNorm, LogNorm, Normalize, SymLogNorm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -773,41 +773,37 @@ def get_bivariate_cmap_from_name(name, n, diagonal_tilt=0.8, offdiag_tilt=1, int
 #### Color Mapping
 
 
-def _map_colors(x_normalized, y_normalized, n_x, n_y, rgba_array, interp_method="nearest", origin="lower"):
-    # Check if the colorspacious package is available
-    try:
-        from scipy.interpolate import RegularGridInterpolator
-    except ImportError:
-        raise ImportError(
-            "The 'scipy' package is required but not found. "
-            "Please install it using the following command: "
-            "conda install -c conda-forge scipy",
-        ) from None
+def _map_colors(x_normalized, y_normalized, n_x, n_y, rgba_array, origin="lower"):
+    # Create output filled with NaN
+    out_shape = (*x_normalized.shape, 4)
+    rgba_mapped = np.full(out_shape, np.nan, dtype=float)
 
-    # Define LUT indices
-    cols = np.linspace(0, 1, n_x)
-    rows = np.linspace(1, 0, n_y) if origin == "lower" else np.linspace(0, 1, n_y)
-    # Define interpolators
-    interpolators = [
-        RegularGridInterpolator(
-            (rows, cols),
-            rgba_array[:, :, i],
-            method=interp_method,
-            bounds_error=False,  # Do not raise error if out of grid. It extrapolate
-            fill_value=np.nan,  # Extrapolate if None.
-        )
-        for i in range(4)
-    ]
+    # Valid mask: both coordinates finite
+    valid = np.isfinite(x_normalized) & np.isfinite(y_normalized)
 
-    # Define (y,x) points to map
-    data_shape = x_normalized.shape
-    pts = np.column_stack([y_normalized.ravel(), x_normalized.ravel()])
+    if not np.any(valid):
+        return rgba_mapped
 
-    # Map colors
-    rgba_mapped = np.stack([interpolators[i](pts).reshape(data_shape) for i in range(4)], axis=-1)
+    # Extract valid values
+    x_valid = x_normalized[valid]
+    y_valid = y_normalized[valid]
 
-    # Ensure RGBA values in [0..1] after interpolation
-    rgba_mapped = np.clip(rgba_mapped, 0.0, 1.0)
+    # Compute indices
+    # - left-inclusive
+    # - right-exclusive
+    # - except for 1.0 which is clipped
+    x_idx = np.clip(np.floor(x_valid * n_x).astype(int), 0, n_x - 1)
+    y_idx = np.clip((np.floor(y_valid * n_y)).astype(int), 0, n_y - 1)
+
+    # Apply origin
+    y_idx = (n_y - 1) - y_idx if origin == "lower" else y_idx
+
+    # Assign mapped colors
+    rgba_mapped[valid] = rgba_array[y_idx, x_idx]
+
+    # Final safety clip
+    np.clip(rgba_mapped, 0.0, 1.0, out=rgba_mapped)
+
     return rgba_mapped
 
 
@@ -819,7 +815,6 @@ def map_colors(
     rgba_array,
     mask,
     bad_color=(0.0, 0.0, 0.0, 0.0),
-    interp_method="nearest",
     origin="lower",
 ):
     """
@@ -840,8 +835,6 @@ def map_colors(
         Boolean mask of shape (n_y, n_x) where True indicates NaN or invalid data.
     bad_color : tuple of float
         RGBA color to assign to invalid points or out-of-bounds values.
-    interp_method : str
-        Interpolation method ("nearest", "linear", "cubic"). Default "nearest".
     origin : str
         Either "upper" or "lower". The default is "lower".
         When "lower", the axis origin is on the bottom left and values (0,0) and (0,1) are
@@ -859,7 +852,6 @@ def map_colors(
         n_x=n_x,
         n_y=n_y,
         rgba_array=rgba_array,
-        interp_method=interp_method,
         origin=origin,
     )
     # Assign bad color for NaNs or out-of-bounds
@@ -1016,7 +1008,7 @@ def normalize_pandas_series(series, norm):
     return normalize_array(series.to_numpy(float), norm=norm)
 
 
-def map_array_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 0.0), interp_method="nearest"):
+def map_array_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 0.0)):
     """
     Map two numeric arrays (x, y) to a bivariate colormap.
 
@@ -1034,8 +1026,6 @@ def map_array_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 0
         The base bivariate colormap of shape (n_y, n_x, 4).
     bad_color : tuple
         RGBA color for invalid points.
-    interp_method : str, optional
-        Interpolation method for RegularGridInterpolator. Default "nearest".
 
     Returns
     -------
@@ -1073,12 +1063,11 @@ def map_array_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 0
         rgba_array=rgba_array,
         mask=mask,
         bad_color=bad_color,
-        interp_method=interp_method,
     )
     return rgba_mapped
 
 
-def map_pandas_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 0.0), interp_method="nearest"):
+def map_pandas_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 0.0)):
     """
     Map two pandas Series (x, y) to a bivariate colormap.
 
@@ -1098,8 +1087,6 @@ def map_pandas_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 
         The bivariate colormap, shape (n_y, n_x, 4).
     bad_color : tuple
         RGBA color for invalid or out-of-bounds points.
-    interp_method : str, optional
-        Interpolation method. Default "nearest".
 
     Returns
     -------
@@ -1146,12 +1133,11 @@ def map_pandas_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 
         rgba_array=rgba_array,
         mask=mask,
         bad_color=bad_color,
-        interp_method=interp_method,
     )
     return rgba_mapped
 
 
-def map_xarray_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 0.0), interp_method="nearest"):
+def map_xarray_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 0.0)):
     """
     Map two xarray DataArrays (x, y) to a bivariate colormap.
 
@@ -1171,8 +1157,6 @@ def map_xarray_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 
         Bivariate colormap of shape (n_y, n_x, 4).
     bad_color : tuple
         RGBA color for invalid points.
-    interp_method : str, optional
-        Interpolation method. Default "nearest".
 
     Returns
     -------
@@ -1190,7 +1174,6 @@ def map_xarray_data(x, y, norm_x, norm_y, rgba_array, bad_color=(0.0, 0.0, 0.0, 
         norm_y=norm_y,
         rgba_array=rgba_array,
         bad_color=bad_color,
-        interp_method=interp_method,
     )
 
     # Convert back to xarray
@@ -1295,23 +1278,254 @@ def plot_bivariate_palette(
 
 
 def get_log_ticks(vmin, vmax):
-    """Return log ticks."""
-    return np.power(10, np.arange(np.floor(np.log10(vmin)), np.ceil(np.log10(vmax)) + 1))
+    """
+    Generate logarithmic tick values for a given data range.
+
+    Generates ticks at powers of 10 within the specified range, suitable for
+    logarithmic scaling of axes.
+
+    Parameters
+    ----------
+    vmin : float
+        Minimum value (must be positive).
+    vmax : float
+        Maximum value (must be positive).
+
+    Returns
+    -------
+    numpy.ndarray
+        Array of tick positions at powers of 10 within [vmin, vmax].
+
+    Raises
+    ------
+    ValueError
+        If vmin or vmax are not positive or if vmin >= vmax.
+    """
+    if vmin <= 0 or vmax <= 0:
+        raise ValueError("vmin and vmax must be positive for logarithmic ticks.")
+    if vmin >= vmax:
+        raise ValueError("vmin must be less than vmax.")
+
+    # Generate ticks at powers of 10
+    ticks = np.power(10, np.arange(np.floor(np.log10(vmin)), np.ceil(np.log10(vmax)) + 1))
+
+    # Filter ticks to only include those >= vmin (ensure first tick is >= vmin)
+    ticks = ticks[ticks >= vmin]
+
+    return ticks
+
+
+def get_symlog_ticks(vmin, vmax, linthresh, base=10):
+    """
+    Generate symmetric logarithmic tick values for a given data range.
+
+    For symmetric log (SymLogNorm), the scale is linear near zero (within ±linthresh)
+    and logarithmic outside this region. This function generates ticks that respect
+    both regions.
+
+    Parameters
+    ----------
+    vmin : float
+        Minimum value of the data range (typically negative).
+    vmax : float
+        Maximum value of the data range (typically positive).
+    linthresh : float
+        The range around zero where scaling is linear (±linthresh).
+        Must be positive.
+    base : int, optional
+        The logarithmic base. Default is 10.
+
+    Returns
+    -------
+    numpy.ndarray
+        Array of tick positions suitable for symmetric log scaling.
+        The array is symmetric around zero.
+
+    Raises
+    ------
+    ValueError
+        If linthresh is not positive or if vmin >= vmax.
+
+    Notes
+    -----
+    The returned ticks respect the linear region [-linthresh, linthresh]
+    and include logarithmically-spaced ticks outside this region.
+    """
+    if linthresh <= 0:
+        raise ValueError("linthresh must be positive.")
+    if vmin >= vmax:
+        raise ValueError("vmin must be less than vmax.")
+
+    ticks = []
+
+    # Add zero if the linear region includes it
+    if vmin <= 0 <= vmax:
+        ticks.append(0)
+
+    # Generate positive ticks
+    if vmax > linthresh:
+        # Log region: start from first power of base >= linthresh
+        log_vmax = np.log(vmax) / np.log(base)
+        log_linthresh = np.log(linthresh) / np.log(base)
+        log_start = np.ceil(log_linthresh)
+        log_end = np.ceil(log_vmax)
+        log_ticks = np.arange(log_start, log_end + 1)
+        pos_ticks = np.power(base, log_ticks)
+        ticks.extend(pos_ticks[pos_ticks <= vmax])
+
+    # # Add intermediate ticks in the linear region (only if range is large)
+    # if vmin < -linthresh and linthresh < vmax:
+    #     # Add fine-grained ticks between 0 and linthresh
+    #     if linthresh > 0:
+    #         intermediate_ticks = np.linspace(0, linthresh, 3)[1:-1]  # Exclude endpoints
+    #         ticks.extend(intermediate_ticks)
+
+    # Generate negative ticks (symmetric to positive)
+    if vmin < -linthresh:
+        log_vmin = np.log(abs(vmin)) / np.log(base)
+        log_linthresh = np.log(linthresh) / np.log(base)
+        log_start = np.ceil(log_linthresh)
+        log_end = np.ceil(log_vmin)
+        log_ticks = np.arange(log_start, log_end + 1)
+        neg_ticks = -np.power(base, log_ticks)
+        ticks.extend(neg_ticks[neg_ticks >= vmin])
+
+    # Add fine-grained negative ticks in linear region if needed
+    # if vmin < -linthresh and linthresh < vmax:
+    #     if linthresh > 0:
+    #         intermediate_ticks = -np.linspace(0, linthresh, 3)[1:-1]  # Exclude endpoints
+    #         ticks.extend(intermediate_ticks)
+
+    # Add linthresh ticks if they are within the range
+    ticks.extend([t for t in [-linthresh, linthresh] if vmin <= t <= vmax])
+
+    # Sort and remove duplicates
+    ticks = np.array(sorted(set(np.round(ticks, 10))))  # Round to avoid float precision issues
+    return ticks
+
+
+def _normalize_log_value(value, axis_min, axis_max):
+    """Normalize a value using logarithmic scaling.
+
+    Maps a positive value to [0, 1] using logarithmic transformation.
+
+    Parameters
+    ----------
+    value : float
+        The value to normalize (must be positive).
+    axis_min : float
+        Minimum value of the data range (must be positive).
+    axis_max : float
+        Maximum value of the data range (must be positive).
+
+    Returns
+    -------
+    float
+        Normalized value in [0, 1] range.
+    """
+    if value <= 0 or axis_min <= 0:
+        raise ValueError("Values must be positive for logarithmic normalization.")
+    return (np.log10(value) - np.log10(axis_min)) / (np.log10(axis_max) - np.log10(axis_min))
+
+
+def _normalize_symlog_value(value, axis_min, axis_max, linthresh, base=10, linscale=1.0):
+    """Normalize a value using symmetric logarithmic scaling.
+
+    Maps a value (positive or negative) to [0, 1] using symmetric logarithmic
+    transformation. The scaling is linear within [-linthresh, +linthresh]
+    and logarithmic outside this region.
+
+    Parameters
+    ----------
+    value : float
+        The value to normalize.
+    axis_min : float
+        Minimum value of the data range.
+    axis_max : float
+        Maximum value of the data range.
+    linthresh : float
+        The range around zero where scaling is linear (±linthresh).
+        Must be positive.
+    base : int, optional
+        The logarithmic base. Default is 10.
+    linscale : float, optional
+        The number of decades to use for the linear part of the norm.
+        Controls visual space for the linear region. Default is 1.0.
+
+    Returns
+    -------
+    float
+        Normalized value in [0, 1] range.
+
+    Notes
+    -----
+    The linscale parameter controls the fraction of the range allocated to the
+    linear region: linear_fraction = linscale / (linscale + 1).
+    The range is divided into positive and negative halves, each scaled independently.
+    """
+    # Compute linear region fraction
+    linear_fraction = linscale / (linscale + 1)
+
+    # Handle zero case
+    if value == 0:
+        return 0.5 if axis_min < 0 < axis_max else (0 if axis_max > 0 else 1)
+
+    # Compute the full range scaling factor
+    abs_vmin = abs(axis_min)
+
+    if value > 0:
+        # Positive side
+        if value <= linthresh:
+            # Linear region: maps to [0.5, 0.5 + 0.5*linear_fraction]
+            norm_pos = 0.5 + (value / linthresh) * 0.5 * linear_fraction
+        else:
+            # Log region: maps to [0.5 + 0.5*linear_fraction, 1.0]
+            log_value = np.log(value) / np.log(base)
+            log_linthresh = np.log(linthresh) / np.log(base)
+            log_vmax = np.log(axis_max) / np.log(base)
+            log_fraction = (log_value - log_linthresh) / (log_vmax - log_linthresh)
+            norm_pos = 0.5 + linear_fraction * 0.5 + (1.0 - linear_fraction) * 0.5 * log_fraction
+        return np.clip(norm_pos, 0, 1)
+    # Negative side
+    abs_value = abs(value)
+    if abs_value <= linthresh:
+        # Linear region: maps to [0.5 - 0.5*linear_fraction, 0.5]
+        norm_neg = 0.5 - (abs_value / linthresh) * 0.5 * linear_fraction
+    else:
+        # Log region: maps to [0.0, 0.5 - 0.5*linear_fraction]
+        log_value = np.log(abs_value) / np.log(base)
+        log_linthresh = np.log(linthresh) / np.log(base)
+        log_vmin = np.log(abs_vmin) / np.log(base)
+        log_fraction = (log_value - log_linthresh) / (log_vmin - log_linthresh)
+        norm_neg = 0.5 - linear_fraction * 0.5 - (1.0 - linear_fraction) * 0.5 * log_fraction
+    return np.clip(norm_neg, 0, 1)
 
 
 def set_log_axis(ax, major_ticks, axis):
-    """
-    Set logarithmic-like ticks on a linear axis for imshow plots.
+    """Set logarithmic-like ticks on a linear axis for imshow plots.
+
+    Positions major and minor ticks using logarithmic transformation. Only suitable
+    for data with values that are all positive.
 
     Parameters
     ----------
     ax : matplotlib.axes.Axes
-        The axes object to modify
+        The axes object to modify.
     major_ticks : array-like
-        The positions for major ticks in data coordinates.
-    axis : str, optional
+        The positions for major ticks in data coordinates (must be positive).
+    axis : {'x', 'y'}
         The axis to modify ("x" or "y").
+
+    Raises
+    ------
+    ValueError
+        If major_ticks contain non-positive values.
     """
+    # Validate inputs
+    major_ticks = np.asarray(major_ticks)
+    if np.any(major_ticks <= 0):
+        raise ValueError("All major_ticks must be positive for logarithmic axis.")
+
     # Get the image extent
     extent = ax.get_images()[0].get_extent()
 
@@ -1320,13 +1534,7 @@ def set_log_axis(ax, major_ticks, axis):
     for i in range(len(major_ticks) - 1):
         current_major = major_ticks[i]
         minor_ticks.extend(np.arange(2, 10) * current_major)
-
-    # Convert to arrays
-    major_ticks = np.array(major_ticks)
     minor_ticks = np.array(minor_ticks)
-
-    # Get axis limits
-    axis_min, axis_max = major_ticks[0], major_ticks[-1]
 
     # Get relevant dimension for pixel conversion
     if axis.lower() == "y":
@@ -1334,26 +1542,29 @@ def set_log_axis(ax, major_ticks, axis):
     else:
         extent_min, extent_max = extent[0], extent[1]
 
-    # Convert to pixel positions
-    major_data_pos = extent_min + (extent_max - extent_min) * (np.log10(major_ticks) - np.log10(axis_min)) / (
-        np.log10(axis_max) - np.log10(axis_min)
-    )
+    # Use extent limits (actual vmin, vmax) for normalization, not tick extremes
+    # This ensures correct positioning when vmin is not a power of 10
+    axis_min, axis_max = extent_min, extent_max
 
-    minor_data_pos = extent_min + (extent_max - extent_min) * (np.log10(minor_ticks) - np.log10(axis_min)) / (
-        np.log10(axis_max) - np.log10(axis_min)
-    )
+    # Convert to pixel positions using logarithmic normalization
+    major_norm = np.array([_normalize_log_value(t, axis_min, axis_max) for t in major_ticks])
+    major_data_pos = extent_min + (extent_max - extent_min) * major_norm
+
+    minor_norm = np.array([_normalize_log_value(t, axis_min, axis_max) for t in minor_ticks])
+    minor_data_pos = extent_min + (extent_max - extent_min) * minor_norm
 
     # Create tick labels
-    major_tick_labels = [f"{x:.0f}" for x in major_ticks]
+    major_tick_labels = [f"{x:g}" for x in major_ticks]
 
     # Set ticks based on axis
     if axis.lower() == "y":
+        print(major_data_pos)
+        print(major_tick_labels)
         ax.set_yticks(major_data_pos)
         ax.set_yticklabels(major_tick_labels)
         ax.set_yticks(minor_data_pos, minor=True)
         ax.yaxis.set_tick_params(which="minor", length=4)
         ax.yaxis.set_tick_params(which="major", length=8)
-
     else:
         ax.set_xticks(major_data_pos)
         ax.set_xticklabels(major_tick_labels)
@@ -1362,31 +1573,187 @@ def set_log_axis(ax, major_ticks, axis):
         ax.xaxis.set_tick_params(which="major", length=8)
 
 
+def set_symlog_axis(ax, major_ticks, axis, linthresh, base=10, linscale=1.0):
+    """Set symmetric logarithmic ticks on a linear axis for imshow plots.
+
+    Positions major and minor ticks using symmetric logarithmic transformation.
+    Suitable for data that includes both positive and negative values with a
+    linear region near zero.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes object to modify.
+    major_ticks : array-like
+        The positions for major ticks in data coordinates (can include negative values).
+    axis : {'x', 'y'}
+        The axis to modify ("x" or "y").
+    linthresh : float
+        The range around zero where scaling is linear (±linthresh).
+        Must be positive.
+    base : int, optional
+        The logarithmic base. Default is 10.
+    linscale : float, optional
+        The number of decades to use for the linear part. Default is 1.0.
+
+    Raises
+    ------
+    ValueError
+        If linthresh is not positive.
+    """
+    # Validate inputs
+    if linthresh <= 0:
+        raise ValueError("linthresh must be positive.")
+
+    major_ticks = np.asarray(major_ticks)
+
+    # Get the image extent
+    extent = ax.get_images()[0].get_extent()
+
+    # Get relevant dimension for pixel conversion
+    if axis.lower() == "y":
+        extent_min, extent_max = extent[2], extent[3]
+    else:
+        extent_min, extent_max = extent[0], extent[1]
+
+    # Use extent limits (actual vmin, vmax) for normalization, not tick extremes
+    # This ensures correct positioning when vmin is not exactly at a power of 10
+    axis_min, axis_max = extent_min, extent_max
+
+    # Convert to pixel positions using symmetric logarithmic normalization
+    major_norm = np.array(
+        [_normalize_symlog_value(t, axis_min, axis_max, linthresh, base, linscale) for t in major_ticks],
+    )
+    major_data_pos = extent_min + (extent_max - extent_min) * major_norm
+
+    # Generate minor ticks in log regions (skip linear region to avoid clutter)
+    minor_ticks = []
+    # Positive side minor ticks
+    for i in range(len(major_ticks) - 1):
+        if major_ticks[i] >= linthresh:  # In log region (including boundary)
+            current_major = major_ticks[i]
+            minor_ticks.extend(np.arange(2, 10) * current_major)
+    # Negative side minor ticks
+    for i in range(len(major_ticks) - 1):
+        if major_ticks[i] <= -linthresh:  # In log region (including boundary)
+            current_major = abs(major_ticks[i])
+            minor_ticks.extend(-np.arange(2, 10) * current_major)
+    minor_ticks = np.array(minor_ticks)
+
+    # Convert minor ticks to pixel positions
+    if len(minor_ticks) > 0:
+        minor_norm = np.array(
+            [_normalize_symlog_value(t, axis_min, axis_max, linthresh, base, linscale) for t in minor_ticks],
+        )
+        minor_data_pos = extent_min + (extent_max - extent_min) * minor_norm
+    else:
+        minor_data_pos = np.array([])
+
+    # Create tick labels with smart formatting
+    # When linscale is very small, don't show labels for ±linthresh to avoid overlap with 0
+    major_tick_labels = []
+    skip_linthresh_labels = linscale < 0.1  # Threshold for suppressing linthresh labels
+    for x in major_ticks:
+        # Skip labels for ±linthresh if linscale is very small
+        if skip_linthresh_labels and (np.isclose(x, linthresh) or np.isclose(x, -linthresh)):
+            major_tick_labels.append("")  # Empty label but tick still visible
+        elif abs(x) < linthresh:
+            major_tick_labels.append(f"{x:g}")
+        else:
+            major_tick_labels.append(f"{x:g}")
+
+    # Set ticks based on axis
+    if axis.lower() == "y":
+        ax.set_yticks(major_data_pos)
+        ax.set_yticklabels(major_tick_labels)
+        if len(minor_data_pos) > 0:
+            ax.set_yticks(minor_data_pos, minor=True)
+            ax.yaxis.set_tick_params(which="minor", length=4)
+        ax.yaxis.set_tick_params(which="major", length=8)
+    else:
+        ax.set_xticks(major_data_pos)
+        ax.set_xticklabels(major_tick_labels)
+        if len(minor_data_pos) > 0:
+            ax.set_xticks(minor_data_pos, minor=True)
+            ax.xaxis.set_tick_params(which="minor", length=4)
+        ax.xaxis.set_tick_params(which="major", length=8)
+
+
 def get_axis_defaults(norm):
-    """Return a tuple ((axis_min, axis_max), ticks, ticklabels) from a matplotlib norm."""
+    """
+    Extract axis configuration from a matplotlib normalization object.
+
+    Generates appropriate axis limits, tick positions, and tick labels based
+    on the type of normalization applied to the data.
+
+    Parameters
+    ----------
+    norm : matplotlib.colors.Normalize
+        A matplotlib normalization object. Supported types include:
+        - CategoryNorm, CategorizeNorm: categorical data
+        - BoundaryNorm: discrete binned data
+        - LogNorm: logarithmic scaling
+        - SymLogNorm: symmetric logarithmic scaling
+        - Normalize, CenterNorm, and other standard norms: linear scaling
+
+    Returns
+    -------
+    tuple
+        A tuple of (value_lims, ticks, ticklabels) where:
+        - value_lims : tuple of (float, float)
+            The (min, max) range for the axis
+        - ticks : numpy.ndarray or None
+            Tick positions in data coordinates
+        - ticklabels : list or None
+            Formatted tick labels, or None for automatic formatting
+
+    Raises
+    ------
+    NotImplementedError
+        If the norm type is not supported.
+    """
+    # Handle categorical norms
     if isinstance(norm, (CategoryNorm, CategorizeNorm)):
         value_lims = (0, norm.Ncmap)
         ticks = np.arange(0, norm.Ncmap) + 0.5
         ticklabels = norm.ticklabels.copy()
         return (value_lims, ticks, ticklabels)
+
+    # Handle boundary (discrete binned) norms
     if isinstance(norm, BoundaryNorm):
         value_lims = norm.boundaries[0], norm.boundaries[-1]
         ticks = norm.boundaries.copy()
         ticklabels = None  # ticklabels = _dynamic_formatting_floats(ticks)
         return (value_lims, ticks, ticklabels)
+
+    # Handle norms with vmin/vmax attributes
     if hasattr(norm, "vmin") and hasattr(norm, "vmax"):
         value_lims = norm.vmin, norm.vmax
+
+        # Handle logarithmic norm
         if isinstance(norm, LogNorm):
             ticks = get_log_ticks(vmin=norm.vmin, vmax=norm.vmax)
             ticklabels = None
-        # TODO: SymmetricLogNorm,
+        # Handle symmetric logarithmic norm
+        elif isinstance(norm, SymLogNorm):
+            linthresh = norm._scale.linthresh
+            # linscale = norm.scale.linscale
+            base = norm._scale.base
+            ticks = get_symlog_ticks(
+                vmin=norm.vmin,
+                vmax=norm.vmax,
+                linthresh=linthresh,
+                # linscale=linscale,
+                base=base,
+            )
+            ticklabels = None
+        # Handle standard linear norms (Normalize, CenterNorm, etc.)
         else:
-            # For e.g. Normalize, CenterNorm etc.
-            value_lims = norm.vmin, norm.vmax
-            # Define some default ticks
             ticks = np.linspace(norm.vmin, norm.vmax, 3)
             ticklabels = None
+
         return (value_lims, ticks, ticklabels)
+
     # If we can't detect boundaries or vmin/vmax
     raise NotImplementedError(f"Unsupported {type(norm).__name__!s} norm.")
 
@@ -1485,23 +1852,51 @@ def add_bivariate_colorbar(
         **imshow_kwargs,
     )
 
-    # Deal with log axis
-    log_axis_x = isinstance(norm_x, LogNorm)
-    log_axis_y = isinstance(norm_y, LogNorm)
+    # Deal with log axis and symmetric log axis
+    is_log_x = isinstance(norm_x, LogNorm)
+    is_log_y = isinstance(norm_y, LogNorm)
+    is_symlog_x = isinstance(norm_x, SymLogNorm)
+    is_symlog_y = isinstance(norm_y, SymLogNorm)
 
     # Add ticks and ticklabels
     xticks_kwargs.setdefault("ticks", x_ticks)
     xticks_kwargs.setdefault("labels", x_ticklabels)
     yticks_kwargs.setdefault("ticks", y_ticks)
     yticks_kwargs.setdefault("labels", y_ticklabels)
+
     if xticks_kwargs.get("ticks", None) is not None:
-        if log_axis_x:
+        if is_log_x:
             set_log_axis(ax=cax, major_ticks=xticks_kwargs["ticks"], axis="x")
+        elif is_symlog_x:
+            linthresh = norm_x._scale.linthresh
+            base = norm_x._scale.base
+            linscale = norm_x._scale.linscale
+            set_symlog_axis(
+                ax=cax,
+                major_ticks=xticks_kwargs["ticks"],
+                axis="x",
+                linthresh=linthresh,
+                base=base,
+                linscale=linscale,
+            )
         else:
             cax.set_xticks(**xticks_kwargs)
+
     if yticks_kwargs.get("ticks", None) is not None:
-        if log_axis_y:
+        if is_log_y:
             set_log_axis(ax=cax, major_ticks=yticks_kwargs["ticks"], axis="y")
+        elif is_symlog_y:
+            linthresh = norm_y._scale.linthresh
+            base = norm_y._scale.base
+            linscale = norm_y._scale.linscale
+            set_symlog_axis(
+                ax=cax,
+                major_ticks=yticks_kwargs["ticks"],
+                axis="y",
+                linthresh=linthresh,
+                base=base,
+                linscale=linscale,
+            )
         else:
             cax.set_yticks(**yticks_kwargs)
 
@@ -2072,7 +2467,7 @@ class BivariateColormap:
         rgba_array = resample_rgba_array(self.rgba_array, n_x=n_x, n_y=n_y, interp_method=interp_method)
         return self._copy_attributes(BivariateColormap(rgba_array=rgba_array))
 
-    def __call__(self, x, y, *, norm_x=None, norm_y=None, interp_method="nearest"):
+    def __call__(self, x, y, *, norm_x=None, norm_y=None):
         """
         Map (x, y) data to RGBA colors based on this bivariate colormap.
 
@@ -2084,9 +2479,6 @@ class BivariateColormap:
             Normalization for the x dimension. If None, default 0-1 scaling is used or computed from data.
         norm_y : None or mpl.colors.Normalize or BoundaryNorm
             Normalization for the y dimension. If None, default 0-1 scaling is used or computed from data.
-        interp_method : str
-            Interpolation method (e.g. "nearest", "linear", "cubic").
-            The default method is "nearest".
 
         Returns
         -------
@@ -2124,7 +2516,6 @@ class BivariateColormap:
                 norm_y=self.norm_y,
                 rgba_array=self.rgba_array,
                 bad_color=self._bad,
-                interp_method=interp_method,
             )
         if _XARRAY_AVAILABLE and isinstance(x, xr.DataArray):
             return map_xarray_data(
@@ -2134,7 +2525,6 @@ class BivariateColormap:
                 norm_y=self.norm_y,
                 rgba_array=self.rgba_array,
                 bad_color=self._bad,
-                interp_method=interp_method,
             )
         return map_array_data(
             x,
@@ -2143,7 +2533,6 @@ class BivariateColormap:
             norm_y=self.norm_y,
             rgba_array=self.rgba_array,
             bad_color=self._bad,
-            interp_method=interp_method,
         )
 
     # Alias
