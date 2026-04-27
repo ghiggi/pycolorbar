@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Define functions to visualize univariate colorbars."""
+
 import math
 
 import matplotlib as mpl
