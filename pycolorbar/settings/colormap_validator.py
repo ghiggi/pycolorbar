@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Implementation of pydantic validator for univariate colormap YAML files."""
+
 import itertools
 import re
 
