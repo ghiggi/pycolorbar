@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Utility to add legends or insets to a Matplotlib figure."""
+
 import matplotlib.patches as mpatches
 import numpy as np
 from matplotlib.transforms import Bbox
