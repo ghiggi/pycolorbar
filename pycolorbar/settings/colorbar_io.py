@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Define functions to read and write colorbar YAML files."""
+
 import os
 
 import numpy as np
