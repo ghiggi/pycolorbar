@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Test ColorbarValidator."""
+
 import os
 from contextlib import contextmanager
 

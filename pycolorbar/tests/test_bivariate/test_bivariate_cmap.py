@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Test BivariateColormap functionalities."""
+
 import geopandas as gpd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
