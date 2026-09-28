@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Test matplotlib legend utilities."""
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pytest

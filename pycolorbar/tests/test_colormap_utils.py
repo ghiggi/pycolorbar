@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Test the Colormap utilities."""
+
 import pytest
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
