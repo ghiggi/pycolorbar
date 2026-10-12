@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Initialize norm module."""
+
 from pycolorbar.norm.categorical import (
     CategorizeNorm,
     CategoryNorm,
