@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Color encoding and decoding functions."""
+
 import numpy as np
 
 
