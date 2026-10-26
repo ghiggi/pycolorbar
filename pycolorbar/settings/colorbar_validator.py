@@ -61,12 +61,12 @@ class ColormapSettings(BaseModel):
         import pycolorbar
 
         if isinstance(v, str):
-            clean_name = v[:-2]  if v.endswith("_r") else v
+            clean_name = v[:-2] if v.endswith("_r") else v
             valid_names = get_mpl_colormaps() + pycolorbar.colormaps.names
             assert clean_name in valid_names, f"'{v}' is not a recognized colormap name."
         elif isinstance(v, list):
             for name in v:
-                clean_name = name[:-2]  if name.endswith("_r") else name
+                clean_name = name[:-2] if name.endswith("_r") else name
                 valid_names = get_mpl_colormaps() + pycolorbar.colormaps.names
                 assert clean_name in valid_names, f"'{name}' is not a recognized colormap name."
         return v
