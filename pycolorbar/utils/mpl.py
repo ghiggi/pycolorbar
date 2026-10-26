@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Matplotlib utility functions."""
+
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
