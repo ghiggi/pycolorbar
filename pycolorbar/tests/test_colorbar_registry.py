@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Test ColorbarRegistry."""
+
 import os
 
 import matplotlib.pyplot as plt  # noqa
