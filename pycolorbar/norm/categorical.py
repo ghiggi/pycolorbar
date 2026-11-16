@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Define categorical norms."""
+
 import numpy as np
 from matplotlib.colors import BoundaryNorm
 

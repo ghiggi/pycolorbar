@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """YAML utility."""
+
 import yaml
 
 from pycolorbar.utils.directories import list_files
