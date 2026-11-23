@@ -25,6 +25,7 @@
 
 # -----------------------------------------------------------------------------.
 """Test code to retrieve plot_kwargs and cbar_kwargs."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
